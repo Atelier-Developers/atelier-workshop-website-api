@@ -22,7 +22,7 @@ public class Request {
             metaValues = {
 
             })
-    @JoinColumn(name="USER_ID")
+    @JoinColumn(name="REQUEST_DATAs_ID")
     private List<RequestData> requestData;
 
     @Enumerated(EnumType.ORDINAL)
