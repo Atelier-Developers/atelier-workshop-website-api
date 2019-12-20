@@ -22,22 +22,37 @@ public class Request {
             metaValues = {
 
             })
-    @JoinColumn(name="REQUEST_DATAs_ID")
+    @JoinColumn(name = "REQUEST_DATAS_ID")
     private List<RequestData> requestData;
 
     @Enumerated(EnumType.ORDINAL)
     private RequestState state;
 
+    public Requester getRequester() {
+        return requester;
+    }
+
+    public void setRequester(Requester requester) {
+        this.requester = requester;
+    }
+
     @ManyToOne
     @JoinColumn(name = "requestable_id")
     private Requestable requestable;
+
+    @ManyToOne
+    @JoinColumn(name = "requester_id")
+    private Requester requester;
 
 
     public Request() {
     }
 
-    public Request( RequestState state) {
+    public Request(List<RequestData> requestData, RequestState state, Requestable requestable, Requester requester) {
+        this.requestData = requestData;
         this.state = state;
+        this.requestable = requestable;
+        this.requester = requester;
     }
 
     public long getId() {
