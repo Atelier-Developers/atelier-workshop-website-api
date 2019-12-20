@@ -1,6 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.PaymentService.Payment;
+import com.atelier.atelier.entity.PaymentService.Payment;
 
 public class AttenderPaymentTab implements Payment {
 }

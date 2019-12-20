@@ -1,8 +1,8 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.FormService.Form;
-import WorkshopSystem.PaymentService.Payment;
-import WorkshopSystem.RequestService.RequestData;
+import com.atelier.atelier.entity.FormService.Form;
+import com.atelier.atelier.entity.PaymentService.Payment;
+import com.atelier.atelier.entity.RequestService.RequestData;
 
 import java.util.List;
 

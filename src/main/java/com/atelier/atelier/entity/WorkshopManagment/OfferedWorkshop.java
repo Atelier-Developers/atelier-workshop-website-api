@@ -1,14 +1,42 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.RequestService.Requestable;
+import com.atelier.atelier.entity.RequestService.Requestable;
 
+import javax.persistence.*;
 import java.util.Calendar;
 import java.util.List;
 
+@Entity
+@Table
+@DiscriminatorValue(value = "OfferedWorkshop")
+
 public class OfferedWorkshop extends Requestable {
+    @Id
+    @GeneratedValue
+    private long id;
+
+    @Basic
+    @Temporal(TemporalType.TIMESTAMP)
     private Calendar startTime;
+
+    @Basic
+    @Temporal(TemporalType.TIMESTAMP)
     private Calendar endTime;
+
+    @ManyToOne
+    @JoinColumn(name = "workshop_id")
+    private Workshop workshop;
+
+    @ManyToOne
+    @JoinColumn(name = "workshop_manager_id")
+    private WorkshopManager workshopManager;
+
+    @OneToMany(mappedBy = "offeredWorkshop")
     private List<WorkshopForm> workshopForms;
-    private List<WorkshopAttenderInfo> atenderInfos;
+
+    @OneToMany(mappedBy = "offeredWorkshop")
+    private List<WorkshopAttenderInfo> attenderInfos;
+
+    @OneToMany(mappedBy = "offeredWorkshop")
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
 }

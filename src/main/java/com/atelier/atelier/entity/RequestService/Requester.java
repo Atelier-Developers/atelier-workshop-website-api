@@ -12,7 +12,7 @@ import javax.persistence.*;
 public abstract class Requester {
     @Id
     @GeneratedValue
-    private long id;
+    protected long id;
 
     @OneToMany(mappedBy = "requester")
     protected List<Request> requests;

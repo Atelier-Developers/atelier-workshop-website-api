@@ -1,11 +1,13 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.FormService.Form;
-import WorkshopSystem.RequestService.RequestData;
+import com.atelier.atelier.entity.FormService.Form;
+import com.atelier.atelier.entity.RequestService.RequestData;
 
 /*
     dar in form, form applicant GraderFormApplicant hast va Answer ham Answer
  */
 
+
+// TODO interface tag
 public class GraderRequestForm extends Form implements RequestData {
 }

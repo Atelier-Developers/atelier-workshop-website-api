@@ -1,7 +1,11 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.FormService.Form;
+import com.atelier.atelier.entity.FormService.Form;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.util.List;
 
 /*
@@ -10,4 +14,12 @@ import java.util.List;
  */
 
 public class GraderEvaluationForm extends Form {
+
+    @Id
+    @GeneratedValue
+    private long id;
+
+    @ManyToOne
+    @JoinColumn(name = "workshop_grader_info_id")
+    private WorkshopGraderInfo workshopGraderInfo;
 }
