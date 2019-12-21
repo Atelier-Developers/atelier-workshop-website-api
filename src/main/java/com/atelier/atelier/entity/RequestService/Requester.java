@@ -17,28 +17,4 @@ public abstract class Requester {
 
     @OneToMany(mappedBy = "requester")
     protected List<Request> requests;
-
-    public Requester(){
-
-    }
-
-    public Requester(List<Request> requests) {
-        this.requests = requests;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public List<Request> getRequests() {
-        return requests;
-    }
-
-    public void setRequests(List<Request> requests) {
-        this.requests = requests;
-    }
 }
