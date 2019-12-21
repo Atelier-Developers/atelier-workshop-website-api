@@ -2,7 +2,6 @@ package com.atelier.atelier.entity.UserPortalManagment;
 
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requester;
-import jdk.internal.jline.internal.TestAccessible;
 
 import javax.persistence.*;
 import java.util.List;
