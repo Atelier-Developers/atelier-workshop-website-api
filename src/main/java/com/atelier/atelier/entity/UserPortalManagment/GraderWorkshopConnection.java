@@ -1,6 +1,16 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
-import WorkshopSystem.WorkshopManagment.WorkshopGrader;
+import com.atelier.atelier.entity.WorkshopManagment.WorkshopGrader;
 
+import javax.persistence.*;
+
+@Entity
+@Table
+@DiscriminatorValue(value = "GraderWorkshopConnection")
 public class GraderWorkshopConnection extends WorkshopGrader{
+
+
+    @OneToOne
+    @JoinColumn(name = "grader_id")
+    private Grader grader;
 }

@@ -10,9 +10,10 @@ import javax.persistence.*;
 @DiscriminatorColumn(name = "REQUESTER_TYPE")
 
 public abstract class Requester {
+
     @Id
     @GeneratedValue
-    private long id;
+    protected long id;
 
     @OneToMany(mappedBy = "requester")
     protected List<Request> requests;

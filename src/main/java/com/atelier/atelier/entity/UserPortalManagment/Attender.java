@@ -1,7 +1,20 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
-import WorkshopSystem.RequestService.Requester;
+import com.atelier.atelier.entity.RequestService.Request;
+import com.atelier.atelier.entity.RequestService.Requester;
+import jdk.internal.jline.internal.TestAccessible;
 
+import javax.persistence.*;
+import java.util.List;
+
+@Entity
+@Table
+@DiscriminatorValue(value = "Attender")
 public class Attender extends Requester implements Role{
+
+
+    @OneToOne(mappedBy = "attender")
     private AttenderWorkshopConnection attenderWorkshopConnection;
+
+
 }

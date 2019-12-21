@@ -10,8 +10,8 @@ import java.util.List;
 public abstract class Requestable {
 
     @Id
-    @GeneratedValue()
-    private long id;
+    @GeneratedValue
+    protected long id;
 
     @OneToMany(mappedBy = "requestable")
     private List<Request> requests;
