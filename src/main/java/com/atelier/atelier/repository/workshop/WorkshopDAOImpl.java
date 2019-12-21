@@ -32,7 +32,7 @@ public class WorkshopDAOImpl implements WorkshopDAO {
     }
 
     @Override
-    public Workshop findById(int id) {
+    public Workshop findById(long id) {
 
         Session currentSession = entityManager.unwrap(Session.class);
 
@@ -46,12 +46,14 @@ public class WorkshopDAOImpl implements WorkshopDAO {
     }
 
     @Override
-    public void deleteById(int id) {
+    public void deleteById(long id) {
+        System.out.println(id);
         Session currentSession = entityManager.unwrap(Session.class);
         Query theQuery =
                 currentSession.createQuery(
                         "delete from Workshop where id=:wid");
         theQuery.setParameter("wid", id);
+        theQuery.executeUpdate();
     }
 
 

@@ -8,11 +8,11 @@ public interface WorkshopService {
 
     public List<Workshop> findAll();
 
-    public Workshop findById(int id);
+    public Workshop findById(long id);
 
     public void save(Workshop workshop);
 
-    public void deleteById(int id);
+    public void deleteById(long id);
 
 
 }

@@ -7,9 +7,9 @@ import java.util.List;
 public interface WorkshopDAO {
     List<Workshop> findAll();
 
-    Workshop findById(int id);
+    Workshop findById(long id);
 
     void save(Workshop workshop);
 
-    void deleteById(int id);
+    void deleteById(long id);
 }

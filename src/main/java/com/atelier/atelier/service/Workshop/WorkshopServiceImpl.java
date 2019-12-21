@@ -26,7 +26,7 @@ public class WorkshopServiceImpl implements WorkshopService {
 
     @Override
     @Transactional
-    public Workshop findById(int id) {
+    public Workshop findById(long id) {
         return workshopDAO.findById(id);
     }
 
@@ -37,7 +37,8 @@ public class WorkshopServiceImpl implements WorkshopService {
     }
 
     @Override
-    public void deleteById(int id) {
+    @Transactional
+    public void deleteById(long id) {
         workshopDAO.deleteById(id);
     }
 }

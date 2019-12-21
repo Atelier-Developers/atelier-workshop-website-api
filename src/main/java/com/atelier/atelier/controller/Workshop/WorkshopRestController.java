@@ -24,7 +24,7 @@ public class WorkshopRestController {
     }
 
     @GetMapping("/workshops/{workshopId}")
-    public Workshop getById(@PathVariable int workshopId){
+    public Workshop getById(@PathVariable long workshopId){
         Workshop workshop = workshopService.findById(workshopId);
 
         if ( workshop == null ){
@@ -47,6 +47,11 @@ public class WorkshopRestController {
 
     @PutMapping("/workshops")
     public Workshop update(@RequestBody Workshop workshop){
+        Workshop workshop1 = workshopService.findById(workshop.getId());
+
+        if (workshop1 == null){
+            throw new NotFoundException("Workshop id not found - " + workshop.getId());
+        }
 
         workshopService.save(workshop);
 
@@ -54,7 +59,7 @@ public class WorkshopRestController {
     }
 
     @DeleteMapping("/workshops/{id}")
-    public void delete(@PathVariable int id){
+    public void delete(@PathVariable long id){
 
         Workshop workshop = workshopService.findById(id);
 
