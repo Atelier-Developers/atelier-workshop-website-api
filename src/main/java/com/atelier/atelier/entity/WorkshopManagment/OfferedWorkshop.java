@@ -11,9 +11,6 @@ import java.util.List;
 @DiscriminatorValue(value = "OfferedWorkshop")
 
 public class OfferedWorkshop extends Requestable {
-    @Id
-    @GeneratedValue
-    private long id;
 
     @Basic
     @Temporal(TemporalType.TIMESTAMP)

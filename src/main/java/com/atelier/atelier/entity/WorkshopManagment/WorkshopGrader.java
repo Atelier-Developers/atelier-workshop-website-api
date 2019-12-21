@@ -11,7 +11,7 @@ import java.util.List;
 public abstract class WorkshopGrader {
     @Id
     @GeneratedValue
-    protected long id;
+    private long id;
 
     @OneToMany(mappedBy = "workshopGrader")
     private List<WorkshopGraderInfo> workshopGraderInfos;

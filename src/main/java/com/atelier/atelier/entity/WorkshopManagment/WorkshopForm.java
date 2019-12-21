@@ -15,10 +15,6 @@ import javax.persistence.*;
 @DiscriminatorValue(value = "WorkshopForm" )
 public class WorkshopForm extends Form {
 
-    @Id
-    @GeneratedValue
-    private long id;
-
     @ManyToOne
     @JoinColumn(name = "offered_workshop_id")
     private OfferedWorkshop offeredWorkshop;

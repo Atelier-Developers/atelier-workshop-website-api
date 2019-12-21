@@ -10,10 +10,6 @@ import javax.persistence.*;
 
 public class WorkshopGraderFormApplicant extends FormApplicant {
 
-    @Id
-    @GeneratedValue
-    private long id;
-
     @ManyToOne
     @JoinColumn(name = "workshop_grader_info_id")
     private WorkshopGraderInfo workshopGraderInfo;

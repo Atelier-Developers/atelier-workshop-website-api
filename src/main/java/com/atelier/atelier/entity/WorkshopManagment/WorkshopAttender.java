@@ -12,7 +12,7 @@ public abstract class WorkshopAttender {
 
     @Id
     @GeneratedValue
-    protected long id;
+    private long id;
 
     @OneToMany(mappedBy = "workshopAttender")
     private List<WorkshopAttenderInfo> workshopAttenderInfos;

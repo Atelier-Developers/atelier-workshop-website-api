@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class WorkshopManager {
     @Id
     @GeneratedValue
-    protected long id;
+    private long id;
 
     @OneToMany(mappedBy = "workshopManager")
     private List<OfferedWorkshop> offeredWorkshops;

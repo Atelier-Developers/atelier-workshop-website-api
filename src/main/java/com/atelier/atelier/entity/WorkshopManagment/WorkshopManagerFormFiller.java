@@ -10,10 +10,6 @@ import javax.persistence.*;
 @DiscriminatorValue(value = "WorkshopManagerFormFiller")
 public class WorkshopManagerFormFiller extends FormFiller {
 
-    @Id
-    @GeneratedValue
-    private long id;
-
     @ManyToOne
     @JoinColumn(name = "workshop_manager_id")
     private WorkshopManager workshopManager;

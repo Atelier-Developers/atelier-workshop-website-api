@@ -2,10 +2,7 @@ package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.FormService.Form;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.List;
 
 /*
@@ -13,11 +10,10 @@ import java.util.List;
     WorkshopManagerFormFiller
  */
 
+@Entity
+@Table
+@DiscriminatorValue(value = "GraderEvaluationForm")
 public class GraderEvaluationForm extends Form {
-
-    @Id
-    @GeneratedValue
-    private long id;
 
     @ManyToOne
     @JoinColumn(name = "workshop_grader_info_id")
