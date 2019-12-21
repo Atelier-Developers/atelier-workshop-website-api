@@ -1,6 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.FormService.FormFiller;
+import com.atelier.atelier.entity.FormService.FormFiller;
 
 public class WorkshopManagerFormFiller extends FormFiller {
 }

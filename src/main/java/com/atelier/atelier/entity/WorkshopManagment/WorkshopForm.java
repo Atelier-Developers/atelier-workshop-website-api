@@ -1,6 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.FormService.Form;
+import com.atelier.atelier.entity.FormService.Form;
 
 /*
     dar in form, form applicant WorkshopAttenderFormApplicant ya GroupFormApplicant hast va Answer ham FilledAnswer va FormFiller ham

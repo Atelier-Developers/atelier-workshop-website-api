@@ -1,6 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.FormService.Form;
+import com.atelier.atelier.entity.FormService.Form;
 
 import java.util.List;
 

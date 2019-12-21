@@ -1,6 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import WorkshopSystem.RequestService.Requestable;
+import com.atelier.atelier.entity.RequestService.Requestable;
 
 import java.util.Calendar;
 import java.util.List;
