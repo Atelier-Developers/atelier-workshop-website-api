@@ -7,7 +7,6 @@ import java.util.Calendar;
 import java.util.List;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "OfferedWorkshop")
 
 public class OfferedWorkshop extends Requestable {

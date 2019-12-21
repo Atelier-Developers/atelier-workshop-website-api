@@ -15,7 +15,6 @@ import java.util.List;
  */
 
 @Entity
-@Table
 @DiscriminatorValue(value = "AttenderRegisterForm")
 
 public class AttenderRegisterForm extends Form implements RequestData {

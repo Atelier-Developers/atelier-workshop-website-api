@@ -7,7 +7,6 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "Attender")
 public class Attender extends Requester implements Role{
 

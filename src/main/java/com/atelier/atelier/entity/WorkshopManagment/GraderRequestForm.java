@@ -13,7 +13,6 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table
 @DiscriminatorValue(value = "GraderRequestForm")
 public class GraderRequestForm extends Form implements RequestData {
 

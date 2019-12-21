@@ -6,7 +6,6 @@ import javax.persistence.*;
 
 
 @Entity
-@Table
 @DiscriminatorValue(value = "WorkshopManagerFormFiller")
 public class WorkshopManagerFormFiller extends FormFiller {
 

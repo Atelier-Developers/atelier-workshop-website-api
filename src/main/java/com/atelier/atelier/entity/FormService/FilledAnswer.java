@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id;
 import javax.persistence.*;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "FilledAnswer")
 public class FilledAnswer extends Answer {
 

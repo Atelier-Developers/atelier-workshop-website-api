@@ -5,7 +5,6 @@ import com.atelier.atelier.entity.FormService.FormApplicant;
 import javax.persistence.*;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "GroupFormApplicant")
 
 public class GroupFormApplicant extends FormApplicant {

@@ -5,7 +5,6 @@ import com.atelier.atelier.entity.FormService.FormFiller;
 import javax.persistence.*;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "WorkshopGraderFormFiller")
 public class WorkshopGraderFormFiller extends FormFiller {
 

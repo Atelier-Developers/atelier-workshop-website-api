@@ -11,7 +11,6 @@ import java.util.List;
  */
 
 @Entity
-@Table
 @DiscriminatorValue(value = "GraderEvaluationForm")
 public class GraderEvaluationForm extends Form {
 

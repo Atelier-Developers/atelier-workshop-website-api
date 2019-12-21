@@ -5,7 +5,6 @@ import com.atelier.atelier.entity.WorkshopManagment.WorkshopManager;
 import javax.persistence.*;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "ManagerWorkshopConnection" )
 public class ManagerWorkshopConnection extends WorkshopManager implements Role {
 

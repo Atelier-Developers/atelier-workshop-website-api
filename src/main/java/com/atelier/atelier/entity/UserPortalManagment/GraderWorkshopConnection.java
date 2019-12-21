@@ -5,7 +5,6 @@ import com.atelier.atelier.entity.WorkshopManagment.WorkshopGrader;
 import javax.persistence.*;
 
 @Entity
-@Table
 @DiscriminatorValue(value = "GraderWorkshopConnection")
 public class GraderWorkshopConnection extends WorkshopGrader{
 
