@@ -3,7 +3,8 @@ package com.atelier.atelier.entity.WorkshopManagment;
 
 import javax.persistence.*;
 import java.util.List;
-
+@Entity
+@Table
 public class WorkshopGraderInfo {
 
     @Id
