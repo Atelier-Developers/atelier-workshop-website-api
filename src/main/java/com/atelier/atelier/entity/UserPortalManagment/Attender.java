@@ -11,8 +11,17 @@ import java.util.List;
 public class Attender extends Requester implements Role{
 
 
-    @OneToOne(mappedBy = "attender")
+    @OneToOne(mappedBy = "attender", cascade = CascadeType.ALL)
     private AttenderWorkshopConnection attenderWorkshopConnection;
 
+    public Attender(){
+    }
 
+    public AttenderWorkshopConnection getAttenderWorkshopConnection() {
+        return attenderWorkshopConnection;
+    }
+
+    public void setAttenderWorkshopConnection(AttenderWorkshopConnection attenderWorkshopConnection) {
+        this.attenderWorkshopConnection = attenderWorkshopConnection;
+    }
 }

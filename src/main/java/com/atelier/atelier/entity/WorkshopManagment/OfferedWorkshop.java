@@ -1,8 +1,10 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.RequestService.Requestable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -10,6 +12,17 @@ import java.util.List;
 @DiscriminatorValue(value = "OfferedWorkshop")
 
 public class OfferedWorkshop extends Requestable {
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Column
+    private String name;
 
     @Basic
     @Temporal(TemporalType.TIMESTAMP)
@@ -34,5 +47,87 @@ public class OfferedWorkshop extends Requestable {
     private List<WorkshopAttenderInfo> attenderInfos;
 
     @OneToMany(mappedBy = "offeredWorkshop")
+    private List<WorkshopGraderInfo> workshopGraderInfos;
+
+    @OneToMany(mappedBy = "offeredWorkshop")
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
+
+    public Calendar getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(Calendar startTime) {
+        this.startTime = startTime;
+    }
+
+    public Calendar getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Calendar endTime) {
+        this.endTime = endTime;
+    }
+
+    @JsonIgnore
+    public Workshop getWorkshop() {
+        return workshop;
+    }
+
+    public void setWorkshop(Workshop workshop) {
+        this.workshop = workshop;
+    }
+
+    @JsonIgnore
+    public WorkshopManager getWorkshopManager() {
+        return workshopManager;
+    }
+
+    public void setWorkshopManager(WorkshopManager workshopManager) {
+        this.workshopManager = workshopManager;
+    }
+
+
+    @JsonIgnore
+    public List<WorkshopForm> getWorkshopForms() {
+        return workshopForms;
+    }
+
+    public void setWorkshopForms(List<WorkshopForm> workshopForms) {
+        this.workshopForms = workshopForms;
+    }
+
+
+    @JsonIgnore
+    public List<WorkshopAttenderInfo> getAttenderInfos() {
+        return attenderInfos;
+    }
+
+    public void setAttenderInfos(List<WorkshopAttenderInfo> attenderInfos) {
+        this.attenderInfos = attenderInfos;
+    }
+
+    @JsonIgnore
+    public List<OfferedWorkshopRelationDetail> getWorkshopRelationDetails() {
+        return workshopRelationDetails;
+    }
+
+    public void setWorkshopRelationDetails(List<OfferedWorkshopRelationDetail> workshopRelationDetails) {
+        this.workshopRelationDetails = workshopRelationDetails;
+    }
+
+    public void addWorkshopAttenderInfo(WorkshopAttenderInfo workshopAttenderInfo){
+        if ( attenderInfos == null ){
+            attenderInfos = new ArrayList<WorkshopAttenderInfo>();
+        }
+
+        attenderInfos.add(workshopAttenderInfo);
+    }
+
+    public void addWorkshopGraderrInfo(WorkshopGraderInfo workshopGraderInfo){
+        if ( workshopGraderInfos == null ){
+            workshopGraderInfos = new ArrayList<>();
+        }
+
+        workshopGraderInfos.add(workshopGraderInfo);
+    }
 }

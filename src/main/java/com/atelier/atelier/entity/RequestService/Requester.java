@@ -13,8 +13,8 @@ public abstract class Requester {
 
     @Id
     @GeneratedValue
-    protected long id;
+    private long id;
 
     @OneToMany(mappedBy = "requester")
-    protected List<Request> requests;
+    private List<Request> requests;
 }

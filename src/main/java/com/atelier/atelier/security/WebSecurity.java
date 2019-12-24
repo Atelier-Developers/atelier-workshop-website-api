@@ -1,5 +1,6 @@
 package com.atelier.atelier.security;
 
+import com.sun.xml.bind.v2.TODO;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,12 +29,16 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, SecurityConstants.SIGN_UP_URL).permitAll()
+                .antMatchers("/workshop/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
                 .addFilter(new JWTAuthorizationFilter(authenticationManager()))
                 // this disables session creation on Spring Security
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//                .and().logout().logoutUrl("/logout").invalidateHttpSession(true);
+//                 LOGOUT NEEDS A (DEFAULT) /LOGIN PAGE
+//                 .logoutSuccessUrl("/users/login") has to be added
     }
 
     @Override

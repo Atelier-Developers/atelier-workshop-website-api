@@ -18,4 +18,27 @@ public abstract class WorkshopManager {
     @OneToMany(mappedBy = "workshopManager")
     private List<WorkshopManagerFormFiller> formFillerList;
 
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public List<OfferedWorkshop> getOfferedWorkshops() {
+        return offeredWorkshops;
+    }
+
+    public void setOfferedWorkshops(List<OfferedWorkshop> offeredWorkshops) {
+        this.offeredWorkshops = offeredWorkshops;
+    }
+
+    public List<WorkshopManagerFormFiller> getFormFillerList() {
+        return formFillerList;
+    }
+
+    public void setFormFillerList(List<WorkshopManagerFormFiller> formFillerList) {
+        this.formFillerList = formFillerList;
+    }
 }

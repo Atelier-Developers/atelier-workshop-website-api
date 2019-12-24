@@ -12,4 +12,12 @@ public class GraderWorkshopConnection extends WorkshopGrader{
     @OneToOne
     @JoinColumn(name = "grader_id")
     private Grader grader;
+
+    public Grader getGrader() {
+        return grader;
+    }
+
+    public void setGrader(Grader grader) {
+        this.grader = grader;
+    }
 }

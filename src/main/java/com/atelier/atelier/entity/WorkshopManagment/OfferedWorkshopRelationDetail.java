@@ -15,7 +15,7 @@ public class OfferedWorkshopRelationDetail {
     private OfferedWorkshop offeredWorkshop;
 
     @ManyToOne
-    @JoinColumn(name = "workshop_id")
+    @JoinColumn(name = "workshop_id", nullable = false)
     private Workshop workshop;
 
     @Enumerated(EnumType.ORDINAL)

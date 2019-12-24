@@ -1,5 +1,4 @@
 package com.atelier.atelier.security;
- // TODO MAYBE SHOULD HAVE A PARTICULAR PACKAGE FOR ITSELF
 
 
 import com.atelier.atelier.repository.user.UserRepository;

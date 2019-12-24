@@ -1,11 +1,14 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
+import com.atelier.atelier.repository.user.UserRepository;
 import org.hibernate.annotations.AnyMetaDef;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.MetaValue;
+import org.springframework.security.core.Authentication;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -19,7 +22,7 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "user_name", nullable = false)
+    @Column(name = "user_name", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
@@ -90,5 +93,29 @@ public class User {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public void addRole(Role role){
+
+        if ( roles == null ){
+            roles = new ArrayList<>();
+        }
+
+        roles.add(role);
+    }
+
+    public Role getRole(String classType){
+        for(Role role : roles){
+            if(role.getClass().getSimpleName().equals(classType)){
+                return role;
+            }
+        }
+        return null;
+    }
+
+    public static User getUser(Authentication authentication, UserRepository userRepository){
+        String userName = authentication.getName();
+        User user =  userRepository.findByUsername(userName);
+        return user;
     }
 }

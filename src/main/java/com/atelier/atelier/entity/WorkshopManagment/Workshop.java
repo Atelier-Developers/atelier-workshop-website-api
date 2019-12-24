@@ -1,6 +1,9 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
+import com.atelier.atelier.entity.UserPortalManagment.Attender;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -54,5 +57,12 @@ public class Workshop {
 
     public void setOfferedWorkshopRelationDetails(List<OfferedWorkshopRelationDetail> offeredWorkshopRelationDetails) {
         this.offeredWorkshopRelationDetails = offeredWorkshopRelationDetails;
+    }
+
+    public void addOfferingWorkshop(OfferedWorkshop offeredWorkshop){
+        if(offeredWorkshops == null){
+            offeredWorkshops = new ArrayList<>();
+        }
+        offeredWorkshops.add(offeredWorkshop);
     }
 }
