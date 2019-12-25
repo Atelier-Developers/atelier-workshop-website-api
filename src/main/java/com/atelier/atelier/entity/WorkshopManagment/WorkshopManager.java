@@ -1,6 +1,8 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
@@ -29,6 +31,7 @@ public abstract class WorkshopManager {
         this.id = id;
     }
 
+    @JsonIgnore
     public List<OfferedWorkshop> getOfferedWorkshops() {
         return offeredWorkshops;
     }
@@ -37,6 +40,7 @@ public abstract class WorkshopManager {
         this.offeredWorkshops = offeredWorkshops;
     }
 
+    @JsonIgnore
     public List<WorkshopManagerFormFiller> getFormFillerList() {
         return formFillerList;
     }

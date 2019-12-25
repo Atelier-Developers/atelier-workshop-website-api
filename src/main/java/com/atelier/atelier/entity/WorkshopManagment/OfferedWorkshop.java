@@ -2,6 +2,7 @@ package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -12,7 +13,6 @@ import java.util.List;
 
 @Entity
 @DiscriminatorValue(value = "OfferedWorkshop")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class OfferedWorkshop extends Requestable {
 
     public String getName() {
@@ -74,6 +74,14 @@ public class OfferedWorkshop extends Requestable {
 
     public Workshop getWorkshop() {
         return workshop;
+    }
+
+    public List<WorkshopGraderInfo> getWorkshopGraderInfos() {
+        return workshopGraderInfos;
+    }
+
+    public void setWorkshopGraderInfos(List<WorkshopGraderInfo> workshopGraderInfos) {
+        this.workshopGraderInfos = workshopGraderInfos;
     }
 
     public void setWorkshop(Workshop workshop) {

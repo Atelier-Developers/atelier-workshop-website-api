@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -26,6 +27,7 @@ public class WorkshopAttenderInfo {
     @ManyToOne
     @JoinColumn(name = "workshop_attender_id", unique = true)
     private WorkshopAttender workshopAttender;
+    @JsonIgnore
 
     @ManyToOne
     @JoinColumn(name = "workshop_group_id", unique = true)
@@ -39,6 +41,7 @@ public class WorkshopAttenderInfo {
     public void setId(long id) {
         this.id = id;
     }
+
 
     public OfferedWorkshop getOfferedWorkshop() {
         return offeredWorkshop;

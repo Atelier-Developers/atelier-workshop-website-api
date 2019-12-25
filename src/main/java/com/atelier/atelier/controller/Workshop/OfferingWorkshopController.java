@@ -63,7 +63,7 @@ public class OfferingWorkshopController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @GetMapping("/offeringWorkshop/{id}/forms")
+    @GetMapping("/offeringWorkshop/{id}")
     public ResponseEntity<Object> showAllOfferedWorkshopForms(Authentication authentication, @PathVariable Long id) {
         User user = User.getUser(authentication, userRepository);
         ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
@@ -71,7 +71,7 @@ public class OfferingWorkshopController {
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
             if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
-                return new ResponseEntity<>(offeredWorkshop.getWorkshopForms(), HttpStatus.OK);
+                return new ResponseEntity<>(offeredWorkshop, HttpStatus.OK);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
         }

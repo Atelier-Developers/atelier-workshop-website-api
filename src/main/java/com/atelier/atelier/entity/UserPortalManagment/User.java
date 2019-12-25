@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
 import com.atelier.atelier.repository.user.UserRepository;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.AnyMetaDef;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ManyToAny;
@@ -71,6 +72,7 @@ public class User {
         this.username = userName;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }

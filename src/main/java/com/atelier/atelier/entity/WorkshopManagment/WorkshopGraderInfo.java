@@ -1,6 +1,8 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.List;
 @Entity
@@ -58,6 +60,7 @@ public class WorkshopGraderInfo {
         this.workshopGroup = workshopGroup;
     }
 
+    @JsonIgnore
     public List<WorkshopGraderFormFiller> getFormFillers() {
         return formFillers;
     }
@@ -66,6 +69,7 @@ public class WorkshopGraderInfo {
         this.formFillers = formFillers;
     }
 
+    @JsonIgnore
     public List<WorkshopGraderFormApplicant> getWorkshopGraderFormApplicants() {
         return workshopGraderFormApplicants;
     }
@@ -74,6 +78,7 @@ public class WorkshopGraderInfo {
         this.workshopGraderFormApplicants = workshopGraderFormApplicants;
     }
 
+    @JsonIgnore
     public List<GraderEvaluationForm> getEvaluationForms() {
         return evaluationForms;
     }

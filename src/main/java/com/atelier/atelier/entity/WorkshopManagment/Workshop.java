@@ -1,9 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.UserPortalManagment.Attender;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -46,6 +44,7 @@ public class Workshop {
         this.name = name;
     }
 
+    @JsonIgnore
     public List<OfferedWorkshop> getOfferedWorkshops() {
         return offeredWorkshops;
     }
