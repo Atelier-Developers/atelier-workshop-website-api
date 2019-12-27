@@ -2,8 +2,10 @@ package com.atelier.atelier.entity.WorkshopManagment;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 @Entity
 @Table
@@ -27,13 +29,15 @@ public class WorkshopGraderInfo {
     private WorkshopGroup workshopGroup;
 
     @OneToMany(mappedBy = "workshopGraderInfo")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private List<WorkshopGraderFormFiller> formFillers;
 
     @OneToMany(mappedBy = "workshopGraderInfo")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private List<WorkshopGraderFormApplicant> workshopGraderFormApplicants;
 
-    @OneToMany(mappedBy = "workshopGraderInfo")
-    private  List<GraderEvaluationForm> evaluationForms;
 
 
     public long getId() {
@@ -60,7 +64,7 @@ public class WorkshopGraderInfo {
         this.workshopGroup = workshopGroup;
     }
 
-    @JsonIgnore
+
     public List<WorkshopGraderFormFiller> getFormFillers() {
         return formFillers;
     }
@@ -69,7 +73,7 @@ public class WorkshopGraderInfo {
         this.formFillers = formFillers;
     }
 
-    @JsonIgnore
+
     public List<WorkshopGraderFormApplicant> getWorkshopGraderFormApplicants() {
         return workshopGraderFormApplicants;
     }
@@ -78,20 +82,32 @@ public class WorkshopGraderInfo {
         this.workshopGraderFormApplicants = workshopGraderFormApplicants;
     }
 
-    @JsonIgnore
-    public List<GraderEvaluationForm> getEvaluationForms() {
-        return evaluationForms;
-    }
-
-    public void setEvaluationForms(List<GraderEvaluationForm> evaluationForms) {
-        this.evaluationForms = evaluationForms;
-    }
-
     public OfferedWorkshop getOfferedWorkshop() {
         return offeredWorkshop;
     }
 
     public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
         this.offeredWorkshop = offeredWorkshop;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == this){
+            return true;
+        }
+        if(!(obj instanceof WorkshopGraderInfo)){
+            return false;
+        }
+        WorkshopGraderInfo workshopGraderInfo = (WorkshopGraderInfo) obj;
+        return this.id == workshopGraderInfo.id;
+    }
+
+
+    public void addWorkshopGraderFormApplicants(WorkshopGraderFormApplicant workshopGraderFormApplicant){
+        if (workshopGraderFormApplicants == null){
+            workshopGraderFormApplicants = new ArrayList<>();
+        }
+
+        workshopGraderFormApplicants.add(workshopGraderFormApplicant);
     }
 }

@@ -13,4 +13,11 @@ public class WorkshopManagerFormFiller extends FormFiller {
     @JoinColumn(name = "workshop_manager_id")
     private WorkshopManager workshopManager;
 
+    public WorkshopManager getWorkshopManager() {
+        return workshopManager;
+    }
+
+    public void setWorkshopManager(WorkshopManager workshopManager) {
+        this.workshopManager = workshopManager;
+    }
 }

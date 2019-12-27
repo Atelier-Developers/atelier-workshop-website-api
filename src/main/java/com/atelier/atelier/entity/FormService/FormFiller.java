@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.FormService;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,4 +15,29 @@ public abstract class FormFiller {
 
     @OneToMany(mappedBy = "formFiller")
     private List<FilledAnswer> answers;
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public List<FilledAnswer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<FilledAnswer> answers) {
+        this.answers = answers;
+    }
+
+
+    public void addAnswer(FilledAnswer filledAnswer){
+        if ( answers == null ){
+            answers = new ArrayList<>();
+        }
+        answers.add(filledAnswer);
+    }
 }

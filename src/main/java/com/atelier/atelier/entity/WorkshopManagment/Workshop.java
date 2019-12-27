@@ -19,6 +19,7 @@ public class Workshop {
     private String name;
 
     @OneToMany(mappedBy = "workshop")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<OfferedWorkshop> offeredWorkshops;
 
     @OneToMany(mappedBy = "workshop")
@@ -44,7 +45,6 @@ public class Workshop {
         this.name = name;
     }
 
-    @JsonIgnore
     public List<OfferedWorkshop> getOfferedWorkshops() {
         return offeredWorkshops;
     }

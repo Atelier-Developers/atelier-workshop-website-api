@@ -1,5 +1,8 @@
 package com.atelier.atelier.entity.FormService;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -18,5 +21,32 @@ public class Answerable {
 
     @ManyToOne
     @JoinColumn(name = "question_id")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Question question;
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+
+    public Question getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(Question question) {
+        this.question = question;
+    }
 }

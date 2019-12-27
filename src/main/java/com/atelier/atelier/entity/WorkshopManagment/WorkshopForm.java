@@ -19,4 +19,11 @@ public class WorkshopForm extends Form {
     private OfferedWorkshop offeredWorkshop;
 
 
+    public OfferedWorkshop getOfferedWorkshop() {
+        return offeredWorkshop;
+    }
+
+    public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
+        this.offeredWorkshop = offeredWorkshop;
+    }
 }

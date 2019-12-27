@@ -2,6 +2,7 @@ package com.atelier.atelier.entity.UserPortalManagment;
 
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopGrader;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 
@@ -12,9 +13,10 @@ public class GraderWorkshopConnection extends WorkshopGrader{
 
     @OneToOne
     @JoinColumn(name = "grader_id", unique = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Grader grader;
 
-    @JsonIgnore
+
     public Grader getGrader() {
         return grader;
     }

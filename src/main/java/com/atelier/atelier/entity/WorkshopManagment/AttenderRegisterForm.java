@@ -4,10 +4,7 @@ import com.atelier.atelier.entity.FormService.Form;
 import com.atelier.atelier.entity.PaymentService.Payment;
 import com.atelier.atelier.entity.RequestService.RequestData;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.List;
 
 /*
@@ -19,7 +16,8 @@ import java.util.List;
 
 public class AttenderRegisterForm extends Form implements RequestData {
 
-    @OneToMany(mappedBy = "attenderRegisterForm")
-    private List<AttenderPaymentTab> payments;
+    @OneToOne(mappedBy = "attenderRegisterForm")
+    private OfferedWorkshop offeredWorkshop;
+
 
 }

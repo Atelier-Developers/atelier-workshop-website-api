@@ -35,19 +35,27 @@ public class UserController {
 //        if ( foundUser != null ){
 //            return new ResponseEntity<>("A user with the username already exists", HttpStatus.BAD_REQUEST);
 //        }
+
+        System.out.println("hey");
+        System.out.println(user.getAddress());
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        System.out.println("jack");
+
         Attender attender = new Attender();
         AttenderWorkshopConnection attenderWorkshopConnection = new AttenderWorkshopConnection();
         attender.setAttenderWorkshopConnection(attenderWorkshopConnection);
         attenderWorkshopConnection.setAttender(attender);
+
         user.addRole(attender);
 
+        System.out.println("jakja");
         Grader grader = new Grader();
         GraderWorkshopConnection graderWorkshopConnection = new GraderWorkshopConnection();
         graderWorkshopConnection.setGrader(grader);
         grader.setGraderWorkshopConnection(graderWorkshopConnection);
         user.addRole(grader);
 
+        System.out.println("lala");
         user.addRole(new ManagerWorkshopConnection()); //TODO REMEMBER TO DELETE THESE AND ADD A PATH FOR ADDING SUCH ROLES TO A USER
         try {
             userRepository.save(user);

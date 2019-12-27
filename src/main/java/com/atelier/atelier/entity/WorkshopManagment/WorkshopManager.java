@@ -1,11 +1,9 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -18,9 +16,13 @@ public abstract class WorkshopManager {
     private long id;
 
     @OneToMany(mappedBy = "workshopManager")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private List<OfferedWorkshop> offeredWorkshops;
 
     @OneToMany(mappedBy = "workshopManager")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private List<WorkshopManagerFormFiller> formFillerList;
 
     public long getId() {
@@ -31,7 +33,7 @@ public abstract class WorkshopManager {
         this.id = id;
     }
 
-    @JsonIgnore
+
     public List<OfferedWorkshop> getOfferedWorkshops() {
         return offeredWorkshops;
     }
@@ -40,12 +42,19 @@ public abstract class WorkshopManager {
         this.offeredWorkshops = offeredWorkshops;
     }
 
-    @JsonIgnore
     public List<WorkshopManagerFormFiller> getFormFillerList() {
         return formFillerList;
     }
 
     public void setFormFillerList(List<WorkshopManagerFormFiller> formFillerList) {
         this.formFillerList = formFillerList;
+    }
+
+
+    public void addFormFiller(WorkshopManagerFormFiller workshopManagerFormFiller){
+        if (formFillerList == null){
+            formFillerList = new ArrayList<>();
+        }
+        formFillerList.add(workshopManagerFormFiller);
     }
 }

@@ -2,6 +2,7 @@ package com.atelier.atelier.entity.UserPortalManagment;
 
 import com.atelier.atelier.repository.user.UserRepository;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.AnyMetaDef;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ManyToAny;
@@ -27,6 +28,7 @@ public class User {
     private String username;
 
     @Column(name = "password", nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Column(name = "address", nullable = false)
@@ -72,7 +74,6 @@ public class User {
         this.username = userName;
     }
 
-    @JsonIgnore
     public String getPassword() {
         return password;
     }

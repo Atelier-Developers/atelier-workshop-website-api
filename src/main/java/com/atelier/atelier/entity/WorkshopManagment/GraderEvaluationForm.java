@@ -14,7 +14,17 @@ import java.util.List;
 @DiscriminatorValue(value = "GraderEvaluationForm")
 public class GraderEvaluationForm extends Form {
 
-    @ManyToOne
-    @JoinColumn(name = "workshop_grader_info_id")
-    private WorkshopGraderInfo workshopGraderInfo;
+
+    @OneToOne
+    @JoinColumn(name = "offered_workshop_id", unique = true)
+
+    private OfferedWorkshop offeredWorkshop;
+
+    public OfferedWorkshop getOfferedWorkshop() {
+        return offeredWorkshop;
+    }
+
+    public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
+        this.offeredWorkshop = offeredWorkshop;
+    }
 }

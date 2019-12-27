@@ -1,9 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -22,15 +19,16 @@ public class WorkshopAttenderInfo {
     private OfferedWorkshop offeredWorkshop;
 
     @OneToMany(mappedBy = "workshopAttenderInfo")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopAttenderFormApplicant> workshopAttenderFormApplicants;
 
     @ManyToOne
     @JoinColumn(name = "workshop_attender_id", unique = true)
     private WorkshopAttender workshopAttender;
-    @JsonIgnore
 
     @ManyToOne
     @JoinColumn(name = "workshop_group_id", unique = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private WorkshopGroup workshopGroup;
 
 
@@ -51,7 +49,6 @@ public class WorkshopAttenderInfo {
         this.offeredWorkshop = offeredWorkshop;
     }
 
-    @JsonIgnore
     public List<WorkshopAttenderFormApplicant> getWorkshopAttenderFormApplicants() {
         return workshopAttenderFormApplicants;
     }

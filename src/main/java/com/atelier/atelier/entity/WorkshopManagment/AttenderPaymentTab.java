@@ -13,7 +13,7 @@ public class AttenderPaymentTab implements Payment {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "attender_register_form_id")
-    private AttenderRegisterForm attenderRegisterForm;
+    @JoinColumn(name = "attender_request_payment_tab_id")
+    private AttenderRequestPaymentTab attenderRequestPaymentTab;
 
 }

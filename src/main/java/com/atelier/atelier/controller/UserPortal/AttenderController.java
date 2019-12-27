@@ -99,7 +99,6 @@ public class AttenderController {
         workshopAttenderInfo.setOfferedWorkshop(offeredWorkshop);
         workshopAttenderInfo.setWorkshopAttender(attenderWorkshopConnection);
         attenderWorkshopConnection.addWorkshopAttenderInfo(workshopAttenderInfo);
-        // TODO SHOULD ADD AN ATTENDER FORM APPLICANT ALSO? SINCE IT'S KIND OF AN ENROLLMENT.
         offeredWorkshop.addWorkshopAttenderInfo(workshopAttenderInfo);
         workshopAttenderInfoRepository.save(workshopAttenderInfo);
         return new ResponseEntity<>(workshopAttenderInfo, HttpStatus.OK);

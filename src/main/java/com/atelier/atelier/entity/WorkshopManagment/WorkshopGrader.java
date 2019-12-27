@@ -2,6 +2,7 @@ package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
@@ -20,9 +21,13 @@ public abstract class WorkshopGrader {
     private long id;
 
     @OneToMany(mappedBy = "workshopGrader")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private List<WorkshopGraderInfo> workshopGraderInfos;
 
     @OneToMany(mappedBy = "workshopGrader")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private List<GraderFormApplicant> graderFormApplicants;
 
 
@@ -34,7 +39,7 @@ public abstract class WorkshopGrader {
         this.id = id;
     }
 
-    @JsonIgnore
+
     public List<WorkshopGraderInfo> getWorkshopGraderInfos() {
         return workshopGraderInfos;
     }
@@ -43,7 +48,7 @@ public abstract class WorkshopGrader {
         this.workshopGraderInfos = workshopGraderInfos;
     }
 
-    @JsonIgnore
+
     public List<GraderFormApplicant> getGraderFormApplicants() {
         return graderFormApplicants;
     }

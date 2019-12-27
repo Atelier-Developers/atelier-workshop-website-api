@@ -2,6 +2,7 @@ package com.atelier.atelier.entity.RequestService;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
@@ -19,6 +20,7 @@ public abstract class Requestable {
     private long id;
 
     @OneToMany(mappedBy = "requestable")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Request> requests;
 
     public long getId() {
@@ -29,7 +31,6 @@ public abstract class Requestable {
         this.id = id;
     }
 
-    @JsonIgnore
     public List<Request> getRequests() {
         return requests;
     }

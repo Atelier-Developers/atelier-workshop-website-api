@@ -3,6 +3,7 @@ package com.atelier.atelier.entity.FormService;
 import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.util.List;
@@ -35,7 +36,39 @@ public class Answer {
     @JoinColumn(name = "question_id")
     private Question question;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "form_applicant_id")
     private FormApplicant formApplicant;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public List<AnswerData> getAnswerData() {
+        return answerData;
+    }
+
+    public void setAnswerData(List<AnswerData> answerData) {
+        this.answerData = answerData;
+    }
+
+    public Question getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(Question question) {
+        this.question = question;
+    }
+
+    public FormApplicant getFormApplicant() {
+        return formApplicant;
+    }
+
+    public void setFormApplicant(FormApplicant formApplicant) {
+        this.formApplicant = formApplicant;
+    }
 }

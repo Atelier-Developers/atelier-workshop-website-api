@@ -1,10 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.RequestService.Requestable;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -43,6 +40,7 @@ public class OfferedWorkshop extends Requestable {
     private WorkshopManager workshopManager;
 
     @OneToMany(mappedBy = "offeredWorkshop")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopForm> workshopForms;
 
     @OneToMany(mappedBy = "offeredWorkshop")
@@ -53,6 +51,18 @@ public class OfferedWorkshop extends Requestable {
 
     @OneToMany(mappedBy = "offeredWorkshop")
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
+
+    @OneToOne(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+    private GraderEvaluationForm graderEvaluationForm;
+
+
+    @OneToOne
+    @JoinColumn(name = "grader_request_form_id", unique = true)
+    private GraderRequestForm graderRequestForm;
+
+    @OneToOne
+    @JoinColumn(name = "attender_register_form_id", unique = true)
+    private AttenderRegisterForm attenderRegisterForm;
 
     public Calendar getStartTime() {
         return startTime;
@@ -98,7 +108,6 @@ public class OfferedWorkshop extends Requestable {
     }
 
 
-    @JsonIgnore
     public List<WorkshopForm> getWorkshopForms() {
         return workshopForms;
     }
@@ -107,7 +116,13 @@ public class OfferedWorkshop extends Requestable {
         this.workshopForms = workshopForms;
     }
 
+    public GraderEvaluationForm getGraderEvaluationForm() {
+        return graderEvaluationForm;
+    }
 
+    public void setGraderEvaluationForm(GraderEvaluationForm graderEvaluationForm) {
+        this.graderEvaluationForm = graderEvaluationForm;
+    }
 
     public List<WorkshopAttenderInfo> getAttenderInfos() {
         return attenderInfos;
@@ -140,5 +155,29 @@ public class OfferedWorkshop extends Requestable {
         }
 
         workshopGraderInfos.add(workshopGraderInfo);
+    }
+
+    public void addWorkshopForm(WorkshopForm workshopForm){
+        if ( workshopForms == null ){
+            workshopForms = new ArrayList<>();
+        }
+
+        workshopForms.add(workshopForm);
+    }
+
+    public GraderRequestForm getGraderRequestForm() {
+        return graderRequestForm;
+    }
+
+    public void setGraderRequestForm(GraderRequestForm graderRequestForm) {
+        this.graderRequestForm = graderRequestForm;
+    }
+
+    public AttenderRegisterForm getAttenderRegisterForm() {
+        return attenderRegisterForm;
+    }
+
+    public void setAttenderRegisterForm(AttenderRegisterForm attenderRegisterForm) {
+        this.attenderRegisterForm = attenderRegisterForm;
     }
 }

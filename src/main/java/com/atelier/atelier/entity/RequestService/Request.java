@@ -2,6 +2,7 @@ package com.atelier.atelier.entity.RequestService;
 
 
 import com.atelier.atelier.entity.WorkshopManagment.AttenderRegisterForm;
+import com.atelier.atelier.entity.WorkshopManagment.AttenderRequestPaymentTab;
 import com.atelier.atelier.entity.WorkshopManagment.GraderRequestForm;
 import com.sun.xml.bind.v2.TODO;
 import org.hibernate.annotations.Any;
@@ -24,7 +25,8 @@ public class Request {
     @AnyMetaDef(idType = "long", metaType = "string",
             metaValues = {
                     @MetaValue(targetEntity = GraderRequestForm.class, value = "GraderRequestForm"),
-                    @MetaValue(targetEntity = AttenderRegisterForm.class, value = "AttenderRegisterForm")
+                    @MetaValue(targetEntity = AttenderRegisterForm.class, value = "AttenderRegisterForm"),
+                    @MetaValue(targetEntity = AttenderRequestPaymentTab.class, value = "AttenderRequestPaymentTab")
             })
     @JoinTable(name = "request_request_data",
             joinColumns = @JoinColumn(name = "request_id"),
