@@ -21,7 +21,7 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @ManyToAny(metaColumn = @Column(name = "REQUEST_DATA_TYPE"))
+    @ManyToAny(metaColumn = @Column(name = "request_data_types"))
     @AnyMetaDef(idType = "long", metaType = "string",
             metaValues = {
                     @MetaValue(targetEntity = GraderRequestForm.class, value = "GraderRequestForm"),

@@ -15,6 +15,7 @@ import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopGraderInfoRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -89,6 +90,22 @@ public class WorkshopManagerController {
         return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
     }
 
+    @GetMapping("/offeringWorkshop/{id}/graderEvaluationForm")
+    public ResponseEntity<Object> getGraderEvalForm(@PathVariable long id, Authentication authentication) {
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+        Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
+        if (offeredWorkshopOptional.isPresent()) {
+            OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
+            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+                return new ResponseEntity<>(offeredWorkshop.getGraderEvaluationForm(), HttpStatus.OK);
+            }
+            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
+
+        }
+        return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
+    }
+
     @PostMapping("/offeringWorkshop/{id}/graderEvaluationForm")
     public ResponseEntity<Object> makeGraderEvalForm(@PathVariable long id, Authentication authentication, @RequestBody GraderEvaluationForm graderEvaluationForm) {
 
@@ -98,10 +115,12 @@ public class WorkshopManagerController {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
             if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
                 graderEvaluationForm.setOfferedWorkshop(offeredWorkshop);
-                System.out.println(graderEvaluationForm.getOfferedWorkshop().getId());
                 offeredWorkshop.setGraderEvaluationForm(graderEvaluationForm);
-                formRepository.save(graderEvaluationForm);
-                // TODO integrity
+                try {
+                    formRepository.save(graderEvaluationForm);
+                } catch (DataIntegrityViolationException e) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
                 return new ResponseEntity<>(HttpStatus.CREATED);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
@@ -134,6 +153,7 @@ public class WorkshopManagerController {
             }
             if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
                 for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
+                    System.out.println("here");
                     Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
                     if (!optionalQuestion.isPresent()) {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -162,7 +182,7 @@ public class WorkshopManagerController {
                     question.addAnswer(filledAnswer);
                     filledAnswer.setQuestion(question);
 
-
+                    // TODO check
                     answerRepository.save(filledAnswer);
                 }
             }

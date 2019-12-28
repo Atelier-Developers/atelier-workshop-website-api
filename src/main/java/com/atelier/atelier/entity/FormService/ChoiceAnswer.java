@@ -13,4 +13,20 @@ public class ChoiceAnswer implements AnswerData{
     @Column(name = "choice", nullable = false)
     private int choice;
 
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public int getChoice() {
+        return choice;
+    }
+
+    public void setChoice(int choice) {
+        this.choice = choice;
+    }
 }

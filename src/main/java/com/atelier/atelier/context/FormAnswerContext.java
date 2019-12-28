@@ -7,7 +7,7 @@ import java.util.List;
 public class FormAnswerContext {
     private long formId;
     private long applicantId;
-    private List<AnswerQuestionContext> answerQuestionContexts;
+    private List<AnswerQuestionContext> answerQuestion;
 
 
     public long getFormId() {
@@ -19,11 +19,11 @@ public class FormAnswerContext {
     }
 
     public List<AnswerQuestionContext> getAnswerQuestionContexts() {
-        return answerQuestionContexts;
+        return answerQuestion;
     }
 
     public void setAnswerQuestionContexts(List<AnswerQuestionContext> answerQuestionContexts) {
-        this.answerQuestionContexts = answerQuestionContexts;
+        this.answerQuestion = answerQuestionContexts;
     }
 
     public long getApplicantId() {
