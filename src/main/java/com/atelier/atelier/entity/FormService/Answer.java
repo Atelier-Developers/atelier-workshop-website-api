@@ -6,6 +6,7 @@ import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -70,5 +71,12 @@ public class Answer {
 
     public void setFormApplicant(FormApplicant formApplicant) {
         this.formApplicant = formApplicant;
+    }
+
+    public void addAnswerData(AnswerData answerData){
+        if(this.answerData == null){
+            this.answerData = new ArrayList<>();
+        }
+        this.answerData.add(answerData);
     }
 }

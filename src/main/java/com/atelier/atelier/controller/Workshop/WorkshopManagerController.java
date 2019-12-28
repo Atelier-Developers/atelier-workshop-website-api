@@ -20,8 +20,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.w3c.dom.Text;
 
 import javax.swing.text.html.Option;
+import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,39 +155,71 @@ public class WorkshopManagerController {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+                WorkshopGraderFormApplicant workshopGraderFormApplicant = new WorkshopGraderFormApplicant();
+                WorkshopManagerFormFiller workshopManagerFormFiller = new WorkshopManagerFormFiller();
+                workshopManagerFormFiller.setWorkshopManager(managerWorkshopConnection);
+                managerWorkshopConnection.addFormFiller(workshopManagerFormFiller);
+                workshopGraderFormApplicant.setWorkshopGraderInfo(workshopGraderInfo);
+                workshopGraderInfo.addWorkshopGraderFormApplicants(workshopGraderFormApplicant);
+
                 for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
-                    System.out.println("here");
+
                     Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
                     if (!optionalQuestion.isPresent()) {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
                     Question question = optionalQuestion.get();
-                    Answer answer = answerQuestionContext.getAnswer();
-                    if (question.getForm().getId() != form.getId() && !(answer instanceof FilledAnswer)) {
+                    FilledAnswer filledAnswer = new FilledAnswer();
+                    if (question.getForm().getId() != form.getId()) {
                         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
                     }
-                    FilledAnswer filledAnswer = (FilledAnswer) answer;
-                    WorkshopManagerFormFiller workshopManagerFormFiller = new WorkshopManagerFormFiller();
 
-                    workshopManagerFormFiller.setWorkshopManager(managerWorkshopConnection);
-                    managerWorkshopConnection.addFormFiller(workshopManagerFormFiller);
+                    String type = answerQuestionContext.getType();
+                    LinkedHashMap<String, Object> answerDataObject = answerQuestionContext.getAnswerData();
+                    System.out.println(answerDataObject);
+                    AnswerData answerData = null;
+
+                    if (type.equalsIgnoreCase("TextAnswer")){
+                        TextAnswer textAnswer = new TextAnswer();
+                        textAnswer.setText((String) answerDataObject.get("text"));
+                        answerData = textAnswer;
+                        System.out.println("here");
+                    }
+
+                    else if ( type.equalsIgnoreCase("ChoiceAnswer")){
+                        ChoiceAnswer choiceAnswer = new ChoiceAnswer();
+                        choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
+                        answerData = choiceAnswer;
+                    }
+                    else {
+                        return new ResponseEntity<>("Type not supported",HttpStatus.BAD_REQUEST);
+                    }
+                    //TODO fix file answer
+
+//                    else if (type.equalsIgnoreCase("FileAnswer")){
+//                        FileAnswer fileAnswer = new FileAnswer();
+//                        fileAnswer.
+//                    }
+
+                    filledAnswer.addAnswerData(answerData);
+
+
+
 
                     filledAnswer.setFormFiller(workshopManagerFormFiller);
                     workshopManagerFormFiller.addAnswer(filledAnswer);
 
-                    WorkshopGraderFormApplicant workshopGraderFormApplicant = new WorkshopGraderFormApplicant();
-                    workshopGraderFormApplicant.setWorkshopGraderInfo(workshopGraderInfo);
-                    workshopGraderInfo.addWorkshopGraderFormApplicants(workshopGraderFormApplicant);
+
 
                     filledAnswer.setFormApplicant(workshopGraderFormApplicant);
                     workshopGraderFormApplicant.addAnswers(filledAnswer);
 
                     question.addAnswer(filledAnswer);
                     filledAnswer.setQuestion(question);
-
-                    // TODO check
                     answerRepository.save(filledAnswer);
+
                 }
+                return new ResponseEntity<>(HttpStatus.CREATED);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
 
