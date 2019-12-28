@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.RequestService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.*;
@@ -17,4 +18,28 @@ public abstract class Requester {
 
     @OneToMany(mappedBy = "requester")
     private List<Request> requests;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public List<Request> getRequests() {
+        return requests;
+    }
+
+    public void setRequests(List<Request> requests) {
+        this.requests = requests;
+    }
+
+    public void addRequest(Request request){
+        if ( requests == null ){
+            requests = new ArrayList<>();
+        }
+
+        requests.add(request);
+    }
 }

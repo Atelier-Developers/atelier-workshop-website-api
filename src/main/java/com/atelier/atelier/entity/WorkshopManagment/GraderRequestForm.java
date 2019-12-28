@@ -20,4 +20,11 @@ public class GraderRequestForm extends Form implements RequestData {
     @OneToOne(mappedBy = "graderRequestForm")
     private OfferedWorkshop offeredWorkshop;
 
+    public OfferedWorkshop getOfferedWorkshop() {
+        return offeredWorkshop;
+    }
+
+    public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
+        this.offeredWorkshop = offeredWorkshop;
+    }
 }

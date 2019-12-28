@@ -63,4 +63,22 @@ public abstract class WorkshopGrader {
         }
         workshopGraderInfos.add(workshopGraderInfo);
     }
+    public WorkshopGraderInfo getWorkshopGraderInfoOfferedWorkshop(OfferedWorkshop offeredWorkshop){
+        for(WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos){
+            if(workshopGraderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()){
+                return workshopGraderInfo;
+            }
+        }
+        return null;
+
+    }
+
+
+    public void addGraderFormApplicant(GraderFormApplicant graderFormApplicant){
+        if (graderFormApplicants == null){
+            graderFormApplicants = new ArrayList<>();
+        }
+
+        graderFormApplicants.add(graderFormApplicant);
+    }
 }

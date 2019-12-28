@@ -12,4 +12,11 @@ public class GraderFormApplicant extends FormApplicant {
     @JoinColumn(name = "workshop_grader_id")
     private WorkshopGrader workshopGrader;
 
+    public WorkshopGrader getWorkshopGrader() {
+        return workshopGrader;
+    }
+
+    public void setWorkshopGrader(WorkshopGrader workshopGrader) {
+        this.workshopGrader = workshopGrader;
+    }
 }

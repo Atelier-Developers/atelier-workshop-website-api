@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
+import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.fasterxml.jackson.annotation.*;
 
@@ -7,6 +8,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+
+//TODO add prerequsite validation
 
 @Entity
 @DiscriminatorValue(value = "OfferedWorkshop")
@@ -179,5 +183,25 @@ public class OfferedWorkshop extends Requestable {
 
     public void setAttenderRegisterForm(AttenderRegisterForm attenderRegisterForm) {
         this.attenderRegisterForm = attenderRegisterForm;
+    }
+
+    public boolean hasGraderRequested(WorkshopGrader workshopGrader){
+        for(WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos){
+            if(workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId() ){
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    public  boolean hasAtendeeRequested(WorkshopAttender workshopAttender){
+        for(WorkshopAttenderInfo workshopAttenderInfo : attenderInfos){
+            if(workshopAttenderInfo.getWorkshopAttender().getId() == workshopAttender.getId()){
+                return false;
+            }
+        }
+        return true;
     }
 }

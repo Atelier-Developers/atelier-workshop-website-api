@@ -19,5 +19,11 @@ public class AttenderRegisterForm extends Form implements RequestData {
     @OneToOne(mappedBy = "attenderRegisterForm")
     private OfferedWorkshop offeredWorkshop;
 
+    public OfferedWorkshop getOfferedWorkshop() {
+        return offeredWorkshop;
+    }
 
+    public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
+        this.offeredWorkshop = offeredWorkshop;
+    }
 }

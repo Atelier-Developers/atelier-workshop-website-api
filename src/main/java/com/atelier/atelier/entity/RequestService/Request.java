@@ -11,6 +11,7 @@ import org.hibernate.annotations.ManyToAny;
 import org.hibernate.annotations.MetaValue;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -31,7 +32,7 @@ public class Request {
     @JoinTable(name = "request_request_data",
             joinColumns = @JoinColumn(name = "request_id"),
             inverseJoinColumns = @JoinColumn(name = "request_data_id"))
-    private List<RequestData> requestData;
+    private List<RequestData> requestDatas;
 
     @Enumerated(EnumType.ORDINAL)
     private RequestState state;
@@ -44,5 +45,50 @@ public class Request {
     @JoinColumn(name = "requester_id")
     private Requester requester;
 
+    public long getId() {
+        return id;
+    }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public List<RequestData> getRequestData() {
+        return requestDatas;
+    }
+
+    public void setRequestData(List<RequestData> requestData) {
+        this.requestDatas = requestData;
+    }
+
+    public RequestState getState() {
+        return state;
+    }
+
+    public void setState(RequestState state) {
+        this.state = state;
+    }
+
+    public Requestable getRequestable() {
+        return requestable;
+    }
+
+    public void setRequestable(Requestable requestable) {
+        this.requestable = requestable;
+    }
+
+    public Requester getRequester() {
+        return requester;
+    }
+
+    public void setRequester(Requester requester) {
+        this.requester = requester;
+    }
+
+    public void addRequestData(RequestData requestData){
+        if(requestDatas == null){
+            requestDatas = new ArrayList<>();
+        }
+        requestDatas.add(requestData);
+    }
 }

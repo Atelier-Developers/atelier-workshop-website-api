@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,5 +38,14 @@ public abstract class Requestable {
 
     public void setRequests(List<Request> requests) {
         this.requests = requests;
+    }
+
+    public void addRequest(Request request){
+
+        if ( requests == null ){
+            requests = new ArrayList<>();
+        }
+
+        requests.add(request);
     }
 }

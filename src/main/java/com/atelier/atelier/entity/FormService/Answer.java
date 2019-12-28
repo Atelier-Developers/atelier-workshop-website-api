@@ -34,7 +34,7 @@ public class Answer {
     private List<AnswerData> answerData;
 
     @ManyToOne
-    @JoinColumn(name = "question_id")
+    @JoinColumn(name = "question_id", unique = true, nullable = false)
     private Question question;
 
     @ManyToOne(cascade = CascadeType.ALL)

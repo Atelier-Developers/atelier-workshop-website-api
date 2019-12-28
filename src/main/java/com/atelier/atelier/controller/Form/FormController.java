@@ -54,31 +54,6 @@ public class FormController {
     }
 
 
-    @PostMapping("/form/{formId}/questions")
-    public ResponseEntity<Object> addQuestion(@RequestBody List<Question> questions, @PathVariable long formId) {
-
-        Optional<Form> optionalForm = formRepository.findById(formId);
-        if (!optionalForm.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        Form form = optionalForm.get();
-        form.setQuestions(questions);
-
-        for (Question question : questions) {
-            List<Answerable> answerables = question.getAnswerables();
-            if (answerables != null) {
-                for (Answerable answerable : answerables) {
-                    answerable.setQuestion(question);
-                }
-            }
-
-            question.setForm(form);
-            questionRepsoitory.save(question);
-        }
-        formRepository.save(form);
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
 
 }
 
