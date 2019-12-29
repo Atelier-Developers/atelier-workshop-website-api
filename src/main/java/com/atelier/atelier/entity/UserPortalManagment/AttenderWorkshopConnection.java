@@ -1,6 +1,9 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
+import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
+import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopAttender;
+import com.atelier.atelier.entity.WorkshopManagment.WorkshopAttenderInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -26,5 +29,14 @@ public class AttenderWorkshopConnection  extends WorkshopAttender{
 
     public void setAttender(Attender attender) {
         this.attender = attender;
+    }
+
+    public boolean hasPassedWorkshop(Workshop workshop){
+        for(WorkshopAttenderInfo workshopAttenderInfo: getWorkshopAttenderInfos()){
+            if(workshop.getId() == workshopAttenderInfo.getOfferedWorkshop().getWorkshop().getId()){
+                return true;
+            }
+        }
+        return false;
     }
 }

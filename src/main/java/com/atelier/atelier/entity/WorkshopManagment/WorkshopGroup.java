@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -64,4 +65,19 @@ public class WorkshopGroup {
     public void setGroupFormApplicants(List<GroupFormApplicant> groupFormApplicants) {
         this.groupFormApplicants = groupFormApplicants;
     }
+
+    public void addGrader(WorkshopGraderInfo workshopGraderInfo) {
+        if (graderInfos == null) {
+            graderInfos = new ArrayList<>();
+        }
+        graderInfos.add(workshopGraderInfo);
+    }
+
+    public void addAttender(WorkshopAttenderInfo workshopAttenderInfo){
+        if(attenderInfos == null){
+            attenderInfos = new ArrayList<>();
+        }
+        attenderInfos.add(workshopAttenderInfo);
+    }
+
 }

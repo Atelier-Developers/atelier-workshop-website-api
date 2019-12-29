@@ -8,9 +8,7 @@ import org.joda.time.Interval;
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.*;
 
 
 //TODO add prerequsite validation
@@ -61,7 +59,7 @@ public class OfferedWorkshop extends Requestable {
     @OneToMany(mappedBy = "offeredWorkshop")
     private List<WorkshopGraderInfo> workshopGraderInfos;
 
-    @OneToMany(mappedBy = "offeredWorkshop")
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
 
     @OneToOne(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
@@ -134,6 +132,14 @@ public class OfferedWorkshop extends Requestable {
 
     public void setGraderEvaluationForm(GraderEvaluationForm graderEvaluationForm) {
         this.graderEvaluationForm = graderEvaluationForm;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public List<WorkshopAttenderInfo> getAttenderInfos() {
@@ -237,5 +243,19 @@ public class OfferedWorkshop extends Requestable {
         else{
             return false;
         }
+    }
+
+    public void addOfferingWorkshopRelations(OfferedWorkshopRelationDetail offeredWorkshopRelationDetail){
+        if(workshopRelationDetails == null){
+            workshopRelationDetails = new ArrayList<>();
+        }
+        workshopRelationDetails.add(offeredWorkshopRelationDetail);
+    }
+    public Set<WorkshopGroup> workshopGroupSet(){
+        Set<WorkshopGroup> workshopGroups = new HashSet<>();
+        for(WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos){
+            workshopGroups.add(workshopGraderInfo.getWorkshopGroup());
+        }
+        return workshopGroups;
     }
 }

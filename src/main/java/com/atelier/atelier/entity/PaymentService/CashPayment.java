@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.PaymentService;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Calendar;
 
 @Entity
@@ -11,12 +12,14 @@ public class CashPayment implements Payment {
     private long id;
 
     @Column(nullable = false)
-    private double value;
+    private BigDecimal value;
 
     @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar paymentDate;
 
+    @Column(nullable = false)
+    private boolean isPaid;
 
     public long getId() {
         return id;
@@ -26,11 +29,11 @@ public class CashPayment implements Payment {
         this.id = id;
     }
 
-    public double getValue() {
+    public BigDecimal getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
@@ -40,5 +43,13 @@ public class CashPayment implements Payment {
 
     public void setPaymentDate(Calendar paymentDate) {
         this.paymentDate = paymentDate;
+    }
+
+    public boolean isPaid() {
+        return isPaid;
+    }
+
+    public void setPaid(boolean paid) {
+        isPaid = paid;
     }
 }

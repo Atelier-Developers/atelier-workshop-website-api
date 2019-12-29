@@ -22,7 +22,7 @@ public class Workshop {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<OfferedWorkshop> offeredWorkshops;
 
-    @OneToMany(mappedBy = "workshop")
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     private List<OfferedWorkshopRelationDetail> offeredWorkshopRelationDetails;
 
     public Workshop(){
@@ -67,4 +67,12 @@ public class Workshop {
         }
         offeredWorkshops.add(offeredWorkshop);
     }
+
+    public void addOfferingWorkshopRelation(OfferedWorkshopRelationDetail offeredWorkshopRelationDetail){
+        if(offeredWorkshopRelationDetails == null){
+            offeredWorkshopRelationDetails = new ArrayList<>();
+        }
+        offeredWorkshopRelationDetails.add(offeredWorkshopRelationDetail);
+    }
+
 }
