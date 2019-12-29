@@ -22,12 +22,10 @@ public abstract class WorkshopAttender {
 
     @OneToMany(mappedBy = "workshopAttender")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private List<WorkshopAttenderInfo> workshopAttenderInfos;
 
     @OneToMany(mappedBy = "workshopAttender")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private List<AttenderFormApplicant> attenderFormApplicants;
 
     public WorkshopAttender() {

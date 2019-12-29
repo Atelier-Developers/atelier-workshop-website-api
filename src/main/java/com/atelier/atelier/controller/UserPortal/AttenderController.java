@@ -17,6 +17,7 @@ import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
+import org.apache.catalina.Manager;
 import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,7 +76,7 @@ public class AttenderController {
         }
         Attender attenderRole = (Attender) role;
         AttenderWorkshopConnection attenderWorkshopConnection = attenderRole.getAttenderWorkshopConnection();
-        if ( attenderWorkshopConnection == null) {
+        if (attenderWorkshopConnection == null) {
             return new ResponseEntity<>("The user has no attendee workshop connection.", HttpStatus.NO_CONTENT);
         }
         List<WorkshopAttenderInfo> workshopAttenderInfos = attenderWorkshopConnection.getWorkshopAttenderInfos();
@@ -119,10 +120,10 @@ public class AttenderController {
 
 
     @GetMapping("/attendee/request/offeringWorkshop/{id}")
-    public ResponseEntity<Object> getGraderRequestForm(@PathVariable long id){
+    public ResponseEntity<Object> getGraderRequestForm(@PathVariable long id) {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
-        if ( !optionalOfferedWorkshop.isPresent() ){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -134,18 +135,37 @@ public class AttenderController {
 
 
     @PostMapping("/attendee/request/offeringWorkshop/{id}/answer")
-    public ResponseEntity<Object> answerAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext){
+    public ResponseEntity<Object> answerAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext) {
         AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
-        if ( !optionalOfferedWorkshop.isPresent() ){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (!offeredWorkshop.hasAtendeeRequested(attenderWorkshopConnection)){
-            return new ResponseEntity<>("The attendee is already in this workshop", HttpStatus.BAD_REQUEST);
+        if (!offeredWorkshop.hasAtendeeRequested(attenderWorkshopConnection)) {
+            return new ResponseEntity<>("The attendee is already in this workshop", HttpStatus.FORBIDDEN);
+        }
+
+        User user = User.getUser(authentication, userRepository);
+        ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
+
+        if (managerWorkshopConnection.getId() == offeredWorkshop.getWorkshopManager().getId()) {
+            return new ResponseEntity<>("You are the workshop manager", HttpStatus.FORBIDDEN);
+        }
+
+        GraderWorkshopConnection graderWorkshopConnection = ((Grader) user.getRole("Grader")).getGraderWorkshopConnection();
+
+        if (!offeredWorkshop.hasGraderRequested(graderWorkshopConnection)) {
+            return new ResponseEntity<>("You are the grader of this workshop", HttpStatus.FORBIDDEN);
+        }
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : attenderWorkshopConnection.getWorkshopAttenderInfos()) {
+            if (OfferedWorkshop.doTwoOfferedWorkshopTimeIntervalsOverlap(workshopAttenderInfo.getOfferedWorkshop(), offeredWorkshop)) {
+                return new ResponseEntity<>("Attender' workshop overlaps ", HttpStatus.BAD_REQUEST);
+            }
         }
         AttenderRegisterForm attenderRegisterForm = offeredWorkshop.getAttenderRegisterForm();
 
@@ -155,7 +175,7 @@ public class AttenderController {
 
         List<Answer> answers = new ArrayList<>();
 
-        for ( AnswerQuestionContext answerQuestionContext : registerRequestContext.getAnswerQuestionContexts()){
+        for (AnswerQuestionContext answerQuestionContext : registerRequestContext.getAnswerQuestionContexts()) {
             Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
 
             if (!optionalQuestion.isPresent()) {
@@ -164,7 +184,7 @@ public class AttenderController {
 
             Question question = optionalQuestion.get();
 
-            if ( question.getForm().getId() != attenderRegisterForm.getId()){
+            if (question.getForm().getId() != attenderRegisterForm.getId()) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
 
@@ -174,19 +194,16 @@ public class AttenderController {
             LinkedHashMap<String, Object> answerDataObject = answerQuestionContext.getAnswerData();
             AnswerData answerData = null;
 
-            if (type.equalsIgnoreCase("TextAnswer")){
+            if (type.equalsIgnoreCase("TextAnswer")) {
                 TextAnswer textAnswer = new TextAnswer();
                 textAnswer.setText((String) answerDataObject.get("text"));
                 answerData = textAnswer;
-            }
-
-            else if ( type.equalsIgnoreCase("ChoiceAnswer")){
+            } else if (type.equalsIgnoreCase("ChoiceAnswer")) {
                 ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                 choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                 answerData = choiceAnswer;
-            }
-            else {
-                return new ResponseEntity<>("Type not supported",HttpStatus.BAD_REQUEST);
+            } else {
+                return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
             }
             //TODO fix file answer
 
@@ -207,7 +224,7 @@ public class AttenderController {
             answers.add(answer);
 
         }
-        for(Answer answer: answers){
+        for (Answer answer : answers) {
             answerRepository.save(answer);
         }
         Request request = new Request();

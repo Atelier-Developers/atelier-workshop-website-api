@@ -16,11 +16,11 @@ public class WorkshopGraderInfo {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "workshop_grader_id", unique = true)
+    @JoinColumn(name = "workshop_grader_id", unique = true, nullable = false)
     private WorkshopGrader workshopGrader;
 
     @ManyToOne
-    @JoinColumn(name = "offered_workshop_id", unique = true)
+    @JoinColumn(name = "offered_workshop_id", unique = true, nullable = false)
     private OfferedWorkshop offeredWorkshop;
 
 

@@ -10,10 +10,35 @@ public class CashPayment implements Payment {
     @GeneratedValue
     private long id;
 
-    @Column
+    @Column(nullable = false)
     private double value;
 
-    @Basic
+    @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar paymentDate;
+
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    public Calendar getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(Calendar paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 }

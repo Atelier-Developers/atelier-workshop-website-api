@@ -15,7 +15,7 @@ public class WorkshopAttenderInfo {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "offered_workshop_id", unique = true)
+    @JoinColumn(name = "offered_workshop_id", unique = true, nullable = false)
     private OfferedWorkshop offeredWorkshop;
 
     @OneToMany(mappedBy = "workshopAttenderInfo")
@@ -23,7 +23,7 @@ public class WorkshopAttenderInfo {
     private List<WorkshopAttenderFormApplicant> workshopAttenderFormApplicants;
 
     @ManyToOne
-    @JoinColumn(name = "workshop_attender_id", unique = true)
+    @JoinColumn(name = "workshop_attender_id", unique = true, nullable = false)
     private WorkshopAttender workshopAttender;
 
     @ManyToOne

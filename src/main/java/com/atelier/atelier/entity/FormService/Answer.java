@@ -38,7 +38,7 @@ public class Answer {
     private Question question;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "form_applicant_id")
+    @JoinColumn(name = "form_applicant_id", nullable = false)
     private FormApplicant formApplicant;
 
     public long getId() {

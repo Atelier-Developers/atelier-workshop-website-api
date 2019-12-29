@@ -17,12 +17,10 @@ public abstract class WorkshopManager {
 
     @OneToMany(mappedBy = "workshopManager")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private List<OfferedWorkshop> offeredWorkshops;
 
     @OneToMany(mappedBy = "workshopManager")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private List<WorkshopManagerFormFiller> formFillerList;
 
     public long getId() {

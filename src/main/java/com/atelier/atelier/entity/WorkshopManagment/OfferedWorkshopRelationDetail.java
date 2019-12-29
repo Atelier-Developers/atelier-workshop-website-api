@@ -17,7 +17,7 @@ public class OfferedWorkshopRelationDetail {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "offered_workshop_id")
+    @JoinColumn(name = "offered_workshop_id", nullable = false)
     private OfferedWorkshop offeredWorkshop;
 
     @ManyToOne
@@ -26,4 +26,36 @@ public class OfferedWorkshopRelationDetail {
 
     @Enumerated(EnumType.ORDINAL)
     private DependencyType dependencyType;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public OfferedWorkshop getOfferedWorkshop() {
+        return offeredWorkshop;
+    }
+
+    public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
+        this.offeredWorkshop = offeredWorkshop;
+    }
+
+    public Workshop getWorkshop() {
+        return workshop;
+    }
+
+    public void setWorkshop(Workshop workshop) {
+        this.workshop = workshop;
+    }
+
+    public DependencyType getDependencyType() {
+        return dependencyType;
+    }
+
+    public void setDependencyType(DependencyType dependencyType) {
+        this.dependencyType = dependencyType;
+    }
 }

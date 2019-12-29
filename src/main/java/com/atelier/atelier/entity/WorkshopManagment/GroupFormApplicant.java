@@ -13,5 +13,11 @@ public class GroupFormApplicant extends FormApplicant {
     @JoinColumn(name = "workshop_group_id")
     private WorkshopGroup workshopGroup;
 
+    public WorkshopGroup getWorkshopGroup() {
+        return workshopGroup;
+    }
 
+    public void setWorkshopGroup(WorkshopGroup workshopGroup) {
+        this.workshopGroup = workshopGroup;
+    }
 }

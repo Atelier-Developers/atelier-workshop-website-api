@@ -9,7 +9,7 @@ import javax.persistence.*;
 public class FilledAnswer extends Answer {
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "form_filler_id")
+    @JoinColumn(name = "form_filler_id", nullable = false)
     private FormFiller formFiller;
 
 

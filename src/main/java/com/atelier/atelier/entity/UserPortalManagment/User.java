@@ -109,7 +109,7 @@ public class User {
 
     public Role getRole(String classType){
         for(Role role : roles){
-            if(role.getClass().getSimpleName().equals(classType)){
+            if(role.getClass().getSimpleName().equalsIgnoreCase(classType)){
                 return role;
             }
         }

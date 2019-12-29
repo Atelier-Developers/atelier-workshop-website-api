@@ -3,8 +3,11 @@ package com.atelier.atelier.entity.WorkshopManagment;
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.fasterxml.jackson.annotation.*;
+import org.joda.time.Interval;
 
 import javax.persistence.*;
+import javax.validation.constraints.Digits;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -24,19 +27,24 @@ public class OfferedWorkshop extends Requestable {
         this.name = name;
     }
 
-    @Column
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @Basic
+    @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar startTime;
 
-    @Basic
+    @Basic(optional = false)
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar endTime;
 
+    @Digits(integer=5, fraction=2)
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
+
+    // TODO CHECK WITH TAVAK
     @ManyToOne
-    @JoinColumn(name = "workshop_id")
+    @JoinColumn(name = "workshop_id", nullable = false)
     private Workshop workshop;
 
     @ManyToOne
@@ -191,7 +199,6 @@ public class OfferedWorkshop extends Requestable {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -203,5 +210,32 @@ public class OfferedWorkshop extends Requestable {
             }
         }
         return true;
+    }
+
+    public static boolean doTwoOfferedWorkshopTimeIntervalsOverlap(OfferedWorkshop offeredWorkshop1, OfferedWorkshop offeredWorkshop2){
+        Calendar start1 = offeredWorkshop1.startTime;
+        Calendar end1 = offeredWorkshop1.endTime;
+        Calendar start2 = offeredWorkshop2.startTime;
+        Calendar end2 = offeredWorkshop2.endTime;
+
+        if ( start1.before(start2) && end1.after(end2)){
+            return true;
+        }
+
+        if ( start1.before(start2) && ( end1.before(end2) && end1.after(start2))){
+            return true;
+        }
+
+        if ( end1.after(end2) && ( start1.after(start2) && start1.before(end2))){
+            return true;
+        }
+
+        if ( (start1.after(start2) && start1.before(end2)) && (end1.before(end2) && end1.after(start2))){
+            return true;
+        }
+
+        else{
+            return false;
+        }
     }
 }

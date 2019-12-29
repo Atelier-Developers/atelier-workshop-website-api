@@ -6,10 +6,7 @@ import com.atelier.atelier.context.RegisterRequestContext;
 import com.atelier.atelier.entity.FormService.*;
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.RequestState;
-import com.atelier.atelier.entity.UserPortalManagment.Grader;
-import com.atelier.atelier.entity.UserPortalManagment.GraderWorkshopConnection;
-import com.atelier.atelier.entity.UserPortalManagment.Role;
-import com.atelier.atelier.entity.UserPortalManagment.User;
+import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.AnswerRepository;
 import com.atelier.atelier.repository.Form.FormRepository;
@@ -143,7 +140,25 @@ public class GraderController {
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
         if (!offeredWorkshop.hasGraderRequested(graderWorkshopConnection)){
-            return new ResponseEntity<>("The grader is already in this workshop", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("The grader is already in this workshop", HttpStatus.FORBIDDEN);
+        }
+        for(WorkshopGraderInfo workshopGraderInfo : graderWorkshopConnection.getWorkshopGraderInfos()){
+            if(OfferedWorkshop.doTwoOfferedWorkshopTimeIntervalsOverlap(workshopGraderInfo.getOfferedWorkshop(), offeredWorkshop)){
+                return new ResponseEntity<>("This overlaps one of the workshops of the grader",HttpStatus.BAD_REQUEST);
+            }
+        }
+        User user = User.getUser(authentication, userRepository);
+        ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
+
+        if(managerWorkshopConnection.getId() == offeredWorkshop.getWorkshopManager().getId()){
+            return new ResponseEntity<>("You are the workshop manager", HttpStatus.FORBIDDEN);
+        }
+
+
+        AttenderWorkshopConnection attenderWorkshopConnection = ((Attender) user.getRole("Attender")).getAttenderWorkshopConnection();
+
+        if (!offeredWorkshop.hasAtendeeRequested(attenderWorkshopConnection)){
+            return new ResponseEntity<>("The grader is already the attendee of this workshop", HttpStatus.FORBIDDEN);
         }
 
         GraderRequestForm graderRequestForm = offeredWorkshop.getGraderRequestForm();

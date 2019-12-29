@@ -9,7 +9,7 @@ import javax.persistence.*;
 public class GraderFormApplicant extends FormApplicant {
 
     @ManyToOne
-    @JoinColumn(name = "workshop_grader_id")
+    @JoinColumn(name = "workshop_grader_id", unique = true, nullable = false)
     private WorkshopGrader workshopGrader;
 
     public WorkshopGrader getWorkshopGrader() {

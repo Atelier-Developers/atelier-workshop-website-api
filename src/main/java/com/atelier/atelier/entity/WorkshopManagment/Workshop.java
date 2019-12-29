@@ -15,7 +15,7 @@ public class Workshop {
     @GeneratedValue
     private long id;
 
-    @Column
+    @Column(nullable = false, unique = true)
     private String name;
 
     @OneToMany(mappedBy = "workshop")

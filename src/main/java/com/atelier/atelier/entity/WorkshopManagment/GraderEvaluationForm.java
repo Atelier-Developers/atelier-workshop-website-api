@@ -17,7 +17,6 @@ public class GraderEvaluationForm extends Form {
 
     @OneToOne
     @JoinColumn(name = "offered_workshop_id", unique = true)
-
     private OfferedWorkshop offeredWorkshop;
 
     public OfferedWorkshop getOfferedWorkshop() {

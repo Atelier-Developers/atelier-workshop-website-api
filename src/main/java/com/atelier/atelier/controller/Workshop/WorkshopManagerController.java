@@ -79,6 +79,9 @@ public class WorkshopManagerController {
         }
         Workshop workshop = optionalWorkshop.get();
         OfferedWorkshop offeredWorkshop = offeringWorkshopContext.getOfferedWorkshop();
+        if(offeredWorkshop.getStartTime().after(offeredWorkshop.getEndTime())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         offeredWorkshop.setWorkshop(workshop);
         workshop.addOfferingWorkshop(offeredWorkshop); // BI DIRECTIONAL MAPPING
         offeredWorkshop.setWorkshopManager(managerWorkshopConnection);
