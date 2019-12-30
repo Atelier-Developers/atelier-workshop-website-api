@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.fasterxml.jackson.annotation.*;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -9,7 +10,8 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "WORKSHOP_MANAGER_TYPE")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@DiscriminatorOptions(force = true)
+
 public abstract class WorkshopManager {
     @Id
     @GeneratedValue

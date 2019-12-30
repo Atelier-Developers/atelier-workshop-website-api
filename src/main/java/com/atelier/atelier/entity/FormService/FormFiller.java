@@ -1,5 +1,7 @@
 package com.atelier.atelier.entity.FormService;
 
+import org.hibernate.annotations.DiscriminatorOptions;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +9,8 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "form_filler_type")
+@DiscriminatorOptions(force = true)
+
 public abstract class FormFiller {
 
     @Id

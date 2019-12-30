@@ -3,13 +3,15 @@ package com.atelier.atelier.entity.FormService;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "form_type")
+@DiscriminatorColumn(name = "form_type" )
+@DiscriminatorOptions(force = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 
 public abstract class Form {

@@ -1,5 +1,7 @@
 package com.atelier.atelier.entity.RequestService;
 
+import org.hibernate.annotations.DiscriminatorOptions;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,8 @@ import javax.persistence.*;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "REQUESTER_TYPE")
+@DiscriminatorOptions(force = true)
+
 
 public abstract class Requester {
 

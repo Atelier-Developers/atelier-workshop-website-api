@@ -11,7 +11,7 @@ import com.atelier.atelier.entity.FormService.Form;
 import javax.persistence.*;
 
 @Entity
-@DiscriminatorValue(value = "WorkshopForm" )
+@DiscriminatorValue(value = "WorkshopForm")
 public class WorkshopForm extends Form {
 
     @ManyToOne

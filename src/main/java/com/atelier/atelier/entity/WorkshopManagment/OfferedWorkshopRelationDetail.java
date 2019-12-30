@@ -8,8 +8,8 @@ import javax.persistence.*;
 
 @Entity
 @Table
-//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class)
-@JsonIdentityReference()
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityReference(alwaysAsId = true)
 public class OfferedWorkshopRelationDetail {
 
     @Id

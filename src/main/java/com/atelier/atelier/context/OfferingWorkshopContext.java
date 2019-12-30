@@ -5,7 +5,9 @@ import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import java.util.List;
 
 public class OfferingWorkshopContext {
-    private List<Long> prerequsiteId;
+    private List<Long> preRequisiteId;
+    private String startTime;
+    private String endTime;
     private OfferedWorkshop offeredWorkshop;
     private long workshopId;
 
@@ -25,11 +27,27 @@ public class OfferingWorkshopContext {
         this.workshopId = workshopId;
     }
 
-    public List<Long> getPrerequsiteId() {
-        return prerequsiteId;
+    public List<Long> getPreRequisiteId() {
+        return preRequisiteId;
     }
 
-    public void setPrerequsiteId(List<Long> prerequsiteId) {
-        this.prerequsiteId = prerequsiteId;
+    public void setPreRequisiteId(List<Long> preRequisiteId) {
+        this.preRequisiteId = preRequisiteId;
+    }
+
+    public String getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public String getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 }

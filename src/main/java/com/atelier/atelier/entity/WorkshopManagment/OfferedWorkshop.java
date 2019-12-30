@@ -40,7 +40,7 @@ public class OfferedWorkshop extends Requestable {
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
-    // TODO CHECK WITH TAVAK
+    //
     @ManyToOne
     @JoinColumn(name = "workshop_id", nullable = false)
     private Workshop workshop;
@@ -50,28 +50,33 @@ public class OfferedWorkshop extends Requestable {
     private WorkshopManager workshopManager;
 
     @OneToMany(mappedBy = "offeredWorkshop")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopForm> workshopForms;
 
     @OneToMany(mappedBy = "offeredWorkshop")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopAttenderInfo> attenderInfos;
 
     @OneToMany(mappedBy = "offeredWorkshop")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopGraderInfo> workshopGraderInfos;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
 
     @OneToOne(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private GraderEvaluationForm graderEvaluationForm;
 
 
     @OneToOne
     @JoinColumn(name = "grader_request_form_id", unique = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private GraderRequestForm graderRequestForm;
 
     @OneToOne
     @JoinColumn(name = "attender_register_form_id", unique = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AttenderRegisterForm attenderRegisterForm;
 
     public Calendar getStartTime() {

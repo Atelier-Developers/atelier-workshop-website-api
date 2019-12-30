@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.FormService.Form;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.List;
