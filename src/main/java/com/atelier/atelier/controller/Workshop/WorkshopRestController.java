@@ -1,12 +1,18 @@
 package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.controller.ExceptionHandling.NotFoundException;
+import com.atelier.atelier.entity.UserPortalManagment.ManagerWorkshopConnection;
+import com.atelier.atelier.entity.UserPortalManagment.Role;
+import com.atelier.atelier.entity.UserPortalManagment.User;
+import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import com.atelier.atelier.entity.WorkshopManagment.Workshop;
+import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
 import org.hibernate.jdbc.Work;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.swing.text.html.Option;
@@ -18,10 +24,12 @@ import java.util.Optional;
 public class WorkshopRestController {
 
     private WorkshopRepository workshopRepository;
+    private OfferingWorkshopRepository offeringWorkshopRepository;
 
     @Autowired
-    public WorkshopRestController(WorkshopRepository workshopRepository) {
+    public WorkshopRestController(OfferingWorkshopRepository offeringWorkshopRepository, WorkshopRepository workshopRepository) {
         this.workshopRepository = workshopRepository;
+        this.offeringWorkshopRepository = offeringWorkshopRepository;
     }
 
     @GetMapping("/workshops")
@@ -45,42 +53,21 @@ public class WorkshopRestController {
         return new ResponseEntity<>(workshop, HttpStatus.OK);
     }
 
-    @PostMapping("/workshops")
-    public ResponseEntity<Object> save(@RequestBody Workshop workshop){
+    @GetMapping("/offeringWorkshop")
+    public ResponseEntity<Object> showAllOfferedWorkshop() {
 
-        workshop.setId(0);
-
-        Workshop savedWorkshop = workshopRepository.save(workshop);
-
-        return new ResponseEntity<>(workshop, HttpStatus.CREATED);
+        return new ResponseEntity<>(offeringWorkshopRepository.findAll(), HttpStatus.OK);
     }
 
-
-    @PutMapping("/workshops")
-    public ResponseEntity<Object> update(@RequestBody Workshop workshop){
-        Optional<Workshop> optionalWorkshop = workshopRepository.findById(workshop.getId());
-
-        if ( !optionalWorkshop.isPresent() ){
-            return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
+    @GetMapping("/offeringWorkshop/{id}")
+    public ResponseEntity<Object> showAllOfferedWorkshopForms(@PathVariable Long id) {
+        Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
+        if (offeredWorkshopOptional.isPresent()) {
+            OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
+            return new ResponseEntity<>(offeredWorkshop, HttpStatus.OK);
         }
-
-        Workshop savedWorkshop = workshopRepository.save(workshop);
-
-        return new ResponseEntity<>(savedWorkshop, HttpStatus.OK);
+        return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping("/workshops/{id}")
-    public ResponseEntity<Object> delete(@PathVariable long id){
 
-        Optional<Workshop> optionalWorkshop = workshopRepository.findById(id);
-
-        if ( !optionalWorkshop.isPresent() ){
-            return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
-        }
-
-        workshopRepository.deleteById(id);
-
-        return new ResponseEntity<>("Item was deleted", HttpStatus.OK);
-
-    }
 }

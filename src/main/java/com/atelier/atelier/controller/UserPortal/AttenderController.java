@@ -374,7 +374,7 @@ public class AttenderController {
         return new ResponseEntity<>(attenderRequestPaymentTab.getAttenderPaymentTabList(), HttpStatus.OK);
     }
 
-    //TODO SET PAYMENT STATUS (PAY)
+
 
 
     private AttenderWorkshopConnection getAttendeeWorkshopConnectionFromAuthentication(Authentication authentication) {

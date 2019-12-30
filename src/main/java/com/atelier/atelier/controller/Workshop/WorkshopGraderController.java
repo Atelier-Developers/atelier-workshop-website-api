@@ -18,7 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -65,10 +67,15 @@ public class WorkshopGraderController {
         }
         WorkshopAttenderInfo workshopAttenderInfo = optionalWorkshopAttenderInfo.get();
         if (workshopAttenderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()) {
+            if(workshopGraderInfo.getWorkshopGroup().getId() != workshopAttenderInfo.getWorkshopGroup().getId()){
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
             WorkshopAttenderFormApplicant workshopAttenderFormApplicant = new WorkshopAttenderFormApplicant();
             WorkshopGraderFormFiller workshopGraderFormFiller = new WorkshopGraderFormFiller();
             workshopGraderFormFiller.setWorkshopGraderInfo(workshopGraderInfo);
             workshopAttenderFormApplicant.setWorkshopAttenderInfo(workshopAttenderInfo);
+
+            List<Answer> answers = new ArrayList<>();
 
             for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
                 Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
@@ -107,7 +114,11 @@ public class WorkshopGraderController {
 
                 question.addAnswer(filledAnswer);
                 filledAnswer.setQuestion(question);
-                answerRepository.save(filledAnswer);
+                answers.add(filledAnswer);
+            }
+            for(Answer answer : answers){
+                answerRepository.save(answer);
+
             }
             return new ResponseEntity<>(HttpStatus.CREATED);
         }
