@@ -681,6 +681,7 @@ public class WorkshopManagerController {
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+        Set<WorkshopGroup> workshopGroupSet = offeredWorkshop.workshopGroupSet();
         //TODO WARNING FOR SET
         return new ResponseEntity<>(offeredWorkshop.workshopGroupSet(), HttpStatus.OK);
     }
@@ -699,6 +700,9 @@ public class WorkshopManagerController {
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
         List<WorkshopGroup> workshopGroups = new ArrayList<>();
         for (GroupWorkshopContext groupWorkshopContext : groupWorkshopContexts) {
+            if ((groupWorkshopContext.getAttendersId() == null || groupWorkshopContext.getAttendersId().isEmpty()) && (groupWorkshopContext.getGradersId() == null || groupWorkshopContext.getGradersId().isEmpty()) ){
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
             WorkshopGroup workshopGroup = new WorkshopGroup();
             workshopGroup.setName(groupWorkshopContext.getName());
             for (Long graderId : groupWorkshopContext.getGradersId()) {
@@ -711,17 +715,25 @@ public class WorkshopManagerController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
 
+                if (workshopGraderInfo.getWorkshopGroup() != null ){
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+
                 workshopGroup.addGrader(workshopGraderInfo);
                 workshopGraderInfo.setWorkshopGroup(workshopGroup);
             }
 
-            for (Long attenderId : groupWorkshopContext.getAttenderId()) {
+            for (Long attenderId : groupWorkshopContext.getAttendersId()) {
                 Optional<WorkshopAttenderInfo> optionalWorkshopAttenderInfo = workshopAttenderInfoRepository.findById(attenderId);
                 if (!optionalWorkshopAttenderInfo.isPresent()) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
                 WorkshopAttenderInfo workshopAttenderInfo = optionalWorkshopAttenderInfo.get();
                 if (workshopAttenderInfo.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+
+                if ( workshopAttenderInfo.getWorkshopGroup() != null ){
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
                 workshopAttenderInfo.setWorkshopGroup(workshopGroup);

@@ -6,7 +6,7 @@ public class GroupWorkshopContext {
 
    private String name;
    private List<Long> gradersId;
-   private List<Long> attenderId;
+   private List<Long> attendersId;
 
     public String getName() {
         return name;
@@ -24,11 +24,11 @@ public class GroupWorkshopContext {
         this.gradersId = gradersId;
     }
 
-    public List<Long> getAttenderId() {
-        return attenderId;
+    public List<Long> getAttendersId() {
+        return attendersId;
     }
 
-    public void setAttenderId(List<Long> attenderId) {
-        this.attenderId = attenderId;
+    public void setAttendersId(List<Long> attendersId) {
+        this.attendersId = attendersId;
     }
 }
