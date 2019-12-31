@@ -46,7 +46,7 @@ public class WorkshopManagerController {
     private AttenderRegisterFormRepository attenderRegisterFormRepository;
     private RequesterRepository requesterRepository;
 
-    public WorkshopManagerController( RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+    public WorkshopManagerController( WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
@@ -747,6 +747,41 @@ public class WorkshopManagerController {
         }
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
+
+
+    @GetMapping("/offeringWorkshop/{id}/attendeeInfos")
+    public ResponseEntity<Object> showAllAttendeeInfos(@PathVariable long id, Authentication authentication){
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+
+        if ( !optionalOfferedWorkshop.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        return new ResponseEntity<>(offeredWorkshop.getAttenderInfos(), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{id}/graderInfos")
+    public ResponseEntity<Object> showAllGraderInfos(@PathVariable long id, Authentication authentication){
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+
+        if ( !optionalOfferedWorkshop.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        return new ResponseEntity<>(offeredWorkshop.getWorkshopGraderInfos(), HttpStatus.OK);
+    }
+
+
 
 
     private void enrollGraderWorkshop(WorkshopGrader workshopGrader, OfferedWorkshop offeredWorkshop) {

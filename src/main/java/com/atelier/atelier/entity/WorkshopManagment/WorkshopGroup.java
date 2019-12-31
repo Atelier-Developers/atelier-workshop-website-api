@@ -1,5 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.List;
 
 @Entity
 @Table
+@JsonIdentityInfo()
 public class WorkshopGroup {
 
     @Id
