@@ -9,7 +9,6 @@ import java.util.List;
 
 @Entity
 @Table
-@JsonIdentityInfo()
 public class WorkshopGroup {
 
     @Id

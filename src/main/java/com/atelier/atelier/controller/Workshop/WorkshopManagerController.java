@@ -682,8 +682,29 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
         Set<WorkshopGroup> workshopGroupSet = offeredWorkshop.workshopGroupSet();
-        //TODO WARNING FOR SET
-        return new ResponseEntity<>(offeredWorkshop.workshopGroupSet(), HttpStatus.OK);
+
+        List<GroupElementContext> groupElementContexts = new ArrayList<>();
+
+        for(WorkshopGroup workshopGroup : workshopGroupSet){
+            GroupElementContext groupElementContext = new GroupElementContext();
+            groupElementContext.setGroupId(workshopGroup.getId());
+            groupElementContext.setGroupName(workshopGroup.getName());
+            for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
+                GroupMemberContext groupMemberContext = new GroupMemberContext();
+                groupMemberContext.setWorkshopInfoId(workshopGraderInfo.getId());
+                groupMemberContext.setWorkshopConnectionId(workshopGraderInfo.getWorkshopGrader().getId());
+                groupElementContext.addGraderInfo(groupMemberContext);
+            }
+            for (WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()){
+                GroupMemberContext groupMemberContext = new GroupMemberContext();
+                groupMemberContext.setWorkshopInfoId(workshopAttenderInfo.getId());
+                groupMemberContext.setWorkshopConnectionId(workshopAttenderInfo.getWorkshopAttender().getId());
+                groupElementContext.addAttendeeInfo(groupMemberContext);
+            }
+            groupElementContexts.add(groupElementContext);
+        }
+
+        return new ResponseEntity<>(groupElementContexts, HttpStatus.OK);
     }
 
 
