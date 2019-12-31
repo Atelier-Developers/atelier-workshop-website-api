@@ -5,7 +5,7 @@ import com.atelier.atelier.entity.RequestService.RequestState;
 public class RequestStatusContext {
 
     private long requestId;
-    private RequestState requestState;
+    private String requestState;
 
     public long getRequestId() {
         return requestId;
@@ -15,11 +15,11 @@ public class RequestStatusContext {
         this.requestId = requestId;
     }
 
-    public RequestState getRequestState() {
+    public String getRequestState() {
         return requestState;
     }
 
-    public void setRequestState(RequestState requestState) {
+    public void setRequestState(String requestState) {
         this.requestState = requestState;
     }
 }

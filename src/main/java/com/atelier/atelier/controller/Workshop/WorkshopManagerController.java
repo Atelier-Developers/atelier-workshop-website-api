@@ -535,7 +535,7 @@ public class WorkshopManagerController {
     }
 
 
-    //TODO GET ATTENDEE REQUEST FILLED FORM (ATTENDEE REGISTER FORM0 A LIST OF QUESTIONS AND ANSWERS
+
     @GetMapping("/offeringWorkshop/form/{id}/result")
     public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody long requesterId) {
 
@@ -605,8 +605,9 @@ public class WorkshopManagerController {
 
     }
 
-    @PostMapping("/offeringWorkshop/request/{id}")
+    @PostMapping("/offeringWorkshop/{id}/request")
     public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody List<RequestStatusContext> requestStatusContexts) {
+
 
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
@@ -628,7 +629,25 @@ public class WorkshopManagerController {
 
             Request request = optionalRequest.get();
 
-            request.setState(requestStatusContext.getRequestState());
+            if ( request.getState() == RequestState.Accepted ){
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            String requestStateString = requestStatusContext.getRequestState();
+            RequestState requestState = null;
+
+            if (requestStateString.equalsIgnoreCase("ACCEPTED") ){
+                requestState = RequestState.Accepted;
+            }
+            else if (requestStateString.equalsIgnoreCase("REJECTED")){
+                requestState = RequestState.Rejected;
+            }
+
+            else {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+
+            request.setState(requestState);
 
             requests.add(request);
 
