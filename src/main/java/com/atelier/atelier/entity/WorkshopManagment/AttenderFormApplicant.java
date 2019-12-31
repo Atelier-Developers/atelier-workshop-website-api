@@ -8,8 +8,9 @@ import javax.persistence.*;
 @DiscriminatorValue(value = "AttenderFormApplicant")
 public class AttenderFormApplicant extends FormApplicant {
 
+    //todo nullable was picked off
     @ManyToOne
-    @JoinColumn(name = "workshop_attender_id", nullable = false, unique = true)
+    @JoinColumn(name = "workshop_attender_id", unique = true)
     private WorkshopAttender workshopAttender;
 
     public WorkshopAttender getWorkshopAttender() {

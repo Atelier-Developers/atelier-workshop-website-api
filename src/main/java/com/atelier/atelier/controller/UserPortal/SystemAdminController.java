@@ -47,7 +47,7 @@ public class SystemAdminController {
 
         Workshop savedWorkshop = workshopRepository.save(workshop);
 
-        return new ResponseEntity<>(workshop, HttpStatus.CREATED);
+        return new ResponseEntity<>(savedWorkshop, HttpStatus.CREATED);
     }
 
 
@@ -97,7 +97,7 @@ public class SystemAdminController {
 
     }
 
-    @PutMapping("/attendeePaymentTab/{id}/")
+    @PutMapping("/attendeePaymentTab/{id}")
     public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id, Authentication authentication){
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 

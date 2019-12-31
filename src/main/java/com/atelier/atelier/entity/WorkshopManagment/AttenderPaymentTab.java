@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.PaymentService.Payment;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -15,7 +16,9 @@ public class AttenderPaymentTab implements Payment {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "attender_request_payment_tab_id", unique = true, nullable = false)
+    @JoinColumn(name = "attender_request_payment_tab_id", nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+
     private AttenderRequestPaymentTab attenderRequestPaymentTab;
 
     @Column(nullable = false)

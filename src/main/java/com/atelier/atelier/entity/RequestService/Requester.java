@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.RequestService;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import java.util.ArrayList;
@@ -12,8 +13,6 @@ import javax.persistence.*;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "REQUESTER_TYPE")
 @DiscriminatorOptions(force = true)
-
-
 public abstract class Requester {
 
     @Id
@@ -21,6 +20,7 @@ public abstract class Requester {
     private long id;
 
     @OneToMany(mappedBy = "requester")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Request> requests;
 
     public long getId() {

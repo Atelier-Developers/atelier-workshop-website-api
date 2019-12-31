@@ -9,7 +9,7 @@ import javax.persistence.*;
 public class WorkshopAttenderFormApplicant extends FormApplicant {
 
     @ManyToOne
-    @JoinColumn(name = "workshop_attender_info_id", nullable = false)
+    @JoinColumn(name = "workshop_attender_info_id", unique = true)
     private WorkshopAttenderInfo workshopAttenderInfo;
 
     public WorkshopAttenderInfo getWorkshopAttenderInfo() {

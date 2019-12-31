@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.FormService;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.*;
 
 import javax.persistence.*;
@@ -35,6 +36,7 @@ public class Answer {
 
     @ManyToOne
     @JoinColumn(name = "question_id", unique = true, nullable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Question question;
 
     @ManyToOne(cascade = CascadeType.ALL)

@@ -10,7 +10,7 @@ import javax.persistence.*;
 public class WorkshopManagerFormFiller extends FormFiller {
 
     @ManyToOne
-    @JoinColumn(name = "workshop_manager_id", nullable = false)
+    @JoinColumn(name = "workshop_manager_id", unique = true)
     private WorkshopManager workshopManager;
 
     public WorkshopManager getWorkshopManager() {

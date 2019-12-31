@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class WorkshopForm extends Form {
 
     @ManyToOne
-    @JoinColumn(name = "offered_workshop_id", nullable = false)
+    @JoinColumn(name = "offered_workshop_id")
     private OfferedWorkshop offeredWorkshop;
 
 

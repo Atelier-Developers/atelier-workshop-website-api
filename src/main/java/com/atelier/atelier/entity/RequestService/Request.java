@@ -4,6 +4,7 @@ package com.atelier.atelier.entity.RequestService;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderRegisterForm;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderRequestPaymentTab;
 import com.atelier.atelier.entity.WorkshopManagment.GraderRequestForm;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.xml.bind.v2.TODO;
 import org.hibernate.annotations.Any;
 import org.hibernate.annotations.AnyMetaDef;
@@ -39,6 +40,7 @@ public class Request {
 
     @ManyToOne
     @JoinColumn(name = "requestable_id")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Requestable requestable;
 
     @ManyToOne

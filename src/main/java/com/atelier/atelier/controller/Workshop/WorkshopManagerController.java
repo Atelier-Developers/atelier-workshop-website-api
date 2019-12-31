@@ -9,14 +9,19 @@ import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.*;
 import com.atelier.atelier.repository.Request.RequestRepository;
+import com.atelier.atelier.repository.Request.RequesterRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.*;
+import org.aspectj.weaver.NameMangler;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
+import javax.xml.crypto.Data;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -36,19 +41,27 @@ public class WorkshopManagerController {
     private RequestRepository requestRepository;
     private WorkshopAttenderInfoRepository workshopAttenderInfoRepository;
     private WorkshopGroupRepository workshopGroupRepository;
+    private FormRepository formRepository;
+    private GraderRequestFormRepository graderRequestFormRepository;
+    private AttenderRegisterFormRepository attenderRegisterFormRepository;
+    private RequesterRepository requesterRepository;
 
-    public WorkshopManagerController(WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+    public WorkshopManagerController( RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
         this.questionRepsoitory = questionRepsoitory;
         this.graderEvaluationFormFormRepository = graderEvaluationFormFormRepository;
         this.workshopFormFormRepository = workshopFormFormRepository;
+        this.formRepository = formRepository;
         this.workshopGraderInfoRepository = workshopGraderInfoRepository;
         this.answerRepository = answerRepository;
         this.requestRepository = requestRepository;
         this.workshopAttenderInfoRepository = workshopAttenderInfoRepository;
         this.workshopGroupRepository = workshopGroupRepository;
+        this.graderRequestFormRepository = graderRequestFormRepository;
+        this.attenderRegisterFormRepository = attenderRegisterFormRepository;
+        this.requesterRepository = requesterRepository;
     }
 
     @GetMapping("/offeringWorkshop")
@@ -118,7 +131,7 @@ public class WorkshopManagerController {
     }
 
     @GetMapping("/offeringWorkshop/{id}")
-    public ResponseEntity<Object> showAllOfferedWorkshopForms(Authentication authentication, @PathVariable Long id) {
+    public ResponseEntity<Object> getOfferingWorkshop(Authentication authentication, @PathVariable Long id) {
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
@@ -158,9 +171,8 @@ public class WorkshopManagerController {
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
             if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
-                System.out.println("kir");
                 List<WorkshopForm> workshopForm = offeredWorkshop.getWorkshopForms();
-                if(workshopForm.isEmpty()){
+                if (workshopForm.isEmpty()) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
                 return new ResponseEntity<>(workshopForm, HttpStatus.OK);
@@ -213,6 +225,90 @@ public class WorkshopManagerController {
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
 
+        }
+        return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/offeringWorkshop/{id}/attenderRegisterForm")
+    public ResponseEntity<Object> makeAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody AttenderRegisterForm attenderRegisterForm) {
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+        Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
+        if (offeredWorkshopOptional.isPresent()) {
+            OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
+            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+                attenderRegisterForm.setOfferedWorkshop(offeredWorkshop);
+                offeredWorkshop.setAttenderRegisterForm(attenderRegisterForm);
+                try {
+                    attenderRegisterFormRepository.save(attenderRegisterForm);
+                } catch (DataIntegrityViolationException e) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
+
+        }
+        return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
+
+    }
+
+    @GetMapping("/offeringWorkshop/{id}/attenderRegisterForm")
+    public ResponseEntity<Object> getAttenderRegisterForm(@PathVariable long id, Authentication authentication) {
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (optionalOfferedWorkshop.isPresent()) {
+            OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+                AttenderRegisterForm attenderRegisterForm = offeredWorkshop.getAttenderRegisterForm();
+                if (attenderRegisterForm == null) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                return new ResponseEntity<>(attenderRegisterForm, HttpStatus.OK);
+            }
+            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
+
+    }
+
+    @GetMapping("/offeringWorkshop/{id}/graderRequestForm")
+    public ResponseEntity<Object> getGraderRequestForm(@PathVariable long id, Authentication authentication) {
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (optionalOfferedWorkshop.isPresent()) {
+            OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+                GraderRequestForm graderRequestForm = offeredWorkshop.getGraderRequestForm();
+                if (graderRequestForm == null) {
+                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                }
+                return new ResponseEntity<>(graderRequestForm, HttpStatus.OK);
+            }
+            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
+
+    }
+
+    @PostMapping("/offeringWorkshop/{id}/graderRequestForm")
+    public ResponseEntity<Object> makeGraderRequestForm(@PathVariable long id, Authentication authentication, @RequestBody GraderRequestForm graderRequestForm) {
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+        Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
+        if (offeredWorkshopOptional.isPresent()) {
+            OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
+            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+                graderRequestForm.setOfferedWorkshop(offeredWorkshop);
+                offeredWorkshop.setGraderRequestForm(graderRequestForm);
+                try {
+                    graderRequestFormRepository.save(graderRequestForm);
+                } catch (DataIntegrityViolationException e) {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+                return new ResponseEntity<>(HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
     }
@@ -306,66 +402,78 @@ public class WorkshopManagerController {
         }
         return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
     }
-//
-//    @PostMapping("/offeringWorkshop/{id}/form/questions")
-//    public ResponseEntity<Object> addQuestion(@RequestBody FormQuestionContext formQuestionContext, @PathVariable long id, Authentication authentication) {
-//
-//        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
-//        Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
-//        if (!offeredWorkshopOptional.isPresent()) {
-//            return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
-//        }
-//        OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-//        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
-//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//        }
-//        Optional<Form> optionalForm = formRepository.findById(formQuestionContext.getFormId());
-//        if (!optionalForm.isPresent()) {
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        Form form = optionalForm.get();
-//
-//        if (form instanceof GraderEvaluationForm) {
-//            GraderEvaluationForm graderEvaluationForm = (GraderEvaluationForm) form;
-//            if (graderEvaluationForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
-//                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//            }
-//        } else if (form instanceof WorkshopForm) {
-//            WorkshopForm workshopForm = (WorkshopForm) form;
-//            if (workshopForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
-//                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//            }
-//        } else if (form instanceof AttenderRegisterForm) {
-//            AttenderRegisterForm attenderRegisterForm = (AttenderRegisterForm) form;
-//            if (attenderRegisterForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
-//                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//            }
-//        } else if (form instanceof GraderRequestForm) {
-//            GraderRequestForm graderRequestForm = (GraderRequestForm) form;
-//            if (graderRequestForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
-//                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//            }
-//        } else {
-//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-//        }
-//
-//        List<Question> questions = formQuestionContext.getQuestion();
-//        form.setQuestions(questions);
-//
-//        for (Question question : questions) {
-//            List<Answerable> answerables = question.getAnswerables();
-//            if (answerables != null) {
-//                for (Answerable answerable : answerables) {
-//                    answerable.setQuestion(question);
-//                }
-//            }
-//
-//            question.setForm(form);
-//            questionRepsoitory.save(question);
-//        }
-//        formRepository.save(form);
-//        return new ResponseEntity<>(HttpStatus.CREATED);
-//    }
+
+    @PostMapping("/offeringWorkshop/{id}/form/questions")
+    public ResponseEntity<Object> addQuestion(@RequestBody FormQuestionContext formQuestionContext, @PathVariable long id, Authentication authentication) {
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+        Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
+        if (!offeredWorkshopOptional.isPresent()) {
+            return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
+        }
+        OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
+        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        Optional<Form> optionalForm = formRepository.findById(formQuestionContext.getFormId());
+        if (!optionalForm.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        Form form = optionalForm.get();
+
+        if (form instanceof GraderEvaluationForm) {
+            GraderEvaluationForm graderEvaluationForm = (GraderEvaluationForm) form;
+            if (graderEvaluationForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        } else if (form instanceof WorkshopForm) {
+            WorkshopForm workshopForm = (WorkshopForm) form;
+            if (workshopForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        } else if (form instanceof AttenderRegisterForm) {
+            AttenderRegisterForm attenderRegisterForm = (AttenderRegisterForm) form;
+            if (attenderRegisterForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        } else if (form instanceof GraderRequestForm) {
+            GraderRequestForm graderRequestForm = (GraderRequestForm) form;
+            if (graderRequestForm.getOfferedWorkshop().getId() != offeredWorkshop.getId()) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<Question> questions = formQuestionContext.getQuestion();
+        form.setQuestions(questions);
+
+        for (Question question : questions) {
+            List<Answerable> answerables = question.getAnswerables();
+            if (answerables != null) {
+                for (Answerable answerable : answerables) {
+                    answerable.setQuestion(question);
+                }
+            }
+
+            question.setForm(form);
+            questionRepsoitory.save(question);
+        }
+        if (form instanceof GraderRequestForm) {
+            GraderRequestForm graderRequestForm = (GraderRequestForm) form;
+            graderRequestFormRepository.save(graderRequestForm);
+        } else if (form instanceof AttenderRegisterForm) {
+            AttenderRegisterForm attenderRegisterForm = (AttenderRegisterForm) form;
+            attenderRegisterFormRepository.save(attenderRegisterForm);
+        } else if (form instanceof WorkshopForm) {
+            WorkshopForm workshopForm = (WorkshopForm) form;
+            workshopFormFormRepository.save(workshopForm);
+        } else if (form instanceof GraderEvaluationForm) {
+            GraderEvaluationForm graderEvaluationForm = (GraderEvaluationForm) form;
+            graderEvaluationFormFormRepository.save(graderEvaluationForm);
+        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 
 
     private ManagerWorkshopConnection getMangerFromAuthentication(Authentication authentication) {
@@ -426,6 +534,76 @@ public class WorkshopManagerController {
         return new ResponseEntity<>(requests, HttpStatus.OK);
     }
 
+
+    //TODO GET ATTENDEE REQUEST FILLED FORM (ATTENDEE REGISTER FORM0 A LIST OF QUESTIONS AND ANSWERS
+    @GetMapping("/offeringWorkshop/form/{id}/result")
+    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody long requesterId) {
+
+        Optional<Form> optionalForm = formRepository.findById(id);
+
+        if (!optionalForm.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Form form = optionalForm.get();
+
+        Optional<Requester> optionalRequester = requesterRepository.findById(requesterId);
+
+        if ( !optionalRequester.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Requester requester = optionalRequester.get();
+
+        if ((form instanceof AttenderRegisterForm) && (requester instanceof Attender)){
+
+            List<FormResultContext> formResultContexts = new ArrayList<>();
+
+            List<Question> questions = form.getQuestions();
+            for(Question question : questions){
+                for (Answer answer : question.getAnswers()){
+                    AttenderFormApplicant attenderFormApplicant = (AttenderFormApplicant)answer.getFormApplicant();
+                    AttenderWorkshopConnection attenderWorkshopConnection = (AttenderWorkshopConnection)attenderFormApplicant.getWorkshopAttender();
+                    if ( attenderWorkshopConnection.getAttender().getId() == requester.getId() ){
+                        FormResultContext formResultContext = new FormResultContext();
+                        formResultContext.setQuestion(question);
+                        formResultContext.setAnswer(answer);
+                        formResultContexts.add(formResultContext);
+                    }
+                }
+            }
+            return new ResponseEntity<>(formResultContexts, HttpStatus.OK);
+
+        }
+
+        else if ((form instanceof GraderRequestForm) && (requester instanceof Grader)){
+
+            List<FormResultContext> formResultContexts = new ArrayList<>();
+
+            List<Question> questions = form.getQuestions();
+            for(Question question : questions){
+                for (Answer answer : question.getAnswers()){
+                    GraderFormApplicant attenderFormApplicant = (GraderFormApplicant)answer.getFormApplicant();
+                    GraderWorkshopConnection attenderWorkshopConnection = (GraderWorkshopConnection) attenderFormApplicant.getWorkshopGrader();
+                    if ( attenderWorkshopConnection.getGrader().getId() == requester.getId() ){
+                        FormResultContext formResultContext = new FormResultContext();
+                        formResultContext.setQuestion(question);
+                        formResultContext.setAnswer(answer);
+                        formResultContexts.add(formResultContext);
+                    }
+                }
+            }
+            return new ResponseEntity<>(formResultContexts, HttpStatus.OK);
+
+        }
+
+
+        else {
+            return  new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+
+    }
 
     @PostMapping("/offeringWorkshop/request/{id}")
     public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody List<RequestStatusContext> requestStatusContexts) {

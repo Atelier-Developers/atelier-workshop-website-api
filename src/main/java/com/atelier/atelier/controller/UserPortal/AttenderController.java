@@ -118,7 +118,7 @@ public class AttenderController {
 
 
     @GetMapping("/attendee/request/offeringWorkshop/{id}")
-    public ResponseEntity<Object> getGraderRequestForm(@PathVariable long id) {
+    public ResponseEntity<Object> getAttendeeRegisterForm(@PathVariable long id) {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
         if (!optionalOfferedWorkshop.isPresent()) {
@@ -127,7 +127,7 @@ public class AttenderController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        return new ResponseEntity<>(offeredWorkshop, HttpStatus.OK);
+        return new ResponseEntity<>(offeredWorkshop.getAttenderRegisterForm(), HttpStatus.OK);
 
     }
 
@@ -294,6 +294,7 @@ public class AttenderController {
                 cal.setTime(dateFormat.parse(date));
 
                 attenderPaymentTab.setPaymentDate(cal);
+                attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
                 attenderRequestPaymentTab.addPayment(attenderPaymentTab);
             }
             // TODO CHECK FOR THE TYPE OF EXCEPTION
@@ -319,6 +320,7 @@ public class AttenderController {
                     cal.setTime(dateFormat.parse(date));
 
                     attenderPaymentTab.setPaymentDate(cal);
+                    attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
                     attenderRequestPaymentTab.addPayment(attenderPaymentTab);
                     total = total.add(price);
                 }
@@ -336,6 +338,10 @@ public class AttenderController {
         }
 
         attenderRequestPaymentTabRepository.save(attenderRequestPaymentTab);
+
+        request.addRequestData(attenderRequestPaymentTab);
+
+        requestRepository.save(request);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -358,7 +364,7 @@ public class AttenderController {
         if (request.getRequester().getId() != attender.getId()) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        if (request.getRequestData().size() < 1) {
+        if (request.getRequestData().size() < 1+2) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
