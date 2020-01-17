@@ -40,6 +40,9 @@ public class OfferedWorkshop extends Requestable {
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false)
+    private String description;
+
     //
     @ManyToOne
     @JoinColumn(name = "workshop_id", nullable = false)
@@ -96,6 +99,13 @@ public class OfferedWorkshop extends Requestable {
     }
 
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
     public Workshop getWorkshop() {
         return workshop;
