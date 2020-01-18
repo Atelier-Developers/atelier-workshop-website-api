@@ -168,7 +168,7 @@ public class WorkshopRestController {
 
             WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
 
-            if (workshopManager.getId() == id){
+            if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
 
                 OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
 

@@ -1,6 +1,7 @@
 package com.atelier.atelier.controller.UserPortal;
 
 
+import com.atelier.atelier.entity.UserPortalManagment.Grader;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopGrader;
 import com.atelier.atelier.repository.user.UserRepository;
@@ -26,14 +27,23 @@ public class PublicUserController {
     }
 
 
-//    @GetMapping("/workshopGrader/{workshopGraderId}")
-//    public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId){
-//
-//        List<User> users = userRepository.findAll();
-//
-//        for ( User user : users ){
-//
-//
-//        }
-//    }
+    @GetMapping("/workshopGrader/{workshopGraderId}")
+    public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId){
+
+        List<User> users = userRepository.findAll();
+
+        for ( User user : users ){
+
+            Grader grader = (Grader) user.getRole("Grader");
+
+            WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
+
+            if ( workshopGrader.getId() == workshopGraderId ){
+                return new ResponseEntity<>(user, HttpStatus.OK);
+            }
+
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
