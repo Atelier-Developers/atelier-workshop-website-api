@@ -26,7 +26,7 @@ public class PublicUserController {
         this.userRepository = userRepository;
     }
 
-
+    // GET USER THROUGHT IDs APIs
     @GetMapping("/workshopGrader/{workshopGraderId}")
     public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId){
 
@@ -46,4 +46,11 @@ public class PublicUserController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
+    /////////////////////////////// END OF USER FETCHING APIs
+
+
+    /// GET WORKSHOPS (PASSED, SOON TO BE HELD, PENDING)
+
 }

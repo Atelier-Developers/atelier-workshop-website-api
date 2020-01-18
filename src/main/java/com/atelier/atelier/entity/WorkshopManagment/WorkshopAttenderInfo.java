@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
+import com.atelier.atelier.entity.RequestService.RequestState;
 import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
@@ -31,6 +32,9 @@ public class WorkshopAttenderInfo {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private WorkshopGroup workshopGroup;
 
+
+    @Enumerated(EnumType.ORDINAL)
+    private AttendeeStatusType attendeeStatusType;
 
     public long getId() {
         return id;
@@ -74,7 +78,15 @@ public class WorkshopAttenderInfo {
     }
 
 
-    public void addWorkshopAttenderFormApplicant( WorkshopAttenderFormApplicant workshopAttenderFormApplicant){
+    public AttendeeStatusType getAttendeeStatusType() {
+        return attendeeStatusType;
+    }
+
+    public void setAttendeeStatusType(AttendeeStatusType attendeeStatusType) {
+        this.attendeeStatusType = attendeeStatusType;
+    }
+
+    public void addWorkshopAttenderFormApplicant(WorkshopAttenderFormApplicant workshopAttenderFormApplicant){
         if ( workshopAttenderFormApplicants == null ){
             workshopAttenderFormApplicants = new ArrayList<WorkshopAttenderFormApplicant>();
         }

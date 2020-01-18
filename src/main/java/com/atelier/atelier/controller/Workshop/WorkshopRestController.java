@@ -2,27 +2,17 @@ package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.context.EnrollCountContext;
 import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
-import com.atelier.atelier.controller.ExceptionHandling.NotFoundException;
-import com.atelier.atelier.entity.UserPortalManagment.ManagerWorkshopConnection;
-import com.atelier.atelier.entity.UserPortalManagment.Role;
-import com.atelier.atelier.entity.UserPortalManagment.User;
-import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
-import com.atelier.atelier.entity.WorkshopManagment.Workshop;
-import com.atelier.atelier.entity.WorkshopManagment.WorkshopManager;
+import com.atelier.atelier.context.OfferedWorkshopUserListsContext;
+import com.atelier.atelier.entity.UserPortalManagment.*;
+import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import org.apache.coyote.Response;
-import org.hibernate.jdbc.Work;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +33,7 @@ public class WorkshopRestController {
     }
 
 
-    @GetMapping("/workshops/offeredWorkshop/{offeredWorkshopId}")
+    @GetMapping("/workshops/offeredWorkshop/{offeredWorkshopId}/count")
     public ResponseEntity<Object> getOfferedWorkshopCount(@PathVariable long offeredWorkshopId){
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeredWorkshopId);
@@ -164,22 +154,64 @@ public class WorkshopRestController {
 
         List<User> users = userRepository.findAll();
 
+        OfferedWorkshopUserListsContext offeredWorkshopUserListsContext = new OfferedWorkshopUserListsContext();
+
+        offeredWorkshopUserListsContext.setOfferedWorkshop(offeredWorkshop);
+
         for ( User user : users ){
 
             WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
 
             if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
 
-                OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
-
-                offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
-                offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
-
-                return new ResponseEntity<>(offeredWorkshopManagerNameContext, HttpStatus.OK);
+                offeredWorkshopUserListsContext.setWorkshopManagerUser(user);
+                break;
             }
         }
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        List<User> attendeeUsers = new ArrayList<User>();
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()){
+
+            WorkshopAttender workshopAttender = workshopAttenderInfo.getWorkshopAttender();
+
+            for ( User user : users ){
+
+                Attender attender = (Attender) user.getRole("Attender");
+
+                WorkshopAttender workshopAttender1 = attender.getAttenderWorkshopConnection();
+
+                if ( workshopAttender1.getId() == workshopAttender.getId() ){
+
+                    attendeeUsers.add(user);
+
+                }
+            }
+        }
+
+        List<User> graderUsers = new ArrayList<User>();
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()){
+
+            WorkshopGrader workshopGrader = workshopGraderInfo.getWorkshopGrader();
+
+            for (User user : users){
+
+                Grader grader = (Grader) user.getRole("Grader");
+
+                WorkshopGrader workshopGrader1 = grader.getGraderWorkshopConnection();
+
+                if (workshopGrader1.getId() == workshopGrader.getId()){
+
+                    graderUsers.add(user);
+                }
+            }
+        }
+
+
+        offeredWorkshopUserListsContext.setAttendeeUsers(attendeeUsers);
+        offeredWorkshopUserListsContext.setGraderUsers(graderUsers);
+
+
+        return new ResponseEntity<>(offeredWorkshopUserListsContext, HttpStatus.OK);
     }
 
 }
