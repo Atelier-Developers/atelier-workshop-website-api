@@ -13,6 +13,7 @@ import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import org.apache.coyote.Response;
 import org.hibernate.jdbc.Work;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -149,5 +150,36 @@ public class WorkshopRestController {
         return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
     }
 
+
+    @GetMapping("/offeringWorkshops/{id}")
+    public ResponseEntity<Object> showSingleOfferingWorkshopByIdForWorkshopPage(@PathVariable long id){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<User> users = userRepository.findAll();
+
+        for ( User user : users ){
+
+            WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+            if (workshopManager.getId() == id){
+
+                OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+
+                offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+                offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+                return new ResponseEntity<>(offeredWorkshopManagerNameContext, HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 }

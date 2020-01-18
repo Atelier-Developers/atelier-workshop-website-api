@@ -1,6 +1,8 @@
 package com.atelier.atelier.controller.UserPortal;
 
 
+import com.atelier.atelier.entity.UserPortalManagment.User;
+import com.atelier.atelier.entity.WorkshopManagment.WorkshopGrader;
 import com.atelier.atelier.repository.user.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/userDetails")
@@ -25,6 +29,11 @@ public class PublicUserController {
 //    @GetMapping("/workshopGrader/{workshopGraderId}")
 //    public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId){
 //
-//        List<Use>
+//        List<User> users = userRepository.findAll();
+//
+//        for ( User user : users ){
+//
+//
+//        }
 //    }
 }
