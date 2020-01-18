@@ -8,7 +8,6 @@ import javax.persistence.*;
 @DiscriminatorValue(value = "FilledAnswer")
 public class FilledAnswer extends Answer {
 
-    //todo had a cascade all
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "form_filler_id")
     private FormFiller formFiller;

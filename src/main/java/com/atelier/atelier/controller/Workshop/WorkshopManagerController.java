@@ -18,10 +18,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.parameters.P;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.swing.text.html.Option;
 import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,8 +48,9 @@ public class WorkshopManagerController {
     private GraderRequestFormRepository graderRequestFormRepository;
     private AttenderRegisterFormRepository attenderRegisterFormRepository;
     private RequesterRepository requesterRepository;
+    private FileAnswerRepository fileAnswerRepository;
 
-    public WorkshopManagerController( WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+    public WorkshopManagerController( FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
@@ -62,6 +66,7 @@ public class WorkshopManagerController {
         this.graderRequestFormRepository = graderRequestFormRepository;
         this.attenderRegisterFormRepository = attenderRegisterFormRepository;
         this.requesterRepository = requesterRepository;
+        this.fileAnswerRepository = fileAnswerRepository;
     }
 
     @GetMapping("/offeringWorkshop")
@@ -315,7 +320,7 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop/{id}/graderEvaluationForm/answer")
-    public ResponseEntity<Object> answerToGraderEvalForm(@PathVariable long id, @RequestBody FormAnswerContext formAnswerContext, Authentication authentication) {
+    public ResponseEntity<Object> answerToGraderEvalForm(@PathVariable long id, @RequestBody FormAnswerContext formAnswerContext, Authentication authentication, @RequestParam(value = "file", required = false) MultipartFile multipartFile) throws IOException {
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
@@ -370,15 +375,23 @@ public class WorkshopManagerController {
                         ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                         choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                         answerData = choiceAnswer;
-                    } else {
+                    } else if (type.equalsIgnoreCase("FileAnswer")){
+                        FileAnswer fileAnswer = new FileAnswer();
+                        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+
+                        fileAnswer.setFileName(fileName);
+                        fileAnswer.setFileType(multipartFile.getContentType());
+                        fileAnswer.setData(multipartFile.getBytes());
+
+                        answerData = fileAnswer;
+
+//                        // TODO ADDED FILE STUFF HERE
+//                        fileAnswerRepository.save(fileAnswer);
+                    }
+                    else {
                         return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
                     }
-                    //TODO fix file answer
 
-//                    else if (type.equalsIgnoreCase("FileAnswer")){
-//                        FileAnswer fileAnswer = new FileAnswer();
-//                        fileAnswer.
-//                    }
 
                     filledAnswer.addAnswerData(answerData);
 

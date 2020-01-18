@@ -8,6 +8,7 @@ import com.atelier.atelier.entity.RequestService.RequestState;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.AnswerRepository;
+import com.atelier.atelier.repository.Form.FileAnswerRepository;
 import com.atelier.atelier.repository.Form.QuestionRepsoitory;
 import com.atelier.atelier.repository.Request.AttenderRequestPaymentTabRepository;
 import com.atelier.atelier.repository.Request.RequestRepository;
@@ -16,19 +17,18 @@ import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-// TODO SYS ADMIN HAS TO HAVE PATHS FOR CREATING ROLES FOR USERS
-// TODO FOR REGISTRATION RETRIEVE GRADERS INFO LIST AND ATTENDER'S INFO LIST FOR A OFFERING WORKSHOP AND
-// TODO HAVE THE WORKSHOP MANGER FORM GROUPS BASED ON THESE LISTS
-// TODO CHECK ATTENDER'S PERMISSION'S FOR ENROLLMENT (SEE IF HE HAS PASSED THE PRE REQUISTIES, IF HE HAS ENROLLED IN THE SAME WORKSHOP)
 
 @RestController
 @RequestMapping("/attendees")
@@ -42,8 +42,9 @@ public class AttenderController {
     private AnswerRepository answerRepository;
     private RequestRepository requestRepository;
     private AttenderRequestPaymentTabRepository attenderRequestPaymentTabRepository;
+    private FileAnswerRepository fileAnswerRepository;
 
-    public AttenderController(AttenderRequestPaymentTabRepository attenderRequestPaymentTabRepository, AttenderRepository attenderRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository, RequestRepository requestRepository) {
+    public AttenderController(FileAnswerRepository fileAnswerRepository, AttenderRequestPaymentTabRepository attenderRequestPaymentTabRepository, AttenderRepository attenderRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository, RequestRepository requestRepository) {
         this.attenderRepository = attenderRepository;
         this.userRepository = userRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
@@ -52,6 +53,7 @@ public class AttenderController {
         this.answerRepository = answerRepository;
         this.requestRepository = requestRepository;
         this.attenderRequestPaymentTabRepository = attenderRequestPaymentTabRepository;
+        this.fileAnswerRepository = fileAnswerRepository;
     }
 
     @GetMapping("/attendee")
@@ -105,7 +107,7 @@ public class AttenderController {
 
 
     @PostMapping("/attendee/request/offeringWorkshop/{id}/answer")
-    public ResponseEntity<Object> answerAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext) {
+    public ResponseEntity<Object> answerAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext, @RequestParam(value = "file", required = false) MultipartFile multipartFile) throws IOException {
         AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
@@ -179,15 +181,24 @@ public class AttenderController {
                 ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                 choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                 answerData = choiceAnswer;
+            } else if (type.equalsIgnoreCase("FileAnswer")){
+                FileAnswer fileAnswer = new FileAnswer();
+                String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+
+                fileAnswer.setFileName(fileName);
+                fileAnswer.setFileType(multipartFile.getContentType());
+                fileAnswer.setData(multipartFile.getBytes());
+
+                answerData = fileAnswer;
+
+//                // TODO ADDED FILE STUFF HERE
+//                fileAnswerRepository.save(fileAnswer);
+
             } else {
                 return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
             }
-            //TODO fix file answer
 
-//                    else if (type.equalsIgnoreCase("FileAnswer")){
-//                        FileAnswer fileAnswer = new FileAnswer();
-//                        fileAnswer.
-//                    }
+
 
 
             answer.addAnswerData(answerData);
@@ -319,7 +330,6 @@ public class AttenderController {
     }
 
 
-    //TODO SHOW PAYMENTS
     @GetMapping("/attendee/request/{id}/payments")
     public ResponseEntity<Object> getRequestPayments(@PathVariable long id, Authentication authentication) {
         User user = User.getUser(authentication, userRepository);

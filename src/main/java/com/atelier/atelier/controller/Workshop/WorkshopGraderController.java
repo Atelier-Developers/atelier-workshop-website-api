@@ -8,6 +8,7 @@ import com.atelier.atelier.entity.UserPortalManagment.GraderWorkshopConnection;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.AnswerRepository;
+import com.atelier.atelier.repository.Form.FileAnswerRepository;
 import com.atelier.atelier.repository.Form.FormRepository;
 import com.atelier.atelier.repository.Form.QuestionRepsoitory;
 import com.atelier.atelier.repository.user.UserRepository;
@@ -16,8 +17,11 @@ import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,18 +37,20 @@ public class WorkshopGraderController {
     private WorkshopAttenderInfoRepository workshopAttenderInfoRepository;
     private QuestionRepsoitory questionRepsoitory;
     private AnswerRepository answerRepository;
+    private FileAnswerRepository fileAnswerRepository;
 
-    public WorkshopGraderController(OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository) {
+    public WorkshopGraderController(FileAnswerRepository fileAnswerRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository) {
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
         this.formRepository = formRepository;
         this.workshopAttenderInfoRepository = workshopAttenderInfoRepository;
         this.questionRepsoitory = questionRepsoitory;
         this.answerRepository = answerRepository;
+        this.fileAnswerRepository = fileAnswerRepository;
     }
 
     @PostMapping("/offeringWorkshop/{id}/workshopForm/answer")
-    public ResponseEntity<Object> answerToWorkshopForm(@PathVariable long id, Authentication authentication, @RequestBody FormAnswerContext formAnswerContext) {
+    public ResponseEntity<Object> answerToWorkshopForm(@PathVariable long id, Authentication authentication, @RequestBody FormAnswerContext formAnswerContext, @RequestParam(value = "file", required =  false) MultipartFile multipartFile) throws IOException {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>("The offering workshop with the id provided is not available", HttpStatus.NO_CONTENT);
@@ -100,10 +106,25 @@ public class WorkshopGraderController {
                     ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                     choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                     answerData = choiceAnswer;
-                } else {
+                } else if (type.equalsIgnoreCase("FileAnswer")){
+
+                    FileAnswer fileAnswer = new FileAnswer();
+                    String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+
+                    fileAnswer.setFileName(fileName);
+                    fileAnswer.setFileType(multipartFile.getContentType());
+                    fileAnswer.setData(multipartFile.getBytes());
+
+                    answerData = fileAnswer;
+
+//                    // TODO ADDED FILE STUFF HERE
+//                    fileAnswerRepository.save(fileAnswer);
+                }
+                else {
                     return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
                 }
-                //TODO fix file answer
+
+
                 filledAnswer.addAnswerData(answerData);
 
                 filledAnswer.setFormFiller(workshopGraderFormFiller);

@@ -42,7 +42,6 @@ public class SystemAdminController {
 
         }
 
-        //TODO CHECK THIS.
         workshop.setId(0);
 
         Workshop savedWorkshop = workshopRepository.save(workshop);

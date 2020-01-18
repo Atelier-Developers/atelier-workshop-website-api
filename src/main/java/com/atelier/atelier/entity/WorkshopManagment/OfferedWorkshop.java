@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
+import com.atelier.atelier.entity.FormService.FileAnswer;
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.fasterxml.jackson.annotation.*;
@@ -10,8 +11,6 @@ import javax.validation.constraints.Digits;
 import java.math.BigDecimal;
 import java.util.*;
 
-
-//TODO add prerequsite validation
 
 @Entity
 @DiscriminatorValue(value = "OfferedWorkshop")
@@ -36,14 +35,17 @@ public class OfferedWorkshop extends Requestable {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar endTime;
 
-    @Digits(integer=5, fraction=2)
+    @Digits(integer = 5, fraction = 2)
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)
     private String description;
 
-    //
+//    @Column
+//    private FileAnswer profileImage;
+
+
     @ManyToOne
     @JoinColumn(name = "workshop_id", nullable = false)
     private Workshop workshop;
@@ -174,24 +176,24 @@ public class OfferedWorkshop extends Requestable {
         this.workshopRelationDetails = workshopRelationDetails;
     }
 
-    public void addWorkshopAttenderInfo(WorkshopAttenderInfo workshopAttenderInfo){
-        if ( attenderInfos == null ){
+    public void addWorkshopAttenderInfo(WorkshopAttenderInfo workshopAttenderInfo) {
+        if (attenderInfos == null) {
             attenderInfos = new ArrayList<WorkshopAttenderInfo>();
         }
 
         attenderInfos.add(workshopAttenderInfo);
     }
 
-    public void addWorkshopGraderrInfo(WorkshopGraderInfo workshopGraderInfo){
-        if ( workshopGraderInfos == null ){
+    public void addWorkshopGraderrInfo(WorkshopGraderInfo workshopGraderInfo) {
+        if (workshopGraderInfos == null) {
             workshopGraderInfos = new ArrayList<>();
         }
 
         workshopGraderInfos.add(workshopGraderInfo);
     }
 
-    public void addWorkshopForm(WorkshopForm workshopForm){
-        if ( workshopForms == null ){
+    public void addWorkshopForm(WorkshopForm workshopForm) {
+        if (workshopForms == null) {
             workshopForms = new ArrayList<>();
         }
 
@@ -214,9 +216,9 @@ public class OfferedWorkshop extends Requestable {
         this.attenderRegisterForm = attenderRegisterForm;
     }
 
-    public boolean hasGraderRequested(WorkshopGrader workshopGrader){
-        for(WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos){
-            if(workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId() ){
+    public boolean hasGraderRequested(WorkshopGrader workshopGrader) {
+        for (WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos) {
+            if (workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId()) {
                 return false;
             }
         }
@@ -224,51 +226,50 @@ public class OfferedWorkshop extends Requestable {
     }
 
 
-    public  boolean hasAtendeeRequested(WorkshopAttender workshopAttender){
-        for(WorkshopAttenderInfo workshopAttenderInfo : attenderInfos){
-            if(workshopAttenderInfo.getWorkshopAttender().getId() == workshopAttender.getId()){
+    public boolean hasAtendeeRequested(WorkshopAttender workshopAttender) {
+        for (WorkshopAttenderInfo workshopAttenderInfo : attenderInfos) {
+            if (workshopAttenderInfo.getWorkshopAttender().getId() == workshopAttender.getId()) {
                 return false;
             }
         }
         return true;
     }
 
-    public static boolean doTwoOfferedWorkshopTimeIntervalsOverlap(OfferedWorkshop offeredWorkshop1, OfferedWorkshop offeredWorkshop2){
+    public static boolean doTwoOfferedWorkshopTimeIntervalsOverlap(OfferedWorkshop offeredWorkshop1, OfferedWorkshop offeredWorkshop2) {
         Calendar start1 = offeredWorkshop1.startTime;
         Calendar end1 = offeredWorkshop1.endTime;
         Calendar start2 = offeredWorkshop2.startTime;
         Calendar end2 = offeredWorkshop2.endTime;
 
-        if ( start1.before(start2) && end1.after(end2)){
+        if (start1.before(start2) && end1.after(end2)) {
             return true;
         }
 
-        if ( start1.before(start2) && ( end1.before(end2) && end1.after(start2))){
+        if (start1.before(start2) && (end1.before(end2) && end1.after(start2))) {
             return true;
         }
 
-        if ( end1.after(end2) && ( start1.after(start2) && start1.before(end2))){
+        if (end1.after(end2) && (start1.after(start2) && start1.before(end2))) {
             return true;
         }
 
-        if ( (start1.after(start2) && start1.before(end2)) && (end1.before(end2) && end1.after(start2))){
+        if ((start1.after(start2) && start1.before(end2)) && (end1.before(end2) && end1.after(start2))) {
             return true;
-        }
-
-        else{
+        } else {
             return false;
         }
     }
 
-    public void addOfferingWorkshopRelations(OfferedWorkshopRelationDetail offeredWorkshopRelationDetail){
-        if(workshopRelationDetails == null){
+    public void addOfferingWorkshopRelations(OfferedWorkshopRelationDetail offeredWorkshopRelationDetail) {
+        if (workshopRelationDetails == null) {
             workshopRelationDetails = new ArrayList<>();
         }
         workshopRelationDetails.add(offeredWorkshopRelationDetail);
     }
-    public Set<WorkshopGroup> workshopGroupSet(){
+
+    public Set<WorkshopGroup> workshopGroupSet() {
         Set<WorkshopGroup> workshopGroups = new HashSet<>();
-        for(WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos){
+        for (WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos) {
             workshopGroups.add(workshopGraderInfo.getWorkshopGroup());
         }
         return workshopGroups;
