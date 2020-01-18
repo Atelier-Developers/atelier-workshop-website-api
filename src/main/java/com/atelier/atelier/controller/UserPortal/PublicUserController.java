@@ -26,7 +26,7 @@ public class PublicUserController {
         this.userRepository = userRepository;
     }
 
-    // GET USER THROUGHT IDs APIs
+    // GET USER THROUGH IDs APIs
     @GetMapping("/workshopGrader/{workshopGraderId}")
     public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId){
 
@@ -52,5 +52,8 @@ public class PublicUserController {
 
 
     /// GET WORKSHOPS (PASSED, SOON TO BE HELD, PENDING)
+
+//    @GetMapping("/grader/{graderId}")
+//
 
 }

@@ -206,9 +206,22 @@ public class WorkshopRestController {
             }
         }
 
+        List<String> preReqs = new ArrayList<String>();
+        for ( OfferedWorkshopRelationDetail offeredWorkshopRelationDetail : offeredWorkshop.getWorkshopRelationDetails()){
+
+            Optional<Workshop> optionalWorkshop = workshopRepository.findById(offeredWorkshopRelationDetail.getWorkshop().getId());
+
+            Workshop workshop = optionalWorkshop.get();
+
+            preReqs.add(workshop.getName());
+
+
+        }
+
 
         offeredWorkshopUserListsContext.setAttendeeUsers(attendeeUsers);
         offeredWorkshopUserListsContext.setGraderUsers(graderUsers);
+        offeredWorkshopUserListsContext.setPreRequisites(preReqs);
 
 
         return new ResponseEntity<>(offeredWorkshopUserListsContext, HttpStatus.OK);

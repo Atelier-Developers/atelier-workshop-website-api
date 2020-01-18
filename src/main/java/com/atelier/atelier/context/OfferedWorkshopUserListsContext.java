@@ -2,6 +2,7 @@ package com.atelier.atelier.context;
 
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
+import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public class OfferedWorkshopUserListsContext {
     private User workshopManagerUser;
     private List<User> attendeeUsers;
     private List<User> graderUsers;
+    private List<String> preRequisites;
 
     public OfferedWorkshop getOfferedWorkshop() {
         return offeredWorkshop;
@@ -42,5 +44,13 @@ public class OfferedWorkshopUserListsContext {
 
     public void setGraderUsers(List<User> graderUsers) {
         this.graderUsers = graderUsers;
+    }
+
+    public List<String> getPreRequisites() {
+        return preRequisites;
+    }
+
+    public void setPreRequisites(List<String> preRequisites) {
+        this.preRequisites = preRequisites;
     }
 }

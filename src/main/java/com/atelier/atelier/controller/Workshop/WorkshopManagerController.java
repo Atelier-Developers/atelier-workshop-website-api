@@ -681,6 +681,12 @@ public class WorkshopManagerController {
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
         Set<WorkshopGroup> workshopGroupSet = offeredWorkshop.workshopGroupSet();
 
         List<GroupElementContext> groupElementContexts = new ArrayList<>();
