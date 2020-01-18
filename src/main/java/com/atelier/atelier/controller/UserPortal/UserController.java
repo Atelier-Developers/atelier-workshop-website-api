@@ -62,9 +62,9 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    public User  showUser(Authentication authentication) {
+    public ResponseEntity<Object>  showUser(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
-        return user;
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @GetMapping("/roles")
