@@ -18,7 +18,7 @@ import java.util.List;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 
-public abstract class WorkshopGrader {
+public abstract class  WorkshopGrader {
     @Id
     @GeneratedValue
     private long id;

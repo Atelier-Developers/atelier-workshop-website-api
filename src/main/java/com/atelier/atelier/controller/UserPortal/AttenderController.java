@@ -89,34 +89,6 @@ public class AttenderController {
     }
 
 
-//
-//    @PostMapping("/attendee/{offeringWorkshopId}")
-//    public ResponseEntity<Object> enrollAttendeeAtOfferingWorkshop(@PathVariable long offeringWorkshopId, Authentication authentication) {
-//        User user = User.getUser(authentication, userRepository);
-//        Role role = user.getRole("Attender");
-//        if (role == null) {
-//            return new ResponseEntity<>("The user does not have an attendee role.", HttpStatus.NO_CONTENT);
-//        }
-//        Attender attenderRole = (Attender) role;
-//        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
-//        if (!optionalOfferedWorkshop.isPresent()) {
-//            return new ResponseEntity<>("The offering workshop with the id provided is not available", HttpStatus.NO_CONTENT);
-//        }
-//        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-//        AttenderWorkshopConnection attenderWorkshopConnection = attenderRole.getAttenderWorkshopConnection();
-//
-//        WorkshopAttenderInfo workshopAttenderInfo = new WorkshopAttenderInfo();
-//        workshopAttenderInfo.setOfferedWorkshop(offeredWorkshop);
-//        workshopAttenderInfo.setWorkshopAttender(attenderWorkshopConnection);
-//        attenderWorkshopConnection.addWorkshopAttenderInfo(workshopAttenderInfo);
-//        offeredWorkshop.addWorkshopAttenderInfo(workshopAttenderInfo);
-//        workshopAttenderInfoRepository.save(workshopAttenderInfo);
-//        return new ResponseEntity<>(workshopAttenderInfo, HttpStatus.OK);
-//
-//
-//    }
-
-
     @GetMapping("/attendee/request/offeringWorkshop/{id}")
     public ResponseEntity<Object> getAttendeeRegisterForm(@PathVariable long id) {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
