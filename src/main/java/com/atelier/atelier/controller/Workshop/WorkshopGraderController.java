@@ -170,6 +170,7 @@ public class WorkshopGraderController {
         GroupUsersContext groupUsersContext = new GroupUsersContext();
 
         groupUsersContext.setGroupName(graderGroup.getName());
+        groupUsersContext.setGroupId(graderGroup.getId());
 
         List<User> users = userRepository.findAll();
 

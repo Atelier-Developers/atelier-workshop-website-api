@@ -39,4 +39,7 @@ public class AttenderWorkshopConnection  extends WorkshopAttender{
         }
         return false;
     }
+
+
+
 }

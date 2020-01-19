@@ -355,7 +355,59 @@ public class AttenderController {
     }
 
 
+    // Returns the attendee groupName, and graders and attendee users of the same group as this user
+    @GetMapping("/offeringWorkshop/{id}/groupDetails")
+    public ResponseEntity<Object> showUsersOfTheSameGroupAsThisUser(@PathVariable long id, Authentication authentication){
 
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>("The offering workshop with the id provided is not available", HttpStatus.NO_CONTENT);
+        }
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+        AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
+        WorkshopAttenderInfo workshopAttenderInfo = attenderWorkshopConnection.getWorkshopAttenderInfoForAnOfferingWorkshop(offeredWorkshop);
+        if (workshopAttenderInfo == null) {
+            return new ResponseEntity<>("You aren't a grader of this workshop", HttpStatus.FORBIDDEN);
+        }
+
+        WorkshopGroup attendeeGroup = workshopAttenderInfo.getWorkshopGroup();
+
+        GroupUsersContext groupUsersContext = new GroupUsersContext();
+
+        groupUsersContext.setGroupName(attendeeGroup.getName());
+        groupUsersContext.setGroupId(attendeeGroup.getId());
+
+        List<User> users = userRepository.findAll();
+
+        List<User> attendeeUsers = new ArrayList<User>();
+
+        for (WorkshopAttenderInfo attInfo : attendeeGroup.getAttenderInfos()){
+            for (User user : users ){
+                Attender attender = (Attender) user.getRole("Attender");
+                if (attender.getAttenderWorkshopConnection().getId() == workshopAttenderInfo.getWorkshopAttender().getId()){
+                    attendeeUsers.add(user);
+                    break;
+                }
+            }
+        }
+
+        groupUsersContext.setAttendees(attendeeUsers);
+
+        List<User> graderUsers = new ArrayList<User>();
+        for (WorkshopGraderInfo workshopGraderInfo1 : attendeeGroup.getGraderInfos()){
+            for(User user : users){
+                Grader grader = (Grader) user.getRole("Grader");
+                if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo1.getWorkshopGrader().getId()){
+                    graderUsers.add(user);
+                    break;
+                }
+            }
+        }
+
+        groupUsersContext.setGraders(graderUsers);
+
+        return new ResponseEntity<>(groupUsersContext, HttpStatus.OK);
+    }
 
     private AttenderWorkshopConnection getAttendeeWorkshopConnectionFromAuthentication(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);

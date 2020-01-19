@@ -68,4 +68,17 @@ public abstract class WorkshopAttender {
     public void addAttenderFormApplicants(AttenderFormApplicant attenderFormApplicant){
         this.attenderFormApplicants.add(attenderFormApplicant);
     }
+
+    public WorkshopAttenderInfo getWorkshopAttenderInfoForAnOfferingWorkshop(OfferedWorkshop offeredWorkshop){
+
+        List<WorkshopAttenderInfo> offeredAttInfos = offeredWorkshop.getAttenderInfos();
+        for (WorkshopAttenderInfo workshopAttenderInfo : this.workshopAttenderInfos){
+
+            if (offeredAttInfos.contains(workshopAttenderInfo)){
+                return workshopAttenderInfo;
+            }
+        }
+
+        return null;
+    }
 }

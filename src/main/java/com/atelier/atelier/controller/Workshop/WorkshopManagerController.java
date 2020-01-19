@@ -855,6 +855,7 @@ public class WorkshopManagerController {
         for(WorkshopGroup workshopGroup : workshopGroupSet){
             GroupUsersContext groupUsersContext = new GroupUsersContext();
             groupUsersContext.setGroupName(workshopGroup.getName());
+            groupUsersContext.setGroupId(workshopGroup.getId());
 
             List<User> graderUsers = new ArrayList<User>();
             for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){

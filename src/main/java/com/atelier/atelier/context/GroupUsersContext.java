@@ -6,10 +6,19 @@ import java.util.List;
 
 public class GroupUsersContext {
 
+    private long groupId;
     private String groupName;
     private List<User> graders;
     private List<User> attendees;
 
+
+    public long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(long groupId) {
+        this.groupId = groupId;
+    }
 
     public String getGroupName() {
         return groupName;
