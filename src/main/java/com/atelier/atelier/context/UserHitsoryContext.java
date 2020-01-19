@@ -6,31 +6,31 @@ import java.util.List;
 
 public class UserHitsoryContext {
 
-    private List<OfferedWorkshop> gradedOfferedWorkshops;
-    private List<OfferedWorkshop> attendedOfferedWorkshops;
-    private List<OfferedWorkshop> managedOfferedWorkshops;
+    private List<OfferedWorkshopManagerNameContext> managedWorkshops;
+    private List<OfferedWorkshopManagerNameContext> attendedWorkshops;
+    private List<OfferedWorkshopManagerNameContext> gradedWorkshops;
 
-    public List<OfferedWorkshop> getGradedOfferedWorkshops() {
-        return gradedOfferedWorkshops;
+    public List<OfferedWorkshopManagerNameContext> getManagedWorkshops() {
+        return managedWorkshops;
     }
 
-    public void setGradedOfferedWorkshops(List<OfferedWorkshop> gradedOfferedWorkshops) {
-        this.gradedOfferedWorkshops = gradedOfferedWorkshops;
+    public void setManagedWorkshops(List<OfferedWorkshopManagerNameContext> managedWorkshops) {
+        this.managedWorkshops = managedWorkshops;
     }
 
-    public List<OfferedWorkshop> getAttendedOfferedWorkshops() {
-        return attendedOfferedWorkshops;
+    public List<OfferedWorkshopManagerNameContext> getAttendedWorkshops() {
+        return attendedWorkshops;
     }
 
-    public void setAttendedOfferedWorkshops(List<OfferedWorkshop> attendedOfferedWorkshops) {
-        this.attendedOfferedWorkshops = attendedOfferedWorkshops;
+    public void setAttendedWorkshops(List<OfferedWorkshopManagerNameContext> attendedWorkshops) {
+        this.attendedWorkshops = attendedWorkshops;
     }
 
-    public List<OfferedWorkshop> getManagedOfferedWorkshops() {
-        return managedOfferedWorkshops;
+    public List<OfferedWorkshopManagerNameContext> getGradedWorkshops() {
+        return gradedWorkshops;
     }
 
-    public void setManagedOfferedWorkshops(List<OfferedWorkshop> managedOfferedWorkshops) {
-        this.managedOfferedWorkshops = managedOfferedWorkshops;
+    public void setGradedWorkshops(List<OfferedWorkshopManagerNameContext> gradedWorkshops) {
+        this.gradedWorkshops = gradedWorkshops;
     }
 }

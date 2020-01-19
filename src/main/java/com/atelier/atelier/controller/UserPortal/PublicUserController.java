@@ -1,6 +1,7 @@
 package com.atelier.atelier.controller.UserPortal;
 
 
+import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
 import com.atelier.atelier.context.UserHitsoryContext;
 import com.atelier.atelier.entity.UserPortalManagment.Attender;
 import com.atelier.atelier.entity.UserPortalManagment.Grader;
@@ -59,7 +60,7 @@ public class PublicUserController {
 
 
 
-    //Returns graded, attended, managed workshops of a single user
+    //Returns graded, attended, managed workshops of a single user in an OfferedWorkshopManageName
     @GetMapping("/history/{id}")
     public ResponseEntity<Object> showUserHistory(@PathVariable long id){
 
@@ -78,37 +79,97 @@ public class PublicUserController {
 
         WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
 
-        List<OfferedWorkshop> attendedWorkshops = new ArrayList<>();
+        List<OfferedWorkshopManagerNameContext> attendedWorkshops = new ArrayList<>();
+
+        List<User> users = userRepository.findAll();
 
         for (WorkshopAttenderInfo workshopAttenderInfo : workshopAttender.getWorkshopAttenderInfos()){
 
-            attendedWorkshops.add(workshopAttenderInfo.getOfferedWorkshop());
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+            OfferedWorkshop offeredWorkshop = workshopAttenderInfo.getOfferedWorkshop();
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            for (User currentUser : users ){
+
+                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
+                    break;
+                }
+            }
+
+            attendedWorkshops.add(offeredWorkshopManagerNameContext);
 
         }
 
-        userHitsoryContext.setAttendedOfferedWorkshops(attendedWorkshops);
+        userHitsoryContext.setAttendedWorkshops(attendedWorkshops);
 
         Grader grader = (Grader) user.getRole("Grader");
 
         WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
 
-        List<OfferedWorkshop> gradedWorkshops = new ArrayList<>();
+        List<OfferedWorkshopManagerNameContext> gradedWorkshops = new ArrayList<>();
 
         for (WorkshopGraderInfo workshopGraderInfo : workshopGrader.getWorkshopGraderInfos()){
 
-            gradedWorkshops.add(workshopGraderInfo.getOfferedWorkshop());
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+            OfferedWorkshop offeredWorkshop = workshopGraderInfo.getOfferedWorkshop();
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            for (User currentUser : users ) {
+
+                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
+                    break;
+                }
+            }
+
+            gradedWorkshops.add(offeredWorkshopManagerNameContext);
 
         }
 
-        userHitsoryContext.setGradedOfferedWorkshops(gradedWorkshops);
+        userHitsoryContext.setGradedWorkshops(gradedWorkshops);
 
 
         WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
 
-        userHitsoryContext.setManagedOfferedWorkshops(workshopManager.getOfferedWorkshops());
+        List<OfferedWorkshopManagerNameContext> managedWorkshops = new ArrayList<>();
+
+        for (OfferedWorkshop offeredWorkshop : workshopManager.getOfferedWorkshops()){
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+
+            offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            managedWorkshops.add(offeredWorkshopManagerNameContext);
+        }
+
+        userHitsoryContext.setManagedWorkshops(managedWorkshops);
 
         return new ResponseEntity<>(userHitsoryContext, HttpStatus.OK);
 
+
+    }
+
+
+
+    // Returns User base on Id
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getUserById(@PathVariable long id){
+
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if (!optionalUser.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        User user = optionalUser.get();
+
+        return new ResponseEntity<>(user, HttpStatus.OK);
 
     }
 
