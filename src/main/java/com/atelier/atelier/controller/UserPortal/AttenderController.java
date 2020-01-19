@@ -427,6 +427,10 @@ public class AttenderController {
         return new ResponseEntity<>(groupUsersContext, HttpStatus.OK);
     }
 
+
+
+    //TODO api to give all the requests of an attendee
+
     private AttenderWorkshopConnection getAttendeeWorkshopConnectionFromAuthentication(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
         Attender attender = (Attender) user.getRole("Attender");
