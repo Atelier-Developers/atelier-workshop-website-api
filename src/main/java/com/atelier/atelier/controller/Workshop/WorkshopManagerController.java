@@ -496,6 +496,7 @@ public class WorkshopManagerController {
     }
 
 
+    //Returns Request Objects(Both Accepted and Pending)
     @GetMapping("/offeringWorkshop/{id}/requests/graders")
     public ResponseEntity<Object> getGraderRequests(@PathVariable long id, Authentication authentication) {
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
@@ -521,6 +522,8 @@ public class WorkshopManagerController {
         return new ResponseEntity<>(requests, HttpStatus.OK);
     }
 
+
+    // Returns Attendee Request Object (Both Accepted and Pending and Rejected)
     @GetMapping("/offeringWorkshop/{id}/requests/attendee")
     public ResponseEntity<Object> getAttendeeRequests(@PathVariable long id, Authentication authentication) {
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
@@ -683,6 +686,7 @@ public class WorkshopManagerController {
     }
 
 
+    //Returns group objects of the offering workshop with the workshopInfo and Connection Info Ids
     @GetMapping("/offeringWorkshop/{id}/groups")
     public ResponseEntity<Object> getGroups(@PathVariable long id, Authentication authentication) {
 
@@ -789,6 +793,7 @@ public class WorkshopManagerController {
     }
 
 
+    // Returns Attendee Info Objects of the Offering Workshop
     @GetMapping("/offeringWorkshop/{id}/attendeeInfos")
     public ResponseEntity<Object> showAllAttendeeInfos(@PathVariable long id, Authentication authentication){
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
@@ -805,6 +810,7 @@ public class WorkshopManagerController {
     }
 
 
+    // Returns Grader Info Objects
     @GetMapping("/offeringWorkshop/{id}/graderInfos")
     public ResponseEntity<Object> showAllGraderInfos(@PathVariable long id, Authentication authentication){
 
@@ -819,6 +825,151 @@ public class WorkshopManagerController {
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
         return new ResponseEntity<>(offeredWorkshop.getWorkshopGraderInfos(), HttpStatus.OK);
+    }
+
+
+    // Returns a list of contexts including the name of the group and the list of its grader and attendee users
+    @GetMapping("/offeringWorkshop/{id}/groupDetails")
+    public ResponseEntity<Object> showGroupsWithAllOfItsUsers(@PathVariable long id, Authentication authentication){
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+
+        List<User> users = userRepository.findAll();
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+
+        Set<WorkshopGroup> workshopGroupSet = offeredWorkshop.workshopGroupSet();
+
+        List<GroupUsersContext> groupUsersContexts = new ArrayList<GroupUsersContext>();
+
+        for(WorkshopGroup workshopGroup : workshopGroupSet){
+            GroupUsersContext groupUsersContext = new GroupUsersContext();
+            groupUsersContext.setGroupName(workshopGroup.getName());
+
+            List<User> graderUsers = new ArrayList<User>();
+            for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
+                for (User user : users) {
+                    Grader grader = (Grader) user.getRole("Grader");
+                    if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo.getWorkshopGrader().getId()){
+                        graderUsers.add(user);
+                        break;
+                    }
+                }
+            }
+
+            groupUsersContext.setGraders(graderUsers);
+
+            List<User> attendeeUsers = new ArrayList<User>();
+            for (WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()){
+                for (User user: users){
+                    Attender attender = (Attender) user.getRole("Attender");
+                    if (attender.getAttenderWorkshopConnection().getId() == workshopAttenderInfo.getWorkshopAttender().getId()) {
+                        attendeeUsers.add(user);
+                        break;
+                    }
+                }
+            }
+
+            groupUsersContext.setAttendees(attendeeUsers);
+
+            groupUsersContexts.add(groupUsersContext);
+
+        }
+
+        return new ResponseEntity<>(groupUsersContexts, HttpStatus.OK);
+    }
+
+
+    // Returns the Requesting Grader Users With Request status As Pending
+    @GetMapping("/offeringWorkshop/{id}/requests/pending/graders")
+    public ResponseEntity<Object> showGraderUsersWithPendingRequests(@PathVariable long id, Authentication authentication){
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<User> graders = new ArrayList<User>();
+
+        List<User> users = userRepository.findAll();
+
+        for (Request request : offeredWorkshop.getRequests()) {
+            if (request.getRequester() instanceof Grader) {
+                if (request.getState().equals(RequestState.Pending)){
+                    Grader grader = (Grader) request.getRequester();
+                    WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
+                    for (User user: users){
+                        Grader userGrader = (Grader) user.getRole("Grader");
+                        if (userGrader.getGraderWorkshopConnection().getId() == workshopGrader.getId() ){
+                            graders.add(user);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ResponseEntity<>(graders, HttpStatus.OK);
+    }
+
+
+    // Returns the Requesting Attendees User Objects with Request status as pending
+    @GetMapping("/offeringWorkshop/{id}/requests/pending/attendees")
+    public ResponseEntity<Object> showPendingAttendeeRequestsUsers(@PathVariable long id, Authentication authentication){
+
+        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<User> attendees = new ArrayList<User>();
+
+        List<User> users = userRepository.findAll();
+
+        for (Request request : offeredWorkshop.getRequests()) {
+            if (request.getRequester() instanceof Attender) {
+                if (request.getState().equals(RequestState.Pending)){
+                    Attender attender = (Attender) request.getRequester();
+                    WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+                    for (User user : users){
+                        Attender userAttender = (Attender) user.getRole("Attender");
+                        if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
+                            attendees.add(user);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ResponseEntity<>(attendees, HttpStatus.OK);
+
     }
 
 

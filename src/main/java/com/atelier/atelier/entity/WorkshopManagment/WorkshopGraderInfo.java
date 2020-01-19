@@ -26,6 +26,7 @@ public class WorkshopGraderInfo {
 
     @ManyToOne
     @JoinColumn(name = "workshop_group_id", unique = true)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private WorkshopGroup workshopGroup;
 
     @OneToMany(mappedBy = "workshopGraderInfo")
@@ -35,7 +36,6 @@ public class WorkshopGraderInfo {
 
     @OneToMany(mappedBy = "workshopGraderInfo")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private List<WorkshopGraderFormApplicant> workshopGraderFormApplicants;
 
 

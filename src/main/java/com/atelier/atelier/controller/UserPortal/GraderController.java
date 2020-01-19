@@ -97,17 +97,6 @@ public class GraderController {
         return new ResponseEntity<>(workshops, HttpStatus.OK);
     }
 
-//    @PostMapping("/grader/{offeringWorkshopId}")
-//    public ResponseEntity<Object> enrollGraderAtOfferingWorkshop(@PathVariable long offeringWorkshopId, Authentication authentication) {
-//        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
-//        if (!optionalOfferedWorkshop.isPresent()) {
-//            return new ResponseEntity<>("The offering workshop with the id provided is not available", HttpStatus.NO_CONTENT);
-//        }
-//        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-//        GraderWorkshopConnection graderWorkshopConnection = getGraderWorkshopConnectionFromAuthentication(authentication);
-//
-//        return new ResponseEntity<>(workshopGraderInfo, HttpStatus.OK);
-//    }
 
     private GraderWorkshopConnection getGraderWorkshopConnectionFromAuthentication(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);

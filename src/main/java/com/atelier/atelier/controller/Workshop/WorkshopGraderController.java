@@ -2,7 +2,9 @@ package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.context.AnswerQuestionContext;
 import com.atelier.atelier.context.FormAnswerContext;
+import com.atelier.atelier.context.GroupUsersContext;
 import com.atelier.atelier.entity.FormService.*;
+import com.atelier.atelier.entity.UserPortalManagment.Attender;
 import com.atelier.atelier.entity.UserPortalManagment.Grader;
 import com.atelier.atelier.entity.UserPortalManagment.GraderWorkshopConnection;
 import com.atelier.atelier.entity.UserPortalManagment.User;
@@ -59,7 +61,7 @@ public class WorkshopGraderController {
         GraderWorkshopConnection graderWorkshopConnection = getGraderWorkshopConnectionFromAuthentication(authentication);
         WorkshopGraderInfo workshopGraderInfo = graderWorkshopConnection.getWorkshopGraderInfoOfferedWorkshop(offeredWorkshop);
         if (workshopGraderInfo == null) {
-            return new ResponseEntity<>("You aren't grader of this workshop", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("You aren't a grader of this workshop", HttpStatus.FORBIDDEN);
         }
 
         Optional<Form> optionalForm = formRepository.findById(formAnswerContext.getFormId());
@@ -145,6 +147,60 @@ public class WorkshopGraderController {
         }
         return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
 
+    }
+
+
+    // Get the grader and attendee users of the same group as this grader in an offering workshop
+    @GetMapping("/offeringWorkshop/{id}/groupDetails")
+    public ResponseEntity<Object> showUsersOfTheSameGroupAsThisGraderInAnOfferingWorkshop(@PathVariable long id, Authentication authentication){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>("The offering workshop with the id provided is not available", HttpStatus.NO_CONTENT);
+        }
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+        GraderWorkshopConnection graderWorkshopConnection = getGraderWorkshopConnectionFromAuthentication(authentication);
+        WorkshopGraderInfo workshopGraderInfo = graderWorkshopConnection.getWorkshopGraderInfoOfferedWorkshop(offeredWorkshop);
+        if (workshopGraderInfo == null) {
+            return new ResponseEntity<>("You aren't a grader of this workshop", HttpStatus.FORBIDDEN);
+        }
+
+        WorkshopGroup graderGroup = workshopGraderInfo.getWorkshopGroup();
+
+        GroupUsersContext groupUsersContext = new GroupUsersContext();
+
+        groupUsersContext.setGroupName(graderGroup.getName());
+
+        List<User> users = userRepository.findAll();
+
+        List<User> attendeeUsers = new ArrayList<User>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : graderGroup.getAttenderInfos()){
+            for (User user : users ){
+                Attender attender = (Attender) user.getRole("Attender");
+                if (attender.getAttenderWorkshopConnection().getId() == workshopAttenderInfo.getWorkshopAttender().getId()){
+                    attendeeUsers.add(user);
+                    break;
+                }
+            }
+        }
+
+        groupUsersContext.setAttendees(attendeeUsers);
+
+        List<User> graderUsers = new ArrayList<User>();
+        for (WorkshopGraderInfo workshopGraderInfo1 : graderGroup.getGraderInfos()){
+            for(User user : users){
+                Grader grader = (Grader) user.getRole("Grader");
+                if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo1.getWorkshopGrader().getId()){
+                    graderUsers.add(user);
+                    break;
+                }
+            }
+        }
+
+        groupUsersContext.setGraders(graderUsers);
+
+        return new ResponseEntity<>(groupUsersContext, HttpStatus.OK);
     }
 
     private GraderWorkshopConnection getGraderWorkshopConnectionFromAuthentication(Authentication authentication) {
