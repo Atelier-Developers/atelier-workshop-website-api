@@ -2,6 +2,7 @@ package com.atelier.atelier.controller.UserPortal;
 
 
 import com.atelier.atelier.context.AnswerQuestionContext;
+import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
 import com.atelier.atelier.context.RegisterRequestContext;
 import com.atelier.atelier.entity.FormService.*;
 import com.atelier.atelier.entity.RequestService.Request;
@@ -18,8 +19,10 @@ import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
 import com.atelier.atelier.repository.workshop.WorkshopGraderInfoRepository;
+import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.support.CustomSQLErrorCodesTranslation;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -73,6 +76,7 @@ public class GraderController {
         return new ResponseEntity<>(graderRole, HttpStatus.OK);
     }
 
+    // Returns OfferedWorkshopManagerNameContext objects of the workshops
     @GetMapping("/grader/workshops")
     public ResponseEntity<Object> getGraderWorkshops(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
@@ -89,12 +93,30 @@ public class GraderController {
         if (workshopGraderInfos.isEmpty()) {
             return new ResponseEntity<>("The user has no workshop grader info.", HttpStatus.NO_CONTENT);
         }
-        List<OfferedWorkshop> workshops = new ArrayList<>();
+        List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<OfferedWorkshopManagerNameContext>();
+        List<User> users = userRepository.findAll();
+
         for (WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos) {
-            workshops.add(workshopGraderInfo.getOfferedWorkshop());
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+            OfferedWorkshop offeredWorkshop = workshopGraderInfo.getOfferedWorkshop();
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            for (User currentUser : users){
+
+                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
+                    break;
+                }
+            }
+
+            offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
+
         }
 
-        return new ResponseEntity<>(workshops, HttpStatus.OK);
+        return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
     }
 
 

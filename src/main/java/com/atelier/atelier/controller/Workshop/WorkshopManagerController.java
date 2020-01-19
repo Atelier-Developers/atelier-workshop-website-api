@@ -69,6 +69,7 @@ public class WorkshopManagerController {
         this.fileAnswerRepository = fileAnswerRepository;
     }
 
+    // Returns OfferedWorkshopManagerNameContext Objects of the Manager's Workshops
     @GetMapping("/offeringWorkshop")
     public ResponseEntity<Object> showAllOfferedWorkshop(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
@@ -77,7 +78,19 @@ public class WorkshopManagerController {
             return new ResponseEntity<>("User has no workshop manager role", HttpStatus.NO_CONTENT);
         }
         ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) role;
-        return new ResponseEntity<>(managerWorkshopConnection.getOfferedWorkshops(), HttpStatus.OK);
+
+        List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<OfferedWorkshopManagerNameContext>();
+
+        for (OfferedWorkshop offeredWorkshop : managerWorkshopConnection.getOfferedWorkshops()){
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+            offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+
+            offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
+        }
+
+        return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
     }
 
 
@@ -496,7 +509,7 @@ public class WorkshopManagerController {
     }
 
 
-    //Returns Request Objects(Both Accepted and Pending)
+    //Returns Grader Request Objects(Both Accepted and Pending)
     @GetMapping("/offeringWorkshop/{id}/requests/graders")
     public ResponseEntity<Object> getGraderRequests(@PathVariable long id, Authentication authentication) {
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);

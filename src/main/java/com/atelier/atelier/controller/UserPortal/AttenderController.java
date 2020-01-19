@@ -83,11 +83,29 @@ public class AttenderController {
         if (workshopAttenderInfos.isEmpty()) {
             return new ResponseEntity<>("The user has no attendee workshop attendee info", HttpStatus.NO_CONTENT);
         }
-        List<OfferedWorkshop> workshops = new ArrayList<>();
+        List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<OfferedWorkshopManagerNameContext>();
+        List<User> users = userRepository.findAll();
+
         for (WorkshopAttenderInfo workshopAttenderInfo : workshopAttenderInfos) {
-            workshops.add(workshopAttenderInfo.getOfferedWorkshop());
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+            OfferedWorkshop offeredWorkshop = workshopAttenderInfo.getOfferedWorkshop();
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            for(User currentUser : users){
+
+                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
+                    break;
+                }
+            }
+
+            offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
         }
-        return new ResponseEntity<>(workshops, HttpStatus.OK);
+
+        return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
     }
 
 
