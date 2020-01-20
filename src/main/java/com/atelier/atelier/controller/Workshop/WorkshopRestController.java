@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -225,6 +226,30 @@ public class WorkshopRestController {
 
 
         return new ResponseEntity<>(offeredWorkshopUserListsContext, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshops/popular")
+    public ResponseEntity<Object> showFirstFivePopularWorkshops(){
+
+        List<OfferedWorkshop> offeredWorkshops = offeringWorkshopRepository.findAll();
+
+        if (offeredWorkshops.size() > 5 ){
+            List<OfferedWorkshop> result = offeredWorkshops.subList(0, 5);
+            Collections.sort(result, Collections.reverseOrder());
+
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+
+        else {
+
+            Collections.sort(offeredWorkshops, Collections.reverseOrder());
+
+
+            return new ResponseEntity<>(offeredWorkshops, HttpStatus.OK);
+        }
+
+
     }
 
 }

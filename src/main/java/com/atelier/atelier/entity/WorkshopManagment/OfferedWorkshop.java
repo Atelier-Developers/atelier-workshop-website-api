@@ -14,7 +14,7 @@ import java.util.*;
 
 @Entity
 @DiscriminatorValue(value = "OfferedWorkshop")
-public class OfferedWorkshop extends Requestable {
+public class OfferedWorkshop extends Requestable implements Comparable<OfferedWorkshop> {
 
     public String getName() {
         return name;
@@ -273,5 +273,11 @@ public class OfferedWorkshop extends Requestable {
             workshopGroups.add(workshopGraderInfo.getWorkshopGroup());
         }
         return workshopGroups;
+    }
+
+
+    @Override
+    public int compareTo(OfferedWorkshop offWorkshop) {
+        return (Integer.compare(this.getAttenderInfos().size(), offWorkshop.getAttenderInfos().size()));
     }
 }
