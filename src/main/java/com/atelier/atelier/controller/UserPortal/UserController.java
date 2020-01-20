@@ -31,10 +31,6 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<Object> signUp(@RequestBody User user) {
-//        User foundUser = userRepository.findByUsername(user.getUsername());
-//        if ( foundUser != null ){
-//            return new ResponseEntity<>("A user with the username already exists", HttpStatus.BAD_REQUEST);
-//        }
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
