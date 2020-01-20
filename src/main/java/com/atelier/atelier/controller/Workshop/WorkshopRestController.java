@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.annotation.Repeatable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,6 +90,47 @@ public class WorkshopRestController {
         Workshop workshop = optionalWorkshop.get();
         return new ResponseEntity<>(workshop, HttpStatus.OK);
     }
+
+    @GetMapping("/workshops/{workshopId}/offeringWorkshop")
+    public ResponseEntity<Object> getOfferingWorkshopsOfAWorkshop(@PathVariable long workshopId){
+
+        Optional<Workshop> optionalWorkshop = workshopRepository.findById(workshopId);
+
+        if (!optionalWorkshop.isPresent()){
+            return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
+        }
+
+        Workshop workshop = optionalWorkshop.get();
+
+        List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<OfferedWorkshopManagerNameContext>();
+        List<User> users = userRepository.findAll();
+
+        for ( OfferedWorkshop offeredWorkshop : workshop.getOfferedWorkshops() ){
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            WorkshopManager workshopManager = offeredWorkshop.getWorkshopManager();
+
+            for ( User user : users ){
+
+                WorkshopManager workshopManager1 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager1.getId() == workshopManager.getId()){
+
+                    offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+                    break;
+                }
+
+            }
+
+            offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
+        }
+
+        return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
+    }
+
 
     @GetMapping("/offeringWorkshop")
     public ResponseEntity<Object> showAllOfferedWorkshop() {

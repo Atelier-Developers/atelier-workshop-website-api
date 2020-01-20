@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,6 +29,23 @@ public class SystemAdminController {
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
         this.attenderPaymentTabRepository = attenderPaymentTabRepository;
+    }
+
+
+    @GetMapping("/workshops")
+    public ResponseEntity<Object> getWorkshops(Authentication authentication){
+
+        SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
+
+        if (systemAdmin == null ){
+
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        }
+
+        List<Workshop> workshops = workshopRepository.findAll();
+
+        return new ResponseEntity<>(workshops, HttpStatus.OK);
     }
 
 
