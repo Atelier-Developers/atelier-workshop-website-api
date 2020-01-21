@@ -2,6 +2,7 @@ package com.atelier.atelier.controller.UserPortal;
 
 
 import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
+import com.atelier.atelier.context.UploadFileResponse;
 import com.atelier.atelier.context.UserHitsoryContext;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
@@ -260,7 +261,7 @@ public class PublicUserController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(pic.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + pic.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
                 .body(new ByteArrayResource(pic.getData()));
     }
 
@@ -281,7 +282,7 @@ public class PublicUserController {
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(pic.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + pic.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
                 .body(new ByteArrayResource(pic.getData()));
     }
 
