@@ -811,6 +811,67 @@ public class WorkshopManagerController {
     }
 
 
+    @PostMapping("/offeringWorkshop/group")
+    public ResponseEntity<Object> addAnEmptyGroup( @RequestBody String groupName){
+
+
+        WorkshopGroup workshopGroup = new WorkshopGroup();
+
+        List<WorkshopGraderInfo> workshopGraderInfos = new ArrayList<>();
+
+        List<WorkshopAttenderInfo> workshopAttenderInfos = new ArrayList<>();
+
+        workshopGroup.setAttenderInfos(workshopAttenderInfos);
+        workshopGroup.setGraderInfos(workshopGraderInfos);
+
+
+        workshopGroup.setName(groupName);
+
+        workshopGroupRepository.save(workshopGroup);
+
+        return new ResponseEntity<>(workshopGroup.getId(), HttpStatus.OK);
+    }
+
+
+    @PostMapping("/offeringWorkshop/group/{groupId}/att")
+    public ResponseEntity<Object> addAttToGroup(@PathVariable long groupId, @RequestBody long attInfo ) {
+
+        WorkshopAttenderInfo workshopAttenderInfo = workshopAttenderInfoRepository.findById(attInfo).get();
+
+        WorkshopGroup workshopGroup = workshopGroupRepository.findById(groupId).get();
+
+
+        workshopGroup.getAttenderInfos().add(workshopAttenderInfo);
+
+
+        workshopGroupRepository.save(workshopGroup);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+
+    @PostMapping("/offeringWorkshop/group/{groupId}/grader")
+    public ResponseEntity<Object> addGraderToGroup(@PathVariable long groupId, @RequestBody long graderInfo ) {
+
+        WorkshopGraderInfo workshopGraderInfo = workshopGraderInfoRepository.findById(graderInfo).get();
+
+        WorkshopGroup workshopGroup = workshopGroupRepository.findById(groupId).get();
+
+
+        workshopGroup.getGraderInfos().add(workshopGraderInfo);
+
+
+        workshopGroupRepository.save(workshopGroup);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
+
+
+
+
     // Returns Attendee Info Objects of the Offering Workshop
     @GetMapping("/offeringWorkshop/{id}/attendeeInfos")
     public ResponseEntity<Object> showAllAttendeeInfos(@PathVariable long id, Authentication authentication){
