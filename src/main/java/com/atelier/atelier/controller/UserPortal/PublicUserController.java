@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.*;
 import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -285,6 +286,46 @@ public class PublicUserController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
                 .body(new ByteArrayResource(pic.getData()));
     }
+
+
+    @GetMapping("/offeringWorkshop/{id}/info/{userId}")
+    public ResponseEntity<Object> getInfoByUserId(@PathVariable long id, @PathVariable long userId){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        User user = userRepository.findById(userId).get();
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        Grader grader = (Grader) user.getRole("Grader");
+
+        WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
+
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()){
+
+
+            if (workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId()){
+                return new ResponseEntity<>(workshopGraderInfo, HttpStatus.OK);
+            }
+        }
+
+
+        Attender attender = (Attender) user.getRole("Attender");
+
+        WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()){
+
+
+            if (workshopAttenderInfo.getWorkshopAttender().getId() == workshopAttender.getId()){
+                return new ResponseEntity<>(workshopAttenderInfo, HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+
 
     ///TODO GET WORKSHOPS (PASSED, SOON TO BE HELD, PENDING)
 

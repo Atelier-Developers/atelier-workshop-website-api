@@ -216,7 +216,7 @@ public class WorkshopManagerController {
                 } catch (DataIntegrityViolationException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-                return new ResponseEntity<>(HttpStatus.CREATED);
+                return new ResponseEntity<>(workshopForm, HttpStatus.OK);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
 
@@ -239,7 +239,7 @@ public class WorkshopManagerController {
                 } catch (DataIntegrityViolationException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-                return new ResponseEntity<>(HttpStatus.CREATED);
+                return new ResponseEntity<>(graderEvaluationForm, HttpStatus.OK);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
 
@@ -262,7 +262,7 @@ public class WorkshopManagerController {
                 } catch (DataIntegrityViolationException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-                return new ResponseEntity<>(HttpStatus.CREATED);
+                return new ResponseEntity<>(attenderRegisterForm, HttpStatus.OK);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
 
@@ -324,7 +324,7 @@ public class WorkshopManagerController {
                 } catch (DataIntegrityViolationException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
-                return new ResponseEntity<>(HttpStatus.CREATED);
+                return new ResponseEntity<>(graderRequestForm, HttpStatus.OK);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
         }
@@ -363,7 +363,12 @@ public class WorkshopManagerController {
                 workshopGraderInfo.addWorkshopGraderFormApplicants(workshopGraderFormApplicant);
 
                 List<Answer> answers = new ArrayList<>();
+                System.out.println("lakdf");
+
+                System.out.println(formAnswerContext.getApplicantId());
+
                 for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
+                    System.out.println("kir");
 
                     Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
                     if (!optionalQuestion.isPresent()) {
@@ -378,7 +383,6 @@ public class WorkshopManagerController {
                     String type = answerQuestionContext.getType();
                     LinkedHashMap<String, Object> answerDataObject = answerQuestionContext.getAnswerData();
                     AnswerData answerData = null;
-
                     if (type.equalsIgnoreCase("TextAnswer")) {
                         TextAnswer textAnswer = new TextAnswer();
                         textAnswer.setText((String) answerDataObject.get("text"));
@@ -388,7 +392,8 @@ public class WorkshopManagerController {
                         ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                         choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                         answerData = choiceAnswer;
-                    } else if (type.equalsIgnoreCase("FileAnswer")){
+                    }
+                    else if (type.equalsIgnoreCase("FileAnswer")){
                         FileAnswer fileAnswer = new FileAnswer();
                         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
 
