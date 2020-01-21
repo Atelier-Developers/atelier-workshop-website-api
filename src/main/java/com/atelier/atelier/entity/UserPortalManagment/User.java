@@ -34,6 +34,10 @@ public class User {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @OneToOne
+    private File pic;
+
+
     @ManyToAny(metaColumn = @Column(name = "role_type"))
     @AnyMetaDef(idType = "long", metaType = "string",
             metaValues = {
@@ -96,6 +100,15 @@ public class User {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+
+    public File getPic() {
+        return pic;
+    }
+
+    public void setPic(File pic) {
+        this.pic = pic;
     }
 
     public void addRole(Role role){

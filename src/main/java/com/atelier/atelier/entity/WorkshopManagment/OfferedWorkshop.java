@@ -3,6 +3,7 @@ package com.atelier.atelier.entity.WorkshopManagment;
 import com.atelier.atelier.entity.FormService.FileAnswer;
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
+import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.fasterxml.jackson.annotation.*;
 import org.joda.time.Interval;
 
@@ -42,8 +43,8 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     @Column(nullable = false)
     private String description;
 
-//    @Column
-//    private FileAnswer profileImage;
+    @OneToOne
+    private File profileImage;
 
 
     @ManyToOne
@@ -157,6 +158,14 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public File getProfileImage() {
+        return profileImage;
+    }
+
+    public void setProfileImage(File profileImage) {
+        this.profileImage = profileImage;
     }
 
     public List<WorkshopAttenderInfo> getAttenderInfos() {
