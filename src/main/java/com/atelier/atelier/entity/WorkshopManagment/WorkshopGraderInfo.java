@@ -16,16 +16,16 @@ public class WorkshopGraderInfo {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "workshop_grader_id", unique = true, nullable = false)
+    @JoinColumn(name = "workshop_grader_id",  nullable = false)
     private WorkshopGrader workshopGrader;
 
     @ManyToOne
-    @JoinColumn(name = "offered_workshop_id", unique = true, nullable = false)
+    @JoinColumn(name = "offered_workshop_id",  nullable = false)
     private OfferedWorkshop offeredWorkshop;
 
 
     @ManyToOne
-    @JoinColumn(name = "workshop_group_id", unique = true)
+    @JoinColumn(name = "workshop_group_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private WorkshopGroup workshopGroup;
 

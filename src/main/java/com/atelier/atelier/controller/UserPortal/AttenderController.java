@@ -127,7 +127,7 @@ public class AttenderController {
     @PostMapping("/attendee/request/offeringWorkshop/{id}/answer")
     public ResponseEntity<Object> answerAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext, @RequestParam(value = "file", required = false) MultipartFile multipartFile) throws IOException {
         AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
-
+        System.out.println("here");
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -25,7 +25,7 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
         this.name = name;
     }
 
-    @Column(unique = true, nullable = false)
+    @Column( nullable = false)
     private String name;
 
     @Basic(optional = false)
@@ -76,12 +76,12 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
 
 
     @OneToOne
-    @JoinColumn(name = "grader_request_form_id", unique = true)
+    @JoinColumn(name = "grader_request_form_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private GraderRequestForm graderRequestForm;
 
     @OneToOne
-    @JoinColumn(name = "attender_register_form_id", unique = true)
+    @JoinColumn(name = "attender_register_form_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AttenderRegisterForm attenderRegisterForm;
 

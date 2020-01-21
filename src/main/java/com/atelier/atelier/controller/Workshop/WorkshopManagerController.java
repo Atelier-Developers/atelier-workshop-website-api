@@ -259,6 +259,7 @@ public class WorkshopManagerController {
                 offeredWorkshop.setAttenderRegisterForm(attenderRegisterForm);
                 try {
                     attenderRegisterFormRepository.save(attenderRegisterForm);
+                    offeringWorkshopRepository.save(offeredWorkshop);
                 } catch (DataIntegrityViolationException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
@@ -277,14 +278,11 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (optionalOfferedWorkshop.isPresent()) {
             OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
-                AttenderRegisterForm attenderRegisterForm = offeredWorkshop.getAttenderRegisterForm();
-                if (attenderRegisterForm == null) {
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                }
-                return new ResponseEntity<>(attenderRegisterForm, HttpStatus.OK);
+            AttenderRegisterForm attenderRegisterForm = offeredWorkshop.getAttenderRegisterForm();
+            if (attenderRegisterForm == null) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(attenderRegisterForm, HttpStatus.OK);
         }
         return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
 
@@ -296,14 +294,11 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (optionalOfferedWorkshop.isPresent()) {
             OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
-                GraderRequestForm graderRequestForm = offeredWorkshop.getGraderRequestForm();
-                if (graderRequestForm == null) {
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                }
-                return new ResponseEntity<>(graderRequestForm, HttpStatus.OK);
+            GraderRequestForm graderRequestForm = offeredWorkshop.getGraderRequestForm();
+            if (graderRequestForm == null) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(graderRequestForm, HttpStatus.OK);
         }
         return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
 
@@ -321,6 +316,7 @@ public class WorkshopManagerController {
                 offeredWorkshop.setGraderRequestForm(graderRequestForm);
                 try {
                     graderRequestFormRepository.save(graderRequestForm);
+                    offeringWorkshopRepository.save(offeredWorkshop);
                 } catch (DataIntegrityViolationException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }

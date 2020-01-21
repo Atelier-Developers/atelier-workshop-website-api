@@ -12,7 +12,7 @@ public class GraderWorkshopConnection extends WorkshopGrader{
 
 
     @OneToOne
-    @JoinColumn(name = "grader_id", unique = true, nullable = false)
+    @JoinColumn(name = "grader_id", nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Grader grader;
 

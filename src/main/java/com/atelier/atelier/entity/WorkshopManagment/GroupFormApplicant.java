@@ -10,7 +10,7 @@ import javax.persistence.*;
 public class GroupFormApplicant extends FormApplicant {
 
     @ManyToOne
-    @JoinColumn(name = "workshop_group_id", unique = true)
+    @JoinColumn(name = "workshop_group_id")
     private WorkshopGroup workshopGroup;
 
     public WorkshopGroup getWorkshopGroup() {

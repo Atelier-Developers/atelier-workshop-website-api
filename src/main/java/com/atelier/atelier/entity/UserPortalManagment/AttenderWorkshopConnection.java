@@ -16,7 +16,7 @@ public class AttenderWorkshopConnection  extends WorkshopAttender{
 
 
     @OneToOne
-    @JoinColumn(name = "attender_id", unique = true, nullable = false)
+    @JoinColumn(name = "attender_id", nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Attender attender;
 
