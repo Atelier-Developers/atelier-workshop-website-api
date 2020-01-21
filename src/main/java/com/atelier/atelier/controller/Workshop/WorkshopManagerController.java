@@ -145,7 +145,7 @@ public class WorkshopManagerController {
         }
 
         offeringWorkshopRepository.save(offeredWorkshop);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(offeredWorkshop.getId(), HttpStatus.OK);
     }
 
     @GetMapping("/offeringWorkshop/{id}")
