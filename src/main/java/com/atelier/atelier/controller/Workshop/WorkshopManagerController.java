@@ -363,12 +363,10 @@ public class WorkshopManagerController {
                 workshopGraderInfo.addWorkshopGraderFormApplicants(workshopGraderFormApplicant);
 
                 List<Answer> answers = new ArrayList<>();
-                System.out.println("lakdf");
 
                 System.out.println(formAnswerContext.getApplicantId());
 
                 for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
-                    System.out.println("kir");
 
                     Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
                     if (!optionalQuestion.isPresent()) {
