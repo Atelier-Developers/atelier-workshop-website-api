@@ -275,12 +275,31 @@ public class WorkshopRestController {
     public ResponseEntity<Object> showFirstFivePopularWorkshops(){
 
         List<OfferedWorkshop> offeredWorkshops = offeringWorkshopRepository.findAll();
+        List<User> users = userRepository.findAll();
 
         if (offeredWorkshops.size() > 5 ){
             List<OfferedWorkshop> result = offeredWorkshops.subList(0, 5);
             Collections.sort(result, Collections.reverseOrder());
 
-            return new ResponseEntity<>(result, HttpStatus.OK);
+            List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<>();
+
+            for (OfferedWorkshop offeredWorkshop : result){
+                OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+                offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+                for ( User user : users ){
+
+                    WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                    if (offeredWorkshop.getWorkshopManager().getId() == workshopManager.getId()){
+                        offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+                        break;
+                    }
+                }
+                offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
+            }
+
+            return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
         }
 
         else {
@@ -288,7 +307,27 @@ public class WorkshopRestController {
             Collections.sort(offeredWorkshops, Collections.reverseOrder());
 
 
-            return new ResponseEntity<>(offeredWorkshops, HttpStatus.OK);
+            List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<>();
+
+            for (OfferedWorkshop offeredWorkshop : offeredWorkshops){
+                OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+                offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+                for ( User user : users ){
+
+                    WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                    if (offeredWorkshop.getWorkshopManager().getId() == workshopManager.getId()){
+                        offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+                        break;
+                    }
+                }
+                offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
+            }
+
+
+
+            return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
         }
 
 
