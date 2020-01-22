@@ -281,6 +281,8 @@ public class PublicUserController {
 
         File pic = offeredWorkshop.getProfileImage();
 
+        System.out.println(pic.getFileType());
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(pic.getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")

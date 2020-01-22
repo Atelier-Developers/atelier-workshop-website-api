@@ -1,32 +1,30 @@
 package com.atelier.atelier.context;
 
-import com.atelier.atelier.entity.WorkshopManagment.WorkshopGraderInfo;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class GroupElementContext {
 
-    private long groupId;
-    private String groupName;
+    private long id;
+    private String name;
     private List<GroupMemberContext> graderInfos;
     private List<GroupMemberContext> attendeeInfos;
 
 
-    public long getGroupId() {
-        return groupId;
+    public long getId() {
+        return id;
     }
 
-    public void setGroupId(long groupId) {
-        this.groupId = groupId;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public String getGroupName() {
-        return groupName;
+    public String getName() {
+        return name;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<GroupMemberContext> getGraderInfos() {
