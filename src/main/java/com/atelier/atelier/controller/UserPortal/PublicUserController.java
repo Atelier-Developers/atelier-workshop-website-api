@@ -39,26 +39,26 @@ public class PublicUserController {
     private FileRepository fileRepository;
 
 
-    public PublicUserController( FileRepository fileRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, AttenderRepository attenderRepository) {
+    public PublicUserController(FileRepository fileRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, AttenderRepository attenderRepository) {
         this.userRepository = userRepository;
         this.attenderRepository = attenderRepository;
         this.fileRepository = fileRepository;
-        this.offeringWorkshopRepository =offeringWorkshopRepository;
+        this.offeringWorkshopRepository = offeringWorkshopRepository;
     }
 
     // GET USER THROUGH IDs APIs
     @GetMapping("/workshopGrader/{workshopGraderId}")
-    public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId){
+    public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId) {
 
         List<User> users = userRepository.findAll();
 
-        for ( User user : users ){
+        for (User user : users) {
 
             Grader grader = (Grader) user.getRole("Grader");
 
             WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
 
-            if ( workshopGrader.getId() == workshopGraderId ){
+            if (workshopGrader.getId() == workshopGraderId) {
                 return new ResponseEntity<>(user, HttpStatus.OK);
             }
 
@@ -70,14 +70,13 @@ public class PublicUserController {
     /////////////////////////////// END OF USER FETCHING APIs
 
 
-
     //Returns graded, attended, managed workshops of a single user in an OfferedWorkshopManageName
     @GetMapping("/history/{id}")
-    public ResponseEntity<Object> showUserHistory(@PathVariable long id){
+    public ResponseEntity<Object> showUserHistory(@PathVariable long id) {
 
         Optional<User> optionalUser = userRepository.findById(id);
 
-        if (!optionalUser.isPresent()){
+        if (!optionalUser.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -94,17 +93,17 @@ public class PublicUserController {
 
         List<User> users = userRepository.findAll();
 
-        for (WorkshopAttenderInfo workshopAttenderInfo : workshopAttender.getWorkshopAttenderInfos()){
+        for (WorkshopAttenderInfo workshopAttenderInfo : workshopAttender.getWorkshopAttenderInfos()) {
 
             OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
             OfferedWorkshop offeredWorkshop = workshopAttenderInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            for (User currentUser : users ){
+            for (User currentUser : users) {
 
                 WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
 
-                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()) {
                     offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
                     break;
                 }
@@ -122,17 +121,17 @@ public class PublicUserController {
 
         List<OfferedWorkshopManagerNameContext> gradedWorkshops = new ArrayList<>();
 
-        for (WorkshopGraderInfo workshopGraderInfo : workshopGrader.getWorkshopGraderInfos()){
+        for (WorkshopGraderInfo workshopGraderInfo : workshopGrader.getWorkshopGraderInfos()) {
 
             OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
             OfferedWorkshop offeredWorkshop = workshopGraderInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            for (User currentUser : users ) {
+            for (User currentUser : users) {
 
                 WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
 
-                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()) {
                     offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
                     break;
                 }
@@ -149,7 +148,7 @@ public class PublicUserController {
 
         List<OfferedWorkshopManagerNameContext> managedWorkshops = new ArrayList<>();
 
-        for (OfferedWorkshop offeredWorkshop : workshopManager.getOfferedWorkshops()){
+        for (OfferedWorkshop offeredWorkshop : workshopManager.getOfferedWorkshops()) {
 
             OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
 
@@ -167,14 +166,13 @@ public class PublicUserController {
     }
 
 
-
     // Returns User base on Id
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getUserById(@PathVariable long id){
+    public ResponseEntity<Object> getUserById(@PathVariable long id) {
 
         Optional<User> optionalUser = userRepository.findById(id);
 
-        if (!optionalUser.isPresent()){
+        if (!optionalUser.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -185,12 +183,38 @@ public class PublicUserController {
     }
 
 
-    @PostMapping("/setPic/user/{id}")
-    public ResponseEntity<Object> setPicForUser(@PathVariable long id, @RequestParam(value = "file", required = true)MultipartFile file) throws IOException {
+
+
+    //Download pic of a given user
+    @GetMapping("/profilePic/user/{id}")
+    public ResponseEntity<Resource> getUserPic(@PathVariable long id) {
 
         Optional<User> optionalUser = userRepository.findById(id);
 
-        if ( !optionalUser.isPresent() ){
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        User user = optionalUser.get();
+
+        File pic = user.getPic();
+
+        if (pic == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(pic.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
+                .body(new ByteArrayResource(pic.getData()));
+    }
+
+    @PostMapping("/profilePic/user/{id}")
+    public ResponseEntity<Object> setPicForUser(@PathVariable long id, @RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
+
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if (!optionalUser.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -215,12 +239,12 @@ public class PublicUserController {
 
     }
 
-    @PostMapping("/setPic/offeringWorkshop/{id}")
-    public ResponseEntity<Object> setPicForOfferingWorkshop(@PathVariable long id, @RequestParam(value = "file")MultipartFile multipartFile) throws IOException {
+    @PostMapping("/pic/offeringWorkshop/{id}")
+    public ResponseEntity<Object> setPicForOfferingWorkshop(@PathVariable long id, @RequestParam(value = "file") MultipartFile multipartFile) throws IOException {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -246,40 +270,23 @@ public class PublicUserController {
     }
 
 
-    //Download pic of a given user
-    @GetMapping("/pic/user/{id}")
-    public ResponseEntity<Resource> getUserPic(@PathVariable long id){
-
-        Optional<User> optionalUser = userRepository.findById(id);
-
-        if ( !optionalUser.isPresent() ){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
-        User user = optionalUser.get();
-
-        File pic = user.getPic();
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(pic.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
-                .body(new ByteArrayResource(pic.getData()));
-    }
-
-
     //Download pic of an offered workshop
     @GetMapping("/pic/offeringWorkshop/{id}")
-    public ResponseEntity<Resource> getOfferedWorkshopPic(@PathVariable long id){
+    public ResponseEntity<Resource> getOfferedWorkshopPic(@PathVariable long id) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
-        if (!optionalOfferedWorkshop.isPresent()){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
         File pic = offeredWorkshop.getProfileImage();
+
+        if (pic == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(pic.getFileType()))
@@ -289,7 +296,7 @@ public class PublicUserController {
 
 
     @GetMapping("/offeringWorkshop/{id}/info/{userId}")
-    public ResponseEntity<Object> getInfoByUserId(@PathVariable long id, @PathVariable long userId){
+    public ResponseEntity<Object> getInfoByUserId(@PathVariable long id, @PathVariable long userId) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         User user = userRepository.findById(userId).get();
@@ -300,10 +307,10 @@ public class PublicUserController {
 
         WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
 
-        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()){
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()) {
 
 
-            if (workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId()){
+            if (workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId()) {
                 return new ResponseEntity<>(workshopGraderInfo, HttpStatus.OK);
             }
         }
@@ -313,18 +320,16 @@ public class PublicUserController {
 
         WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
 
-        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()){
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()) {
 
 
-            if (workshopAttenderInfo.getWorkshopAttender().getId() == workshopAttender.getId()){
+            if (workshopAttenderInfo.getWorkshopAttender().getId() == workshopAttender.getId()) {
                 return new ResponseEntity<>(workshopAttenderInfo, HttpStatus.OK);
             }
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
 
 
     ///TODO GET WORKSHOPS (PASSED, SOON TO BE HELD, PENDING)
