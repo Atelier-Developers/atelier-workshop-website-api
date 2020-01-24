@@ -281,6 +281,9 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
         for (WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos) {
             workshopGroups.add(workshopGraderInfo.getWorkshopGroup());
         }
+        for (WorkshopAttenderInfo workshopAttenderInfo : attenderInfos){
+            workshopGroups.add(workshopAttenderInfo.getWorkshopGroup());
+        }
         return workshopGroups;
     }
 

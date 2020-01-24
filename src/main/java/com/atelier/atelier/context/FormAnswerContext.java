@@ -18,20 +18,20 @@ public class FormAnswerContext {
         this.formId = formId;
     }
 
-    public List<AnswerQuestionContext> getAnswerQuestionContexts() {
-        return answerQuestion;
-    }
-
-    public void setAnswerQuestionContexts(List<AnswerQuestionContext> answerQuestionContexts) {
-        this.answerQuestion = answerQuestionContexts;
-    }
-
     public long getApplicantId() {
         return applicantId;
     }
 
     public void setApplicantId(long applicantId) {
         this.applicantId = applicantId;
+    }
+
+    public List<AnswerQuestionContext> getAnswerQuestion() {
+        return answerQuestion;
+    }
+
+    public void setAnswerQuestion(List<AnswerQuestionContext> answerQuestion) {
+        this.answerQuestion = answerQuestion;
     }
 }
 

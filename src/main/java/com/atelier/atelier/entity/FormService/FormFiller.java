@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.FormService;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ public abstract class FormFiller {
     private long id;
 
     @OneToMany(mappedBy = "formFiller")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<FilledAnswer> answers;
 
 

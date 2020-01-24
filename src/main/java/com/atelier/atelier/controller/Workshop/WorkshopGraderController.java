@@ -85,7 +85,7 @@ public class WorkshopGraderController {
 
             List<Answer> answers = new ArrayList<>();
 
-            for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
+            for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestion()) {
                 Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
                 if (!optionalQuestion.isPresent()) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);

@@ -10,20 +10,18 @@ import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.*;
 import com.atelier.atelier.repository.Request.RequestRepository;
 import com.atelier.atelier.repository.Request.RequesterRepository;
+import com.atelier.atelier.repository.role.AttenderRepository;
+import com.atelier.atelier.repository.role.GraderRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.*;
-import org.aspectj.weaver.NameMangler;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -49,8 +47,10 @@ public class WorkshopManagerController {
     private AttenderRegisterFormRepository attenderRegisterFormRepository;
     private RequesterRepository requesterRepository;
     private FileAnswerRepository fileAnswerRepository;
+    private GraderRepository graderRepository;
+    private AttenderRepository attenderRepository;
 
-    public WorkshopManagerController( FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+    public WorkshopManagerController( AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
@@ -67,6 +67,8 @@ public class WorkshopManagerController {
         this.attenderRegisterFormRepository = attenderRegisterFormRepository;
         this.requesterRepository = requesterRepository;
         this.fileAnswerRepository = fileAnswerRepository;
+        this.graderRepository = graderRepository;
+        this.attenderRepository = attenderRepository;
     }
 
     // Returns OfferedWorkshopManagerNameContext Objects of the Manager's Workshops
@@ -362,7 +364,9 @@ public class WorkshopManagerController {
 
                 System.out.println(formAnswerContext.getApplicantId());
 
-                for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestionContexts()) {
+                for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestion()) {
+
+                    System.out.println("lajkdf");
 
                     Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
                     if (!optionalQuestion.isPresent()) {
@@ -377,12 +381,15 @@ public class WorkshopManagerController {
                     String type = answerQuestionContext.getType();
                     LinkedHashMap<String, Object> answerDataObject = answerQuestionContext.getAnswerData();
                     AnswerData answerData = null;
+
                     if (type.equalsIgnoreCase("TextAnswer")) {
                         TextAnswer textAnswer = new TextAnswer();
                         textAnswer.setText((String) answerDataObject.get("text"));
                         answerData = textAnswer;
                         System.out.println("here");
                     } else if (type.equalsIgnoreCase("ChoiceAnswer")) {
+                        System.out.println("hey");
+
                         ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                         choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                         answerData = choiceAnswer;
@@ -564,8 +571,8 @@ public class WorkshopManagerController {
 
 
 
-    @GetMapping("/offeringWorkshop/form/{id}/result")
-    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody long requesterId) {
+    @PostMapping("/offeringWorkshop/form/{id}/result")
+    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody RequesterIdContext requesterId) {
 
         Optional<Form> optionalForm = formRepository.findById(id);
 
@@ -575,7 +582,7 @@ public class WorkshopManagerController {
 
         Form form = optionalForm.get();
 
-        Optional<Requester> optionalRequester = requesterRepository.findById(requesterId);
+        Optional<Requester> optionalRequester = requesterRepository.findById(requesterId.getId());
 
         if ( !optionalRequester.isPresent() ){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -685,16 +692,22 @@ public class WorkshopManagerController {
                 Requester requester = request.getRequester();
                 if (requester instanceof Attender) {
                     Attender attender = (Attender) requester;
-                    enrollAttendeeWorkshop(attender.getAttenderWorkshopConnection(), offeredWorkshop);
+                    WorkshopAttenderInfo workshopAttenderInfo = enrollAttendeeWorkshop(attender.getAttenderWorkshopConnection(), offeredWorkshop);
+                    requestRepository.save(request);
+
+                    return new ResponseEntity<>(workshopAttenderInfo.getId(), HttpStatus.OK);
+
                 } else if (requester instanceof Grader) {
                     Grader grader = (Grader) requester;
-                    enrollGraderWorkshop(grader.getGraderWorkshopConnection(), offeredWorkshop);
+                    WorkshopGraderInfo workshopGraderInfo = enrollGraderWorkshop(grader.getGraderWorkshopConnection(), offeredWorkshop);
+                    requestRepository.save(request);
+
+                    return new ResponseEntity<>(workshopGraderInfo.getId(), HttpStatus.OK);
                 }
             }
-            requestRepository.save(request);
         }
-        return new ResponseEntity<>(HttpStatus.OK);
 
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 
@@ -722,8 +735,8 @@ public class WorkshopManagerController {
 
         for(WorkshopGroup workshopGroup : workshopGroupSet){
             GroupElementContext groupElementContext = new GroupElementContext();
-            groupElementContext.setGroupId(workshopGroup.getId());
-            groupElementContext.setGroupName(workshopGroup.getName());
+            groupElementContext.setId(workshopGroup.getId());
+            groupElementContext.setName(workshopGroup.getName());
             for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
                 GroupMemberContext groupMemberContext = new GroupMemberContext();
                 groupMemberContext.setWorkshopInfoId(workshopGraderInfo.getId());
@@ -806,7 +819,7 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop/group")
-    public ResponseEntity<Object> addAnEmptyGroup( @RequestBody String groupName){
+    public ResponseEntity<Object> addAnEmptyGroup( @RequestBody RequestStringContext groupName){
 
 
         WorkshopGroup workshopGroup = new WorkshopGroup();
@@ -819,24 +832,27 @@ public class WorkshopManagerController {
         workshopGroup.setGraderInfos(workshopGraderInfos);
 
 
-        workshopGroup.setName(groupName);
+        workshopGroup.setName(groupName.getText());
 
         workshopGroupRepository.save(workshopGroup);
 
-        return new ResponseEntity<>(workshopGroup.getId(), HttpStatus.OK);
+        return new ResponseEntity<>(workshopGroup, HttpStatus.OK);
     }
 
 
     @PostMapping("/offeringWorkshop/group/{groupId}/att")
-    public ResponseEntity<Object> addAttToGroup(@PathVariable long groupId, @RequestBody long attInfo ) {
+    public ResponseEntity<Object> addAttToGroup(@PathVariable long groupId, @RequestBody RequesterIdContext attInfo ) {
 
-        WorkshopAttenderInfo workshopAttenderInfo = workshopAttenderInfoRepository.findById(attInfo).get();
+        WorkshopAttenderInfo workshopAttenderInfo = workshopAttenderInfoRepository.findById(attInfo.getId()).get();
 
         WorkshopGroup workshopGroup = workshopGroupRepository.findById(groupId).get();
 
 
         workshopGroup.getAttenderInfos().add(workshopAttenderInfo);
 
+        workshopAttenderInfo.setWorkshopGroup(workshopGroup);
+
+        workshopAttenderInfoRepository.save(workshopAttenderInfo);
 
         workshopGroupRepository.save(workshopGroup);
 
@@ -846,16 +862,18 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop/group/{groupId}/grader")
-    public ResponseEntity<Object> addGraderToGroup(@PathVariable long groupId, @RequestBody long graderInfo ) {
+    public ResponseEntity<Object> addGraderToGroup(@PathVariable long groupId, @RequestBody RequesterIdContext graderInfo ) {
 
-        WorkshopGraderInfo workshopGraderInfo = workshopGraderInfoRepository.findById(graderInfo).get();
+        WorkshopGraderInfo workshopGraderInfo = workshopGraderInfoRepository.findById(graderInfo.getId()).get();
 
         WorkshopGroup workshopGroup = workshopGroupRepository.findById(groupId).get();
 
 
         workshopGroup.getGraderInfos().add(workshopGraderInfo);
 
+        workshopGraderInfo.setWorkshopGroup(workshopGroup);
 
+        workshopGraderInfoRepository.save(workshopGraderInfo);
         workshopGroupRepository.save(workshopGroup);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -1047,23 +1065,69 @@ public class WorkshopManagerController {
     }
 
 
+    @GetMapping("/offeringWorkshop/{id}/graderRequest/{graderId}")
+    public ResponseEntity<Object> getRequestByGraderId(@PathVariable long id, @PathVariable long graderId){
+
+        OfferedWorkshop offeredWorkshop = offeringWorkshopRepository.findById(id).get();
+
+        Grader grader = graderRepository.findById(graderId).get();
+
+        for (Request request : offeredWorkshop.getRequests()){
+
+            if (request.getState().equals(RequestState.Pending)){
+
+                if (request.getRequester().getId() == grader.getId()){
+                    return new ResponseEntity<>(request, HttpStatus.OK);
+                }
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 
-    private void enrollGraderWorkshop(WorkshopGrader workshopGrader, OfferedWorkshop offeredWorkshop) {
+
+    @GetMapping("/offeringWorkshop/{id}/attendeeRegister/{attId}")
+    public ResponseEntity<Object> getRequestByAttId(@PathVariable long id, @PathVariable long attId){
+
+        OfferedWorkshop offeredWorkshop = offeringWorkshopRepository.findById(id).get();
+
+        Attender attender = attenderRepository.findById(attId).get();
+
+        for (Request request : offeredWorkshop.getRequests()){
+
+            if (request.getState().equals(RequestState.Pending)){
+
+                if (request.getRequester().getId() == attender.getId()){
+                    return new ResponseEntity<>(request, HttpStatus.OK);
+                }
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+
+
+    private WorkshopGraderInfo enrollGraderWorkshop(WorkshopGrader workshopGrader, OfferedWorkshop offeredWorkshop) {
         WorkshopGraderInfo workshopGraderInfo = new WorkshopGraderInfo();
         workshopGraderInfo.setWorkshopGrader(workshopGrader);
         workshopGraderInfo.setOfferedWorkshop(offeredWorkshop);
         offeredWorkshop.addWorkshopGraderrInfo(workshopGraderInfo);
         workshopGrader.addGraderInfo(workshopGraderInfo);
         workshopGraderInfoRepository.save(workshopGraderInfo);
+
+        return workshopGraderInfo;
     }
 
-    private void enrollAttendeeWorkshop(WorkshopAttender workshopAttender, OfferedWorkshop offeredWorkshop) {
+    private WorkshopAttenderInfo enrollAttendeeWorkshop(WorkshopAttender workshopAttender, OfferedWorkshop offeredWorkshop) {
         WorkshopAttenderInfo workshopAttenderInfo = new WorkshopAttenderInfo();
         workshopAttenderInfo.setOfferedWorkshop(offeredWorkshop);
         workshopAttenderInfo.setWorkshopAttender(workshopAttender);
         workshopAttender.addWorkshopAttenderInfo(workshopAttenderInfo);
         offeredWorkshop.addWorkshopAttenderInfo(workshopAttenderInfo);
         workshopAttenderInfoRepository.save(workshopAttenderInfo);
+        return workshopAttenderInfo;
     }
 }

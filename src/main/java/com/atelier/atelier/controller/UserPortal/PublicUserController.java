@@ -70,6 +70,7 @@ public class PublicUserController {
     /////////////////////////////// END OF USER FETCHING APIs
 
 
+
     //Returns graded, attended, managed workshops of a single user in an OfferedWorkshopManageName
     @GetMapping("/history/{id}")
     public ResponseEntity<Object> showUserHistory(@PathVariable long id) {
@@ -166,6 +167,7 @@ public class PublicUserController {
     }
 
 
+
     // Returns User base on Id
     @GetMapping("/{id}")
     public ResponseEntity<Object> getUserById(@PathVariable long id) {
@@ -183,38 +185,12 @@ public class PublicUserController {
     }
 
 
-
-
-    //Download pic of a given user
-    @GetMapping("/profilePic/user/{id}")
-    public ResponseEntity<Resource> getUserPic(@PathVariable long id) {
+    @PostMapping("/setPic/user/{id}")
+    public ResponseEntity<Object> setPicForUser(@PathVariable long id, @RequestParam(value = "file", required = true)MultipartFile file) throws IOException {
 
         Optional<User> optionalUser = userRepository.findById(id);
 
-        if (!optionalUser.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        User user = optionalUser.get();
-
-        File pic = user.getPic();
-
-        if (pic == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(pic.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
-                .body(new ByteArrayResource(pic.getData()));
-    }
-
-    @PostMapping("/profilePic/user/{id}")
-    public ResponseEntity<Object> setPicForUser(@PathVariable long id, @RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
-
-        Optional<User> optionalUser = userRepository.findById(id);
-
-        if (!optionalUser.isPresent()) {
+        if ( !optionalUser.isPresent() ){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -330,6 +306,8 @@ public class PublicUserController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+
 
 
     ///TODO GET WORKSHOPS (PASSED, SOON TO BE HELD, PENDING)
