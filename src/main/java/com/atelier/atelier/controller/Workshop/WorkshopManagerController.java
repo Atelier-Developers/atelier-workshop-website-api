@@ -640,6 +640,8 @@ public class WorkshopManagerController {
 
     }
 
+
+    // TODO CHECK FOR THE LIST
     @PostMapping("/offeringWorkshop/{id}/request")
     public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody List<RequestStatusContext> requestStatusContexts) {
 
@@ -1130,4 +1132,75 @@ public class WorkshopManagerController {
         workshopAttenderInfoRepository.save(workshopAttenderInfo);
         return workshopAttenderInfo;
     }
+
+
+    // API to get the grader infos list of a workshop without a group (User and info Id)
+    @GetMapping("/offeringWorkshop/{offeringWorkshopId}/groupless/graderInfos")
+    public ResponseEntity<Object> getGraderUsersAndInfosWithoutAGroup(@PathVariable long offeringWorkshopId){
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+        if ( !optionalOfferedWorkshop.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+        List<UserInfoContext> userInfoContexts = new ArrayList<UserInfoContext>();
+        List<User> users = userRepository.findAll();
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()) {
+
+            if (workshopGraderInfo.getWorkshopGroup() == null){
+                UserInfoContext userInfoContext = new UserInfoContext();
+
+                userInfoContext.setInfoId(workshopGraderInfo.getId());
+
+                for ( User user : users ){
+
+                    Grader grader = (Grader) user.getRole("Grader");
+                    WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
+
+                    if (workshopGrader.getWorkshopGraderInfos().contains(workshopGraderInfo)){
+                        userInfoContext.setUser(user);
+                        break;
+                    }
+                }
+                userInfoContexts.add(userInfoContext);
+            }
+        }
+
+        return new ResponseEntity<>(userInfoContexts, HttpStatus.OK);
+    }
+
+    // API to get the attendee infos list of a workshop without a group
+    @GetMapping("/offeringWorkshop/{offeringWorkshopId}/groupless/attendeeInfos")
+    public ResponseEntity<Object> getAttendeeUsersAndInfosWithoutAGroup(@PathVariable long offeringWorkshopId){
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+        if ( !optionalOfferedWorkshop.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+        List<UserInfoContext> userInfoContexts = new ArrayList<UserInfoContext>();
+        List<User> users = userRepository.findAll();
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()) {
+
+            if (workshopAttenderInfo.getWorkshopGroup() == null){
+                UserInfoContext userInfoContext = new UserInfoContext();
+
+                userInfoContext.setInfoId(workshopAttenderInfo.getId());
+
+                for ( User user : users ){
+
+                    Attender attender = (Attender) user.getRole("Attender");
+                    WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+
+                    if (workshopAttender.getWorkshopAttenderInfos().contains(workshopAttenderInfo)){
+                        userInfoContext.setUser(user);
+                        break;
+                    }
+                }
+                userInfoContexts.add(userInfoContext);
+            }
+        }
+        return new ResponseEntity<>(userInfoContexts, HttpStatus.OK);
+    }
+
+
+
 }

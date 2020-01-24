@@ -2,7 +2,6 @@ package com.atelier.atelier.controller.UserPortal;
 
 
 import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
-import com.atelier.atelier.context.UploadFileResponse;
 import com.atelier.atelier.context.UserHitsoryContext;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
@@ -15,14 +14,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.*;
-import javax.swing.text.html.Option;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -333,32 +330,6 @@ public class PublicUserController {
     }
 
 
-
-
-    ///TODO GET WORKSHOPS (PASSED, SOON TO BE HELD, PENDING)
-
-//    @GetMapping("/attendee/{attendeeId}")
-//    public ResponseEntity<Object> getGradersOfferedWorkshopsForGraderPage(@PathVariable long id){
-//
-//        Optional<Attender> optionalAttender = attenderRepository.findById(id);
-//
-//        if ( !optionalAttender.isPresent() ){
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//
-//        Attender attender = optionalAttender.get();
-//
-//        List<OfferedWorkshop> passedWorkshops;
-//        List<OfferedWorkshop> soonWorkshops;
-//        List<OfferedWorkshop> currentWorkshops;
-//        for (WorkshopAttenderInfo workshopAttenderInfo : attender.getAttenderWorkshopConnection().getWorkshopAttenderInfos()){
-//
-//            if ( workshopAttenderInfo.getAttendeeStatusType().equals(AttendeeStatusType.Passed)){
-//
-//            }
-//        }
-//
-//    }
 
 
 }
