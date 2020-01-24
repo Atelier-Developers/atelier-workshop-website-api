@@ -18,7 +18,7 @@ public class Workshop {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "workshop")
+    @OneToMany(mappedBy = "workshop", cascade = CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<OfferedWorkshop> offeredWorkshops;
 

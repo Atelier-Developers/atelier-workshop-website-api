@@ -31,6 +31,18 @@ public class SystemAdminController {
         this.attenderPaymentTabRepository = attenderPaymentTabRepository;
     }
 
+    // TODO for test remove for production
+    @PostMapping("/makeAdmin")
+    public ResponseEntity<Object> makeAdmin(Authentication authentication){
+        User user = User.getUser(authentication, userRepository);
+        if(user.getUsername().equals("admin")){
+            SystemAdmin systemAdmin = new SystemAdmin();
+            user.addRole(systemAdmin);
+            userRepository.save(user);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    }
 
     @GetMapping("/workshops")
     public ResponseEntity<Object> getWorkshops(Authentication authentication){
@@ -108,7 +120,7 @@ public class SystemAdminController {
             return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
         }
 
-        workshopRepository.deleteById(id);
+        workshopRepository.delete(optionalWorkshop.get());
 
         return new ResponseEntity<>("Item was deleted", HttpStatus.OK);
 

@@ -24,7 +24,7 @@ public abstract class Form {
     private String name;
 
 
-    @OneToMany(mappedBy = "form")
+    @OneToMany(mappedBy = "form", cascade = CascadeType.ALL)
     private List<Question> questions;
 
     public long getId() {

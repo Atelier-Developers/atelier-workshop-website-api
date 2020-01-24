@@ -55,15 +55,15 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     @JoinColumn(name = "workshop_manager_id")
     private WorkshopManager workshopManager;
 
-    @OneToMany(mappedBy = "offeredWorkshop")
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
 //    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopForm> workshopForms;
 
-    @OneToMany(mappedBy = "offeredWorkshop")
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopAttenderInfo> attenderInfos;
 
-    @OneToMany(mappedBy = "offeredWorkshop")
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopGraderInfo> workshopGraderInfos;
 
@@ -75,12 +75,12 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private GraderEvaluationForm graderEvaluationForm;
 
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "grader_request_form_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private GraderRequestForm graderRequestForm;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "attender_register_form_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AttenderRegisterForm attenderRegisterForm;

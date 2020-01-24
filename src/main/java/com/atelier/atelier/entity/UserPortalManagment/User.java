@@ -31,8 +31,8 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @Column(name = "address", nullable = false)
-    private String address;
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @OneToOne
     private File pic;
@@ -86,12 +86,12 @@ public class User {
         this.password = password;
     }
 
-    public String getAddress() {
-        return address;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public List<Role> getRoles() {
