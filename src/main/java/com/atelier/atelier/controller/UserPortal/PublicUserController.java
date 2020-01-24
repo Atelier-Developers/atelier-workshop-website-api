@@ -185,7 +185,32 @@ public class PublicUserController {
     }
 
 
-    @PostMapping("/setPic/user/{id}")
+    //Download pic of a given user
+    @GetMapping("/profilePic/user/{id}")
+    public ResponseEntity<Resource> getUserPic(@PathVariable long id) {
+
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        User user = optionalUser.get();
+
+        File pic = user.getPic();
+
+        if (pic == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(pic.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + pic.getFileName() + "\"")
+                .body(new ByteArrayResource(pic.getData()));
+    }
+
+
+    @PostMapping("/profilePic/user/{id}")
     public ResponseEntity<Object> setPicForUser(@PathVariable long id, @RequestParam(value = "file", required = true)MultipartFile file) throws IOException {
 
         Optional<User> optionalUser = userRepository.findById(id);
