@@ -8,6 +8,7 @@ import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
 import com.atelier.atelier.repository.Request.AttenderRequestPaymentTabRepository;
 import com.atelier.atelier.repository.user.UserRepository;
+import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +25,13 @@ public class SystemAdminController {
     private WorkshopRepository workshopRepository;
     private UserRepository userRepository;
     private AttenderPaymentTabRepository attenderPaymentTabRepository;
+    private OfferingWorkshopRepository offeringWorkshopRepository;
 
-    public SystemAdminController(AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
+    public SystemAdminController(OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
         this.workshopRepository = workshopRepository;
         this.userRepository = userRepository;
         this.attenderPaymentTabRepository = attenderPaymentTabRepository;
+        this.offeringWorkshopRepository = offeringWorkshopRepository;
     }
 
     // TODO for test remove for production
@@ -60,6 +63,17 @@ public class SystemAdminController {
         return new ResponseEntity<>(workshops, HttpStatus.OK);
     }
 
+    @DeleteMapping("/offeringWorkshop/{id}")
+    public ResponseEntity<Object> deleteOfferedWorkshop(@PathVariable long id, Authentication authentication){
+        SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
+
+        if ( systemAdmin == null ){
+
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        offeringWorkshopRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
     @PostMapping("/workshops")
     public ResponseEntity<Object> save(@RequestBody Workshop workshop, Authentication authentication){
@@ -68,7 +82,7 @@ public class SystemAdminController {
 
         if ( systemAdmin == null ){
 
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         }
 

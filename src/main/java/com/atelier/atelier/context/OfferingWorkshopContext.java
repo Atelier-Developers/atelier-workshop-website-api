@@ -10,6 +10,15 @@ public class OfferingWorkshopContext {
     private String endTime;
     private OfferedWorkshop offeredWorkshop;
     private long workshopId;
+    private long userManagerId;
+
+    public long getUserManagerId() {
+        return userManagerId;
+    }
+
+    public void setUserManagerId(long userManagerId) {
+        this.userManagerId = userManagerId;
+    }
 
     public OfferedWorkshop getOfferedWorkshop() {
         return offeredWorkshop;

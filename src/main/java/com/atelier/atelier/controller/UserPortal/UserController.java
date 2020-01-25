@@ -63,6 +63,11 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @GetMapping("/allUsers")
+    public ResponseEntity<Object>  showAllUser() {
+        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
+    }
+
     @GetMapping("/roles")
     public List<Role> showRoles(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);

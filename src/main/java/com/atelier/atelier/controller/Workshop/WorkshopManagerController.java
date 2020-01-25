@@ -97,8 +97,13 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop")
-    public ResponseEntity<Object> addOfferingWorkshop(@RequestBody OfferingWorkshopContext offeringWorkshopContext, Authentication authentication) throws ParseException {
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+    public ResponseEntity<Object> addOfferingWorkshop(@RequestBody OfferingWorkshopContext offeringWorkshopContext) throws ParseException {
+        Optional<User> optionalUser = userRepository.findById(offeringWorkshopContext.getUserManagerId());
+        if(!optionalUser.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        User user = optionalUser.get();
+        ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
         long wid = offeringWorkshopContext.getWorkshopId();
         Optional<Workshop> optionalWorkshop = workshopRepository.findById(wid);
         if (!optionalWorkshop.isPresent()) {
