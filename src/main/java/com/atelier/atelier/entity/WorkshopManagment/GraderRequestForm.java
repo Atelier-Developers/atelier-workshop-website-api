@@ -6,11 +6,7 @@ import com.atelier.atelier.entity.RequestService.RequestData;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.OneToOne;
-import javax.persistence.Table;
 
-/*
-    dar in form, form applicant GraderFormApplicant hast va Answer ham Answer
- */
 
 
 @Entity

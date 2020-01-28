@@ -3,15 +3,22 @@ package com.atelier.atelier.controller.Workshop;
 import com.atelier.atelier.context.EnrollCountContext;
 import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
 import com.atelier.atelier.context.OfferedWorkshopUserListsContext;
+import com.atelier.atelier.context.WorkshopFileGETContext;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
+import com.atelier.atelier.repository.user.FileRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
+import com.atelier.atelier.repository.workshop.WorkshopFileRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.lang.annotation.Repeatable;
 import java.util.ArrayList;
@@ -26,12 +33,16 @@ public class WorkshopRestController {
     private WorkshopRepository workshopRepository;
     private OfferingWorkshopRepository offeringWorkshopRepository;
     private UserRepository userRepository;
+    private WorkshopFileRepository workshopFileRepository;
+    private FileRepository fileRepository;
 
     @Autowired
-    public WorkshopRestController(UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopRepository workshopRepository) {
+    public WorkshopRestController(FileRepository fileRepository, WorkshopFileRepository workshopFileRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopRepository workshopRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
+        this.workshopFileRepository = workshopFileRepository;
+        this.fileRepository = fileRepository;
     }
 
 
@@ -332,5 +343,73 @@ public class WorkshopRestController {
 
 
     }
+
+
+    // Get a workshop file's file download URI, title, description, receivers list
+    @GetMapping("/offeringWorkshops/workshopFile/{workshopFileId}/workshopFile")
+    public ResponseEntity<Object> getDownloadUriForAFile(@PathVariable long workshopFileId){
+
+        Optional<WorkshopFile> optionalWorkshopFile = workshopFileRepository.findById(workshopFileId);
+
+        if (!optionalWorkshopFile.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopFile workshopFile = optionalWorkshopFile.get();
+
+        WorkshopFileGETContext workshopFileGETContext = new WorkshopFileGETContext();
+
+        workshopFileGETContext.setTitle(workshopFile.getTitle());
+        workshopFileGETContext.setDescription(workshopFile.getDescription());
+
+        List<String> workshopFileReceivers = new ArrayList<String>();
+        for (WorkshopFileReceiver workshopFileReceiver : workshopFile.getReceivers()){
+
+            if (workshopFileReceiver.equals(WorkshopFileReceiver.Attendee)){
+                workshopFileReceivers.add("Attendee");
+            }
+
+            else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)){
+                workshopFileReceivers.add("Grader");
+            }
+
+            else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)){
+                workshopFileReceivers.add("Manager");
+            }
+        }
+
+        workshopFileGETContext.setReceivers(workshopFileReceivers);
+
+        File file = workshopFile.getFile();
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/workshop/offeringWorkshops/download/")
+                .path(Long.toString(file.getId()))
+                .toUriString();
+
+        workshopFileGETContext.setDownloadURI(fileDownloadUri);
+
+        return new ResponseEntity<>(workshopFileGETContext, HttpStatus.OK);
+    }
+
+
+
+    @GetMapping("/offeringWorkshops/download/{fileId}")
+    public ResponseEntity<Object> downloadWorkshopFile(@PathVariable long fileId){
+
+        Optional<File> optionalFile = fileRepository.findById(fileId);
+
+        if (!optionalFile.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        File file = optionalFile.get();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(file.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                .body(new ByteArrayResource(file.getData()));
+    }
+
 
 }

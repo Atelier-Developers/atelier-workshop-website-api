@@ -17,15 +17,7 @@ import java.util.*;
 @DiscriminatorValue(value = "OfferedWorkshop")
 public class OfferedWorkshop extends Requestable implements Comparable<OfferedWorkshop> {
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Column( nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @Basic(optional = false)
@@ -56,7 +48,6 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private WorkshopManager workshopManager;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
-//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopForm> workshopForms;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
@@ -71,7 +62,6 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
 
     @OneToOne(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
-//    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private GraderEvaluationForm graderEvaluationForm;
 
 
@@ -84,6 +74,19 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     @JoinColumn(name = "attender_register_form_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private AttenderRegisterForm attenderRegisterForm;
+
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+    private List<WorkshopFile> workshopFiles;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     public Calendar getStartTime() {
         return startTime;
@@ -120,6 +123,15 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
 
     public void setWorkshopGraderInfos(List<WorkshopGraderInfo> workshopGraderInfos) {
         this.workshopGraderInfos = workshopGraderInfos;
+    }
+
+
+    public List<WorkshopFile> getWorkshopFiles() {
+        return workshopFiles;
+    }
+
+    public void setWorkshopFiles(List<WorkshopFile> workshopFiles) {
+        this.workshopFiles = workshopFiles;
     }
 
     public void setWorkshop(Workshop workshop) {
@@ -276,12 +288,19 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
         workshopRelationDetails.add(offeredWorkshopRelationDetail);
     }
 
+    public void addWorkshopFile(WorkshopFile workshopFile){
+        if (workshopFiles == null ){
+            workshopFiles = new ArrayList<>();
+        }
+        workshopFiles.add(workshopFile);
+    }
+
     public Set<WorkshopGroup> workshopGroupSet() {
         Set<WorkshopGroup> workshopGroups = new HashSet<>();
         for (WorkshopGraderInfo workshopGraderInfo : workshopGraderInfos) {
             workshopGroups.add(workshopGraderInfo.getWorkshopGroup());
         }
-        for (WorkshopAttenderInfo workshopAttenderInfo : attenderInfos){
+        for (WorkshopAttenderInfo workshopAttenderInfo : attenderInfos) {
             workshopGroups.add(workshopAttenderInfo.getWorkshopGroup());
         }
         return workshopGroups;

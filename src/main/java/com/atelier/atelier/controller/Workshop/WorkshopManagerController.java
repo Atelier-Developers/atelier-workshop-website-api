@@ -12,8 +12,10 @@ import com.atelier.atelier.repository.Request.RequestRepository;
 import com.atelier.atelier.repository.Request.RequesterRepository;
 import com.atelier.atelier.repository.role.AttenderRepository;
 import com.atelier.atelier.repository.role.GraderRepository;
+import com.atelier.atelier.repository.user.FileRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.*;
+import org.hibernate.service.spi.OptionallyManageable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +23,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.swing.text.html.Option;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,11 +51,13 @@ public class WorkshopManagerController {
     private GraderRequestFormRepository graderRequestFormRepository;
     private AttenderRegisterFormRepository attenderRegisterFormRepository;
     private RequesterRepository requesterRepository;
-    private FileAnswerRepository fileAnswerRepository;
     private GraderRepository graderRepository;
     private AttenderRepository attenderRepository;
+    private WorkshopFileRepository workshopFileRepository;
+    private FileRepository fileRepository;
 
-    public WorkshopManagerController( AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+
+    public WorkshopManagerController( WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
@@ -66,8 +73,9 @@ public class WorkshopManagerController {
         this.graderRequestFormRepository = graderRequestFormRepository;
         this.attenderRegisterFormRepository = attenderRegisterFormRepository;
         this.requesterRepository = requesterRepository;
-        this.fileAnswerRepository = fileAnswerRepository;
         this.graderRepository = graderRepository;
+        this.workshopFileRepository = workshopFileRepository;
+        this.fileRepository = fileRepository;
         this.attenderRepository = attenderRepository;
     }
 
@@ -887,9 +895,70 @@ public class WorkshopManagerController {
 
     }
 
+    //TODO API TO ADD A LIST OF ATTENDEES & GRADERS TO A GROUP, (GETS A LIST OF IDs)
+    @PostMapping("/offeringWorkshop/group/{groupId}/atts")
+    public ResponseEntity<Object> addAttendeesToGroup(@PathVariable long groupId, @RequestBody List<RequesterIdContext> attendeeInfos){
 
+        Optional<WorkshopGroup> optionalWorkshopGroup = workshopGroupRepository.findById(groupId);
 
+        if (!optionalWorkshopGroup.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
 
+        WorkshopGroup workshopGroup = optionalWorkshopGroup.get();
+
+        for(RequesterIdContext requesterIdContext : attendeeInfos){
+
+            Optional<WorkshopAttenderInfo> optionalWorkshopAttenderInfo = workshopAttenderInfoRepository.findById(requesterIdContext.getId());
+
+            if (!optionalWorkshopAttenderInfo.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            WorkshopAttenderInfo workshopAttenderInfo = optionalWorkshopAttenderInfo.get();
+
+            workshopGroup.getAttenderInfos().add(workshopAttenderInfo);
+            workshopAttenderInfo.setWorkshopGroup(workshopGroup);
+
+            workshopAttenderInfoRepository.save(workshopAttenderInfo);
+        }
+
+        workshopGroupRepository.save(workshopGroup);
+
+        return new ResponseEntity<>(workshopGroup.getId(), HttpStatus.OK);
+    }
+
+    @PostMapping("/offeringWorkshop/group/graders")
+    public ResponseEntity<Object> addGradersToGroup(@PathVariable long groupId, @RequestBody List<RequesterIdContext> graderInfos){
+
+        Optional<WorkshopGroup> optionalWorkshopGroup = workshopGroupRepository.findById(groupId);
+
+        if (!optionalWorkshopGroup.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopGroup workshopGroup = optionalWorkshopGroup.get();
+
+        for(RequesterIdContext requesterIdContext : graderInfos){
+
+            Optional<WorkshopGraderInfo> optionalWorkshopGraderInfo = workshopGraderInfoRepository.findById(requesterIdContext.getId());
+
+            if (!optionalWorkshopGraderInfo.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            WorkshopGraderInfo workshopGraderInfo = optionalWorkshopGraderInfo.get();
+
+            workshopGroup.getGraderInfos().add(workshopGraderInfo);
+            workshopGraderInfo.setWorkshopGroup(workshopGroup);
+
+            workshopGraderInfoRepository.save(workshopGraderInfo);
+        }
+
+        workshopGroupRepository.save(workshopGroup);
+
+        return new ResponseEntity<>(workshopGroup.getId(), HttpStatus.OK);
+    }
 
     // Returns Attendee Info Objects of the Offering Workshop
     @GetMapping("/offeringWorkshop/{id}/attendeeInfos")
@@ -1205,6 +1274,98 @@ public class WorkshopManagerController {
         }
         return new ResponseEntity<>(userInfoContexts, HttpStatus.OK);
     }
+
+
+    // API to create workshop file (GET method in WorkshopRestController)
+    @PostMapping("/offeringWorkshop/{offeringWorkshopId}/workshopFile/create")
+    public ResponseEntity<Object> createWorkshopFile(@PathVariable long offeringWorkshopId, @RequestBody WorkshopFileContext workshopFileContext,  Authentication authentication) throws IOException {
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        WorkshopManager workshopManager = getMangerFromAuthentication(authentication);
+
+        if (offeredWorkshop.getWorkshopManager().getId() != workshopManager.getId()){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        WorkshopFile workshopFile = new WorkshopFile();
+
+        workshopFile.setTitle(workshopFileContext.getTitle());
+        workshopFile.setDescription(workshopFileContext.getDescription());
+        workshopFile.setOfferedWorkshop(offeredWorkshop);
+
+        List<WorkshopFileReceiver> workshopFileReceivers = new ArrayList<>();
+        for (String receiver: workshopFileContext.getReceiverList()){
+
+            if (receiver.equalsIgnoreCase("Attendee")){
+                workshopFileReceivers.add(WorkshopFileReceiver.Attendee);
+            }
+
+            else if (receiver.equalsIgnoreCase("Grader")){
+                workshopFileReceivers.add(WorkshopFileReceiver.Grader);
+            }
+
+            else if (receiver.equalsIgnoreCase("Manager")){
+                workshopFileReceivers.add(WorkshopFileReceiver.Manager);
+            }
+        }
+
+        workshopFile.setReceivers(workshopFileReceivers);
+
+        offeredWorkshop.addWorkshopFile(workshopFile);
+
+        workshopFileRepository.save(workshopFile);
+
+        offeringWorkshopRepository.save(offeredWorkshop);
+
+        System.out.println(workshopFile.getId());
+
+        return new ResponseEntity<>(workshopFile.getId(), HttpStatus.CREATED);
+    }
+
+
+    @PostMapping("/offeringWorkshop/workshopFile/{workshopFileId}/upload")
+    public ResponseEntity<Object> uploadWorkshopFile(@PathVariable long workshopFileId, @RequestParam(value = "file") MultipartFile multipartFile, Authentication authentication ) throws IOException {
+
+
+        Optional<WorkshopFile> optionalWorkshopFile = workshopFileRepository.findById(workshopFileId);
+
+        if (!optionalWorkshopFile.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopFile workshopFile = optionalWorkshopFile.get();
+
+
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+
+        File uploadedFile = new File();
+
+        uploadedFile.setFileName(fileName);
+        uploadedFile.setData(multipartFile.getBytes());
+        uploadedFile.setFileType(multipartFile.getContentType());
+
+        fileRepository.save(uploadedFile);
+
+        workshopFile.setFile(uploadedFile);
+
+        workshopFileRepository.save(workshopFile);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/workshop/offeringWorkshops/download/")
+                .path(Long.toString(uploadedFile.getId()))
+                .toUriString();
+
+        return new ResponseEntity<>(fileDownloadUri, HttpStatus.OK);
+    }
+
+
 
 
 
