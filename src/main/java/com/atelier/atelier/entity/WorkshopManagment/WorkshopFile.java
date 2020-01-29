@@ -5,6 +5,8 @@ import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -23,9 +25,8 @@ public class WorkshopFile {
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
-    @ElementCollection(targetClass = WorkshopFileReceiver.class)
-    @JoinTable(name = "receivers", joinColumns = @JoinColumn(name = "workshop_file_id"))
-    @Column(nullable = false)
+    @ElementCollection(fetch = FetchType.EAGER, targetClass = WorkshopFileReceiver.class)
+    @CollectionTable(name = "file_reciever_type", joinColumns = @JoinColumn(name = "id"))
     @Enumerated(EnumType.STRING)
     private List<WorkshopFileReceiver> receivers;
 
@@ -81,6 +82,10 @@ public class WorkshopFile {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public List<WorkshopFileReceiver> getReceivers() {
