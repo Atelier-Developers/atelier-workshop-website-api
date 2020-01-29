@@ -23,7 +23,7 @@ public abstract class Requestable {
     @GeneratedValue
     private long id;
 
-    @OneToMany(mappedBy = "requestable")
+    @OneToMany(mappedBy = "requestable", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Request> requests;
 
