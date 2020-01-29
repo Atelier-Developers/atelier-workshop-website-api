@@ -23,6 +23,7 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ManyToAny(metaColumn = @Column(name = "request_data_types"))
     @AnyMetaDef(idType = "long", metaType = "string",
             metaValues = {
