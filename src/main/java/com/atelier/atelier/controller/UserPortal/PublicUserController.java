@@ -43,7 +43,6 @@ public class PublicUserController {
         this.offeringWorkshopRepository = offeringWorkshopRepository;
     }
 
-    // GET USER THROUGH IDs APIs
     @GetMapping("/workshopGrader/{workshopGraderId}")
     public ResponseEntity<Object> findUserByWorkshopGraderId(@PathVariable long workshopGraderId) {
 
@@ -63,10 +62,6 @@ public class PublicUserController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    /////////////////////////////// END OF USER FETCHING APIs
-
-
 
     //Returns graded, attended, managed workshops of a single user in an OfferedWorkshopManageName
     @GetMapping("/history/{id}")
@@ -97,15 +92,23 @@ public class PublicUserController {
             OfferedWorkshop offeredWorkshop = workshopAttenderInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            for (User currentUser : users) {
+            List<String> managerNames = new ArrayList<>();
 
-                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
 
-                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()) {
-                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
-                    break;
+                for (User currentUser : users) {
+
+                    WorkshopManager workshopManager1 = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager.getId() == workshopManager1.getId()) {
+                        managerNames.add(currentUser.getName());
+                        break;
+                    }
                 }
             }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
 
             attendedWorkshops.add(offeredWorkshopManagerNameContext);
 
@@ -125,15 +128,23 @@ public class PublicUserController {
             OfferedWorkshop offeredWorkshop = workshopGraderInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            for (User currentUser : users) {
+            List<String> managerNames = new ArrayList<>();
 
-                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
 
-                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()) {
-                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
-                    break;
+                for (User currentUser : users) {
+
+                    WorkshopManager workshopManager1 = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager.getId() == workshopManager1.getId()) {
+                        managerNames.add(currentUser.getName());
+                        break;
+                    }
                 }
             }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
 
             gradedWorkshops.add(offeredWorkshopManagerNameContext);
 
@@ -141,26 +152,36 @@ public class PublicUserController {
 
         userHitsoryContext.setGradedWorkshops(gradedWorkshops);
 
-
         WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
 
         List<OfferedWorkshopManagerNameContext> managedWorkshops = new ArrayList<>();
 
-        for (OfferedWorkshop offeredWorkshop : workshopManager.getOfferedWorkshops()) {
+        for (WorkshopManagerInfo workshopManagerInfo : workshopManager.getWorkshopManagerInfos()) {
 
             OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
-
-            offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+            OfferedWorkshop offeredWorkshop = workshopManagerInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
+            List<String> managerNames = new ArrayList<>();
+            for (WorkshopManagerInfo workshopManagerInfo1 : offeredWorkshop.getWorkshopManagerInfos()){
+
+                WorkshopManager workshopManager1 = workshopManagerInfo1.getWorkshopManager();
+
+                for (User currentUser : users){
+
+                    WorkshopManager workshopManager2 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager1.getId() == workshopManager2.getId()){
+                        managerNames.add(currentUser.getName());
+                        break;
+                    }
+                }
+            }
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
             managedWorkshops.add(offeredWorkshopManagerNameContext);
         }
-
         userHitsoryContext.setManagedWorkshops(managedWorkshops);
-
         return new ResponseEntity<>(userHitsoryContext, HttpStatus.OK);
-
-
     }
 
 
@@ -306,8 +327,6 @@ public class PublicUserController {
         WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
 
         for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()) {
-
-
             if (workshopGraderInfo.getWorkshopGrader().getId() == workshopGrader.getId()) {
                 return new ResponseEntity<>(workshopGraderInfo, HttpStatus.OK);
             }

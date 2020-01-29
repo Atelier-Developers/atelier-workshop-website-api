@@ -5,8 +5,6 @@ import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.fasterxml.jackson.annotation.*;
-import javassist.expr.Cast;
-import org.joda.time.Interval;
 
 import javax.persistence.*;
 import javax.validation.constraints.Digits;

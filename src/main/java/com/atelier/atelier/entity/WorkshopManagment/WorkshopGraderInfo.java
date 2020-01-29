@@ -1,12 +1,11 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+
 @Entity
 @Table
 public class WorkshopGraderInfo {
@@ -31,7 +30,6 @@ public class WorkshopGraderInfo {
 
     @OneToMany(mappedBy = "workshopGraderInfo")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private List<WorkshopGraderFormFiller> formFillers;
 
     @OneToMany(mappedBy = "workshopGraderInfo")

@@ -3,10 +3,8 @@ package com.atelier.atelier.controller.UserPortal;
 import com.atelier.atelier.entity.UserPortalManagment.SystemAdmin;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderPaymentTab;
-import com.atelier.atelier.entity.WorkshopManagment.AttenderRequestPaymentTab;
 import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
-import com.atelier.atelier.repository.Request.AttenderRequestPaymentTabRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
@@ -169,10 +167,6 @@ public class SystemAdminController {
 
         User user = User.getUser(authentication, userRepository);
         SystemAdmin systemAdmin = (SystemAdmin) user.getRole("SystemAdmin");
-
-
-
-
         return systemAdmin;
 
     }

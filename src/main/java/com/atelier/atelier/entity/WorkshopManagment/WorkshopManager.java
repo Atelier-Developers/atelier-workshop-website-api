@@ -11,8 +11,8 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "WORKSHOP_MANAGER_TYPE")
 @DiscriminatorOptions(force = true)
-
 public abstract class WorkshopManager {
+
     @Id
     @GeneratedValue
     private long id;

@@ -8,8 +8,6 @@ import javax.persistence.*;
 @DiscriminatorValue(value = "Grader")
 public class Grader extends Requester implements Role {
 
-
-
     @OneToOne(mappedBy = "grader", cascade = CascadeType.ALL)
     private GraderWorkshopConnection graderWorkshopConnection;
 

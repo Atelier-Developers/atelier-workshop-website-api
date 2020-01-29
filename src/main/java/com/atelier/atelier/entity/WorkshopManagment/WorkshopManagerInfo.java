@@ -1,7 +1,5 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.*;
 
 @Entity
@@ -11,11 +9,11 @@ public class WorkshopManagerInfo {
     @GeneratedValue
     private long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "workshop_manager_id",  nullable = false)
     private WorkshopManager workshopManager;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "offered_workshop_id",  nullable = false)
     private OfferedWorkshop offeredWorkshop;
 

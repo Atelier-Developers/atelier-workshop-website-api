@@ -6,7 +6,6 @@ import javax.persistence.*;
 
 @Entity
 @DiscriminatorValue(value = "GroupFormApplicant")
-
 public class GroupFormApplicant extends FormApplicant {
 
     @ManyToOne

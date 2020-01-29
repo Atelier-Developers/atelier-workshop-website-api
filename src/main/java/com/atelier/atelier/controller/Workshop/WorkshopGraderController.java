@@ -103,7 +103,6 @@ public class WorkshopGraderController {
                     TextAnswer textAnswer = new TextAnswer();
                     textAnswer.setText((String) answerDataObject.get("text"));
                     answerData = textAnswer;
-                    System.out.println("here");
                 } else if (type.equalsIgnoreCase("ChoiceAnswer")) {
                     ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                     choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));

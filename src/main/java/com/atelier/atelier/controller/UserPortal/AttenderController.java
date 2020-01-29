@@ -92,15 +92,24 @@ public class AttenderController {
             OfferedWorkshop offeredWorkshop = workshopAttenderInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            for(User currentUser : users){
+            List<String> managerNames = new ArrayList<>();
 
-                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
 
-                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
-                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
-                    break;
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
+
+                for(User currentUser : users){
+
+                    WorkshopManager workshopManager1 = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager.getId() == workshopManager1.getId()){
+                        managerNames.add(currentUser.getName());
+                        break;
+                    }
                 }
             }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
 
             offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
         }
@@ -127,7 +136,6 @@ public class AttenderController {
     @PostMapping("/attendee/request/offeringWorkshop/{id}/answer")
     public ResponseEntity<Object> answerAttenderRegisterForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext, @RequestParam(value = "file", required = false) MultipartFile multipartFile) throws IOException {
         AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
-        System.out.println("here");
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -141,8 +149,8 @@ public class AttenderController {
 
         User user = User.getUser(authentication, userRepository);
         ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
-
-        if (managerWorkshopConnection.getId() == offeredWorkshop.getWorkshopManager().getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo != null) {
             return new ResponseEntity<>("You are the workshop manager", HttpStatus.FORBIDDEN);
         }
 
@@ -385,7 +393,7 @@ public class AttenderController {
         AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
         WorkshopAttenderInfo workshopAttenderInfo = attenderWorkshopConnection.getWorkshopAttenderInfoForAnOfferingWorkshop(offeredWorkshop);
         if (workshopAttenderInfo == null) {
-            return new ResponseEntity<>("You aren't a grader of this workshop", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("You aren't an attendee of this workshop", HttpStatus.FORBIDDEN);
         }
 
         WorkshopGroup attendeeGroup = workshopAttenderInfo.getWorkshopGroup();
@@ -435,6 +443,19 @@ public class AttenderController {
         User user = User.getUser(authentication, userRepository);
         Attender attender = (Attender) user.getRole("Attender");
         return attender.getAttenderWorkshopConnection();
+    }
+
+
+    public WorkshopManagerInfo findWorkshopManagerInfoOfWorkshop(OfferedWorkshop offeredWorkshop, WorkshopManager workshopManager) {
+
+        for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
+
+            if (workshopManagerInfo.getWorkshopManager().getId() == workshopManager.getId()) {
+                return workshopManagerInfo;
+            }
+        }
+
+        return null;
     }
 
 }

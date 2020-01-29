@@ -1,7 +1,6 @@
 package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.context.WorkshopFormContext;
-import com.atelier.atelier.entity.FormService.Form;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopForm;
 import com.atelier.atelier.repository.Form.FormRepository;

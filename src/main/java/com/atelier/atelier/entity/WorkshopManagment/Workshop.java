@@ -1,6 +1,5 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import com.atelier.atelier.entity.UserPortalManagment.Attender;
 import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
@@ -9,7 +8,6 @@ import java.util.List;
 
 @Entity
 @Table
-//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Workshop {
     @Id
     @GeneratedValue

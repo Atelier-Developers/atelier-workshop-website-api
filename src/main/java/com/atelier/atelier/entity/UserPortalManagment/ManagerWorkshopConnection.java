@@ -7,7 +7,4 @@ import javax.persistence.*;
 @Entity
 @DiscriminatorValue(value = "ManagerWorkshopConnection" )
 public class ManagerWorkshopConnection extends WorkshopManager implements Role {
-
-
-
 }

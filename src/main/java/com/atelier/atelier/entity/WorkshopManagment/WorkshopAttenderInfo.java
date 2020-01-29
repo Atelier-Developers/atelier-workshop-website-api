@@ -1,6 +1,5 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-import com.atelier.atelier.entity.RequestService.RequestState;
 import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
