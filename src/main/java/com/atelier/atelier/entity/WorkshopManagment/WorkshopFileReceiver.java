@@ -5,5 +5,4 @@ public enum WorkshopFileReceiver {
     Attendee,
     Grader,
     Manager;
-
 }

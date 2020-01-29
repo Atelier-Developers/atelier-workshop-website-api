@@ -15,10 +15,9 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "WORKSHOP_GRADER_TYPE")
 @DiscriminatorOptions(force = true)
-
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-
 public abstract class  WorkshopGrader {
+
     @Id
     @GeneratedValue
     private long id;

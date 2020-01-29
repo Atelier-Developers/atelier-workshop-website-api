@@ -19,10 +19,8 @@ import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
 import com.atelier.atelier.repository.workshop.WorkshopGraderInfoRepository;
-import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.support.CustomSQLErrorCodesTranslation;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -102,15 +100,23 @@ public class GraderController {
             OfferedWorkshop offeredWorkshop = workshopGraderInfo.getOfferedWorkshop();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            for (User currentUser : users){
+            List<String> managerNames = new ArrayList<>();
 
-                WorkshopManager workshopManager = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
 
-                if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
-                    offeredWorkshopManagerNameContext.setWorkshopManagerName(currentUser.getName());
-                    break;
+                for (User currentUser : users){
+
+                    WorkshopManager workshopManager1 = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager.getId() == workshopManager1.getId()){
+                        managerNames.add(currentUser.getName());
+                        break;
+                    }
                 }
             }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
 
             offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
 
@@ -163,8 +169,8 @@ public class GraderController {
         }
         User user = User.getUser(authentication, userRepository);
         ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
-
-        if(managerWorkshopConnection.getId() == offeredWorkshop.getWorkshopManager().getId()){
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if(workshopManagerInfo != null){
             return new ResponseEntity<>("You are the workshop manager", HttpStatus.FORBIDDEN);
         }
 
@@ -262,5 +268,17 @@ public class GraderController {
     }
 
     //TODO api to give requests of a grader
+
+    public WorkshopManagerInfo findWorkshopManagerInfoOfWorkshop(OfferedWorkshop offeredWorkshop, WorkshopManager workshopManager) {
+
+        for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
+
+            if (workshopManagerInfo.getWorkshopManager().getId() == workshopManager.getId()) {
+                return workshopManagerInfo;
+            }
+        }
+
+        return null;
+    }
 
 }

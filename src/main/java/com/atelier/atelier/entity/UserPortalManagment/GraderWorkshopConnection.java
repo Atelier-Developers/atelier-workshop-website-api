@@ -1,7 +1,6 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopGrader;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;

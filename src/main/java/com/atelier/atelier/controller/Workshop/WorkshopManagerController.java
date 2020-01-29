@@ -16,7 +16,6 @@ import com.atelier.atelier.repository.role.GraderRepository;
 import com.atelier.atelier.repository.user.FileRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.*;
-import org.hibernate.service.spi.OptionallyManageable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +25,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.swing.text.html.Option;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,9 +53,11 @@ public class WorkshopManagerController {
     private AttenderRepository attenderRepository;
     private WorkshopFileRepository workshopFileRepository;
     private FileRepository fileRepository;
+    private WorkshopManagerInfoRepository workshopManagerInfoRepository;
     private RequestableRepository requestableRepository;
 
-    public WorkshopManagerController(RequestableRepository requestableRepository, WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+
+    public WorkshopManagerController(RequestableRepository requestableRepository, WorkshopManagerInfoRepository workshopManagerInfoRepository, WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
@@ -79,6 +78,7 @@ public class WorkshopManagerController {
         this.fileRepository = fileRepository;
         this.attenderRepository = attenderRepository;
         this.requestableRepository = requestableRepository;
+        this.workshopManagerInfoRepository = workshopManagerInfoRepository;
     }
 
     // Returns OfferedWorkshopManagerNameContext Objects of the Manager's Workshops
@@ -93,11 +93,29 @@ public class WorkshopManagerController {
 
         List<OfferedWorkshopManagerNameContext> offeredWorkshopManagerNameContexts = new ArrayList<OfferedWorkshopManagerNameContext>();
 
-        for (OfferedWorkshop offeredWorkshop : managerWorkshopConnection.getOfferedWorkshops()) {
+        List<OfferedWorkshop> offeredWorkshops = getManagersOfferedWorkshops(managerWorkshopConnection);
+        List<User> users = userRepository.findAll();
+        for (OfferedWorkshop offeredWorkshop : offeredWorkshops) {
 
             OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
-            offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
+            List<String> managerNames = new ArrayList<>();
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
+
+                for (User user1 : users) {
+
+                    WorkshopManager workshopManagerRole = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManagerRole.getId() == workshopManager.getId()) {
+                        managerNames.add(user1.getName());
+                        break;
+                    }
+
+                }
+
+            }
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
 
             offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
         }
@@ -108,12 +126,18 @@ public class WorkshopManagerController {
 
     @PostMapping("/offeringWorkshop")
     public ResponseEntity<Object> addOfferingWorkshop(@RequestBody OfferingWorkshopContext offeringWorkshopContext) throws ParseException {
-        Optional<User> optionalUser = userRepository.findById(offeringWorkshopContext.getUserManagerId());
-        if (!optionalUser.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+        List<ManagerWorkshopConnection> managerWorkshopConnections = new ArrayList<ManagerWorkshopConnection>();
+        for (long id : offeringWorkshopContext.getUserManagerId()) {
+            Optional<User> optionalUser = userRepository.findById(id);
+            if (!optionalUser.isPresent()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            User user = optionalUser.get();
+            ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
+            managerWorkshopConnections.add(managerWorkshopConnection);
         }
-        User user = optionalUser.get();
-        ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
+
         long wid = offeringWorkshopContext.getWorkshopId();
         Optional<Workshop> optionalWorkshop = workshopRepository.findById(wid);
         if (!optionalWorkshop.isPresent()) {
@@ -140,7 +164,17 @@ public class WorkshopManagerController {
         }
         offeredWorkshop.setWorkshop(workshop);
         workshop.addOfferingWorkshop(offeredWorkshop); // BI DIRECTIONAL MAPPING
-        offeredWorkshop.setWorkshopManager(managerWorkshopConnection);
+        List<WorkshopManagerInfo> workshopManagerInfos = new ArrayList<>();
+        for (WorkshopManager workshopManager : managerWorkshopConnections) {
+            WorkshopManagerInfo workshopManagerInfo = new WorkshopManagerInfo();
+            workshopManagerInfo.setOfferedWorkshop(offeredWorkshop);
+            workshopManagerInfo.setWorkshopManager(workshopManager);
+            workshopManager.addWorkshopManagerInfo(workshopManagerInfo);
+            workshopManagerInfoRepository.save(workshopManagerInfo);
+
+            workshopManagerInfos.add(workshopManagerInfo);
+        }
+        offeredWorkshop.setWorkshopManagerInfos(workshopManagerInfos);
         List<Workshop> workshops = new ArrayList<>();
         if (offeringWorkshopContext.getPreRequisiteId() != null) {
 
@@ -171,7 +205,8 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 return new ResponseEntity<>(offeredWorkshop, HttpStatus.OK);
             }
             return new ResponseEntity<>("The offering workshop that you requested is not permitted.", HttpStatus.FORBIDDEN);
@@ -186,7 +221,8 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 GraderEvaluationForm graderEvaluationForm = offeredWorkshop.getGraderEvaluationForm();
                 if (graderEvaluationForm == null) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -205,7 +241,8 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 List<WorkshopForm> workshopForm = offeredWorkshop.getWorkshopForms();
                 if (workshopForm.isEmpty()) {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -225,7 +262,8 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 workshopForm.setOfferedWorkshop(offeredWorkshop);
                 offeredWorkshop.addWorkshopForm(workshopForm);
                 try {
@@ -248,7 +286,8 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 graderEvaluationForm.setOfferedWorkshop(offeredWorkshop);
                 offeredWorkshop.setGraderEvaluationForm(graderEvaluationForm);
                 try {
@@ -271,7 +310,8 @@ public class WorkshopManagerController {
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 attenderRegisterForm.setOfferedWorkshop(offeredWorkshop);
                 offeredWorkshop.setAttenderRegisterForm(attenderRegisterForm);
                 try {
@@ -291,7 +331,6 @@ public class WorkshopManagerController {
 
     @GetMapping("/offeringWorkshop/{id}/attenderRegisterForm")
     public ResponseEntity<Object> getAttenderRegisterForm(@PathVariable long id, Authentication authentication) {
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (optionalOfferedWorkshop.isPresent()) {
             OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
@@ -307,7 +346,6 @@ public class WorkshopManagerController {
 
     @GetMapping("/offeringWorkshop/{id}/graderRequestForm")
     public ResponseEntity<Object> getGraderRequestForm(@PathVariable long id, Authentication authentication) {
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (optionalOfferedWorkshop.isPresent()) {
             OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
@@ -323,12 +361,12 @@ public class WorkshopManagerController {
 
     @PostMapping("/offeringWorkshop/{id}/graderRequestForm")
     public ResponseEntity<Object> makeGraderRequestForm(@PathVariable long id, Authentication authentication, @RequestBody GraderRequestForm graderRequestForm) {
-
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
         Optional<OfferedWorkshop> offeredWorkshopOptional = offeringWorkshopRepository.findById(id);
         if (offeredWorkshopOptional.isPresent()) {
             OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+            if (workshopManagerInfo != null) {
                 graderRequestForm.setOfferedWorkshop(offeredWorkshop);
                 offeredWorkshop.setGraderRequestForm(graderRequestForm);
                 try {
@@ -366,7 +404,10 @@ public class WorkshopManagerController {
             if (!(offeredWorkshop.getWorkshopGraderInfos().contains(workshopGraderInfo))) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
-            if (offeredWorkshop.getWorkshopManager().getId() == managerWorkshopConnection.getId()) {
+
+            WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+
+            if (workshopManagerInfo != null) {
 
                 WorkshopGraderFormApplicant workshopGraderFormApplicant = new WorkshopGraderFormApplicant();
                 WorkshopManagerFormFiller workshopManagerFormFiller = new WorkshopManagerFormFiller();
@@ -376,8 +417,6 @@ public class WorkshopManagerController {
                 workshopGraderInfo.addWorkshopGraderFormApplicants(workshopGraderFormApplicant);
 
                 List<Answer> answers = new ArrayList<>();
-
-                System.out.println(formAnswerContext.getApplicantId());
 
                 for (AnswerQuestionContext answerQuestionContext : formAnswerContext.getAnswerQuestion()) {
 
@@ -400,29 +439,22 @@ public class WorkshopManagerController {
                         TextAnswer textAnswer = new TextAnswer();
                         textAnswer.setText((String) answerDataObject.get("text"));
                         answerData = textAnswer;
-                        System.out.println("here");
                     } else if (type.equalsIgnoreCase("ChoiceAnswer")) {
-                        System.out.println("hey");
-
                         ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                         choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                         answerData = choiceAnswer;
                     } else if (type.equalsIgnoreCase("FileAnswer")) {
                         FileAnswer fileAnswer = new FileAnswer();
                         String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-
                         fileAnswer.setFileName(fileName);
                         fileAnswer.setFileType(multipartFile.getContentType());
                         fileAnswer.setData(multipartFile.getBytes());
-
                         answerData = fileAnswer;
-
-//                        // TODO ADDED FILE STUFF HERE
+//                        // ADDED FILE STUFF HERE
 //                        fileAnswerRepository.save(fileAnswer);
                     } else {
                         return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
                     }
-
 
                     filledAnswer.addAnswerData(answerData);
 
@@ -456,7 +488,8 @@ public class WorkshopManagerController {
             return new ResponseEntity<>("No Offered Workshop with the id provided was found.", HttpStatus.NO_CONTENT);
         }
         OfferedWorkshop offeredWorkshop = offeredWorkshopOptional.get();
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         Optional<Form> optionalForm = formRepository.findById(formQuestionContext.getFormId());
@@ -539,7 +572,8 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -565,8 +599,8 @@ public class WorkshopManagerController {
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -647,8 +681,15 @@ public class WorkshopManagerController {
     }
 
 
+//<<<<<<< HEAD
     @GetMapping("/offeringWorkshop/{id}/requester/{requesterId}")
     public ResponseEntity<Object> getRequesterRequest(@PathVariable long id, Authentication authentication, @PathVariable long requesterId) {
+//=======
+//    @PostMapping("/offeringWorkshop/{id}/request")
+//    public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody List<RequestStatusContext> requestStatusContexts) {
+//
+//
+//>>>>>>> workshop_manager_fix
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
@@ -680,10 +721,12 @@ public class WorkshopManagerController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
+
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
 
         Optional<Request> optionalRequest = requestRepository.findById(requestStatusContext.getRequestId());
+
 
         if (!optionalRequest.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -758,7 +801,8 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -771,6 +815,7 @@ public class WorkshopManagerController {
             if (workshopGroup == null) {
                 continue;
             }
+
             GroupElementContext groupElementContext = new GroupElementContext();
             groupElementContext.setId(workshopGroup.getId());
             groupElementContext.setName(workshopGroup.getName());
@@ -937,10 +982,21 @@ public class WorkshopManagerController {
     @PostMapping("/offeringWorkshop/group/{groupId}/att")
     public ResponseEntity<Object> addAttToGroup(@PathVariable long groupId, @RequestBody RequesterIdContext attInfo) {
 
-        WorkshopAttenderInfo workshopAttenderInfo = workshopAttenderInfoRepository.findById(attInfo.getId()).get();
+        Optional<WorkshopAttenderInfo> optionalWorkshopAttenderInfo = workshopAttenderInfoRepository.findById(attInfo.getId());
 
-        WorkshopGroup workshopGroup = workshopGroupRepository.findById(groupId).get();
+        if (!optionalWorkshopAttenderInfo.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
 
+        WorkshopAttenderInfo workshopAttenderInfo = optionalWorkshopAttenderInfo.get();
+
+        Optional<WorkshopGroup> optionalWorkshopGroup = workshopGroupRepository.findById(groupId);
+
+        if (!optionalWorkshopGroup.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopGroup workshopGroup = optionalWorkshopGroup.get();
 
         workshopGroup.getAttenderInfos().add(workshopAttenderInfo);
 
@@ -955,12 +1011,25 @@ public class WorkshopManagerController {
     }
 
 
+    // TODO CONTINUE REFACTORING THE WORKSHOP MANAGER
     @PostMapping("/offeringWorkshop/group/{groupId}/grader")
     public ResponseEntity<Object> addGraderToGroup(@PathVariable long groupId, @RequestBody RequesterIdContext graderInfo) {
 
-        WorkshopGraderInfo workshopGraderInfo = workshopGraderInfoRepository.findById(graderInfo.getId()).get();
+        Optional<WorkshopGraderInfo> optionalWorkshopGraderInfo = workshopGraderInfoRepository.findById(graderInfo.getId());
 
-        WorkshopGroup workshopGroup = workshopGroupRepository.findById(groupId).get();
+        if (!optionalWorkshopGraderInfo.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopGraderInfo workshopGraderInfo = optionalWorkshopGraderInfo.get();
+
+        Optional<WorkshopGroup> optionalWorkshopGroup = workshopGroupRepository.findById(groupId);
+
+        if (!optionalWorkshopGroup.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopGroup workshopGroup = optionalWorkshopGroup.get();
 
 
         workshopGroup.getGraderInfos().add(workshopGraderInfo);
@@ -974,7 +1043,6 @@ public class WorkshopManagerController {
 
     }
 
-    //TODO API TO ADD A LIST OF ATTENDEES & GRADERS TO A GROUP, (GETS A LIST OF IDs)
     @PostMapping("/offeringWorkshop/group/{groupId}/atts")
     public ResponseEntity<Object> addAttendeesToGroup(@PathVariable long groupId, @RequestBody List<RequesterIdContext> attendeeInfos) {
 
@@ -1042,7 +1110,6 @@ public class WorkshopManagerController {
     // Returns Attendee Info Objects of the Offering Workshop
     @GetMapping("/offeringWorkshop/{id}/attendeeInfos")
     public ResponseEntity<Object> showAllAttendeeInfos(@PathVariable long id, Authentication authentication) {
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
@@ -1059,8 +1126,6 @@ public class WorkshopManagerController {
     // Returns Grader Info Objects
     @GetMapping("/offeringWorkshop/{id}/graderInfos")
     public ResponseEntity<Object> showAllGraderInfos(@PathVariable long id, Authentication authentication) {
-
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
@@ -1089,7 +1154,9 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -1102,6 +1169,7 @@ public class WorkshopManagerController {
             if (workshopGroup == null) {
                 continue;
             }
+
             GroupUsersContext groupUsersContext = new GroupUsersContext();
             groupUsersContext.setGroupName(workshopGroup.getName());
             groupUsersContext.setGroupId(workshopGroup.getId());
@@ -1152,8 +1220,8 @@ public class WorkshopManagerController {
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -1193,8 +1261,8 @@ public class WorkshopManagerController {
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-
-        if (offeredWorkshop.getWorkshopManager().getId() != managerWorkshopConnection.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -1226,9 +1294,22 @@ public class WorkshopManagerController {
     @GetMapping("/offeringWorkshop/{id}/graderRequest/{graderId}")
     public ResponseEntity<Object> getRequestByGraderId(@PathVariable long id, @PathVariable long graderId) {
 
-        OfferedWorkshop offeredWorkshop = offeringWorkshopRepository.findById(id).get();
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
 
-        Grader grader = graderRepository.findById(graderId).get();
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+
+        Optional<Grader> optionalGrader = graderRepository.findById(graderId);
+
+        if (!optionalGrader.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Grader grader = optionalGrader.get();
 
         for (Request request : offeredWorkshop.getRequests()) {
 
@@ -1247,9 +1328,23 @@ public class WorkshopManagerController {
     @GetMapping("/offeringWorkshop/{id}/attendeeRegister/{attId}")
     public ResponseEntity<Object> getRequestByAttId(@PathVariable long id, @PathVariable long attId) {
 
-        OfferedWorkshop offeredWorkshop = offeringWorkshopRepository.findById(id).get();
 
-        Attender attender = attenderRepository.findById(attId).get();
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        Optional<Attender> optionalAttender = attenderRepository.findById(id);
+
+        if (!optionalAttender.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+
+        Attender attender = optionalAttender.get();
 
         for (Request request : offeredWorkshop.getRequests()) {
 
@@ -1258,7 +1353,9 @@ public class WorkshopManagerController {
                 if (request.getRequester().getId() == attender.getId()) {
                     return new ResponseEntity<>(request, HttpStatus.OK);
                 }
+
             }
+
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -1369,7 +1466,8 @@ public class WorkshopManagerController {
 
         WorkshopManager workshopManager = getMangerFromAuthentication(authentication);
 
-        if (offeredWorkshop.getWorkshopManager().getId() != workshopManager.getId()) {
+        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, workshopManager);
+        if (workshopManagerInfo == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -1441,4 +1539,28 @@ public class WorkshopManagerController {
     }
 
 
+
+    public List<OfferedWorkshop> getManagersOfferedWorkshops(WorkshopManager workshopManager) {
+
+        List<OfferedWorkshop> offeredWorkshops = new ArrayList<>();
+
+        for (WorkshopManagerInfo workshopManagerInfo : workshopManager.getWorkshopManagerInfos()) {
+            offeredWorkshops.add(workshopManagerInfo.getOfferedWorkshop());
+        }
+
+        return offeredWorkshops;
+    }
+
+
+    public WorkshopManagerInfo findWorkshopManagerInfoOfWorkshop(OfferedWorkshop offeredWorkshop, WorkshopManager workshopManager) {
+
+        for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
+
+            if (workshopManagerInfo.getWorkshopManager().getId() == workshopManager.getId()) {
+                return workshopManagerInfo;
+            }
+        }
+
+        return null;
+    }
 }

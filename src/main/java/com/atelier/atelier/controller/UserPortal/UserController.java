@@ -2,18 +2,14 @@ package com.atelier.atelier.controller.UserPortal;
 
 
 import com.atelier.atelier.entity.UserPortalManagment.*;
-import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
-import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.repository.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.Query;
 import java.util.List;
 
 @RestController

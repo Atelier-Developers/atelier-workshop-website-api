@@ -18,7 +18,6 @@ public class AttenderPaymentTab implements Payment {
     @ManyToOne
     @JoinColumn(name = "attender_request_payment_tab_id", nullable = false)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-
     private AttenderRequestPaymentTab attenderRequestPaymentTab;
 
     @Column(nullable = false)

@@ -1,15 +1,12 @@
 package com.atelier.atelier.controller.Form;
 
 
-import com.atelier.atelier.context.AnswerQuestionContext;
-import com.atelier.atelier.entity.FormService.Answer;
 import com.atelier.atelier.entity.FormService.Question;
 import com.atelier.atelier.repository.Form.QuestionRepsoitory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
