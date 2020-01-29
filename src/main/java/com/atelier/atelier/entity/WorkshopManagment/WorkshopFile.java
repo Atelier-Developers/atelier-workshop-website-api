@@ -25,8 +25,9 @@ public class WorkshopFile {
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
 
-    @ElementCollection(fetch = FetchType.EAGER, targetClass = WorkshopFileReceiver.class)
-    @CollectionTable(name = "file_reciever_type", joinColumns = @JoinColumn(name = "id"))
+    @ElementCollection(targetClass = WorkshopFileReceiver.class)
+    @JoinTable(name = "receivers", joinColumns = @JoinColumn(name = "workshop_file_id"))
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private List<WorkshopFileReceiver> receivers;
 
