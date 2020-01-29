@@ -9,7 +9,7 @@ import java.util.List;
 public class OfferedWorkshopUserListsContext {
 
     private OfferedWorkshop offeredWorkshop;
-    private User workshopManagerUser;
+    private List<User> workshopManagerUser;
     private List<User> attendeeUsers;
     private List<User> graderUsers;
     private List<String> preRequisites;
@@ -22,11 +22,11 @@ public class OfferedWorkshopUserListsContext {
         this.offeredWorkshop = offeredWorkshop;
     }
 
-    public User getWorkshopManagerUser() {
+    public List<User> getWorkshopManagerUser() {
         return workshopManagerUser;
     }
 
-    public void setWorkshopManagerUser(User workshopManagerUser) {
+    public void setWorkshopManagerUser(List<User> workshopManagerUser) {
         this.workshopManagerUser = workshopManagerUser;
     }
 

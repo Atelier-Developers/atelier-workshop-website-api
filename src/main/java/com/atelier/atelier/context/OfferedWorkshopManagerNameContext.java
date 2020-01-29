@@ -1,11 +1,14 @@
 package com.atelier.atelier.context;
 
+import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
+
+import java.util.List;
 
 public class OfferedWorkshopManagerNameContext {
 
     private OfferedWorkshop offeredWorkshop;
-    private String workshopManagerName;
+    private List<String> workshopManagers;
 
     public OfferedWorkshop getOfferedWorkshop() {
         return offeredWorkshop;
@@ -15,11 +18,12 @@ public class OfferedWorkshopManagerNameContext {
         this.offeredWorkshop = offeredWorkshop;
     }
 
-    public String getWorkshopManagerName() {
-        return workshopManagerName;
+
+    public List<String> getWorkshopManagers() {
+        return workshopManagers;
     }
 
-    public void setWorkshopManagerName(String workshopManagerName) {
-        this.workshopManagerName = workshopManagerName;
+    public void setWorkshopManagers(List<String> workshopManagers) {
+        this.workshopManagers = workshopManagers;
     }
 }

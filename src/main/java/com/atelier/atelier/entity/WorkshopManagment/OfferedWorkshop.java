@@ -5,6 +5,7 @@ import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.fasterxml.jackson.annotation.*;
+import javassist.expr.Cast;
 import org.joda.time.Interval;
 
 import javax.persistence.*;
@@ -43,9 +44,8 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     @JoinColumn(name = "workshop_id", nullable = false)
     private Workshop workshop;
 
-    @ManyToOne
-    @JoinColumn(name = "workshop_manager_id")
-    private WorkshopManager workshopManager;
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+    private List<WorkshopManagerInfo> workshopManagerInfos;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     private List<WorkshopForm> workshopForms;
@@ -139,14 +139,13 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     }
 
 
-    public WorkshopManager getWorkshopManager() {
-        return workshopManager;
+    public List<WorkshopManagerInfo> getWorkshopManagerInfos() {
+        return workshopManagerInfos;
     }
 
-    public void setWorkshopManager(WorkshopManager workshopManager) {
-        this.workshopManager = workshopManager;
+    public void setWorkshopManagerInfos(List<WorkshopManagerInfo> workshopManagerInfos) {
+        this.workshopManagerInfos = workshopManagerInfos;
     }
-
 
     public List<WorkshopForm> getWorkshopForms() {
         return workshopForms;

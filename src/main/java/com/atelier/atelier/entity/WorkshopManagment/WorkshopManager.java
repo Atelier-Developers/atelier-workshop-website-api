@@ -19,7 +19,7 @@ public abstract class WorkshopManager {
 
     @OneToMany(mappedBy = "workshopManager")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private List<OfferedWorkshop> offeredWorkshops;
+    private List<WorkshopManagerInfo> workshopManagerInfos;
 
     @OneToMany(mappedBy = "workshopManager")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -34,12 +34,12 @@ public abstract class WorkshopManager {
     }
 
 
-    public List<OfferedWorkshop> getOfferedWorkshops() {
-        return offeredWorkshops;
+    public List<WorkshopManagerInfo> getWorkshopManagerInfos() {
+        return workshopManagerInfos;
     }
 
-    public void setOfferedWorkshops(List<OfferedWorkshop> offeredWorkshops) {
-        this.offeredWorkshops = offeredWorkshops;
+    public void setWorkshopManagerInfos(List<WorkshopManagerInfo> workshopManagerInfos) {
+        this.workshopManagerInfos = workshopManagerInfos;
     }
 
     public List<WorkshopManagerFormFiller> getFormFillerList() {
@@ -56,5 +56,12 @@ public abstract class WorkshopManager {
             formFillerList = new ArrayList<>();
         }
         formFillerList.add(workshopManagerFormFiller);
+    }
+
+    public void addWorkshopManagerInfo(WorkshopManagerInfo workshopManagerInfo){
+        if (workshopManagerInfos == null ){
+            workshopManagerInfos = new ArrayList<>();
+        }
+        workshopManagerInfos.add(workshopManagerInfo);
     }
 }

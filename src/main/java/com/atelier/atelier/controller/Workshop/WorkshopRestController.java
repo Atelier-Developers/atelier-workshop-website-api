@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.lang.annotation.Repeatable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -122,19 +121,27 @@ public class WorkshopRestController {
 
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
 
-            WorkshopManager workshopManager = offeredWorkshop.getWorkshopManager();
+            List<WorkshopManagerInfo> workshopManagerInfos = offeredWorkshop.getWorkshopManagerInfos();
 
-            for ( User user : users ){
+            List<String> workshopManagerUsers = new ArrayList<String>();
 
-                WorkshopManager workshopManager1 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+            for (WorkshopManagerInfo workshopManagerInfo : workshopManagerInfos){
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
+                for ( User user : users ){
 
-                if (workshopManager1.getId() == workshopManager.getId()){
+                    WorkshopManager workshopManager1 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
 
-                    offeredWorkshopManagerNameContext.setWorkshopManagerName(user.getName());
-                    break;
+                    if (workshopManager1.getId() == workshopManager.getId()){
+
+                        workshopManagerUsers.add(user.getName());
+                        break;
+                    }
+
                 }
-
             }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(workshopManagerUsers);
+
 
             offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
         }
@@ -170,23 +177,26 @@ public class WorkshopRestController {
 
         for ( OfferedWorkshop offeredWorkshop : offeredWorkshops){
 
-            long workshopManagerId = offeredWorkshop.getWorkshopManager().getId();
+            List<String> workshopManagerUsers = new ArrayList<String>();
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+                WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
 
-            User workshopManagerUser = null;
-            for ( User user: users){
+                for ( User user: users){
 
-                WorkshopManager workshopManagerRole = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+                    WorkshopManager workshopManagerRole = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
 
-                if (workshopManagerRole.getId() == workshopManagerId){
-                    workshopManagerUser = user;
-                    break;
+                    if (workshopManagerRole.getId() == workshopManager.getId()){
+                        workshopManagerUsers.add(user.getName());
+                        break;
+                    }
+
                 }
-
             }
+
 
             OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
             offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
-            offeredWorkshopManagerNameContext.setWorkshopManagerName(workshopManagerUser.getName());
+            offeredWorkshopManagerNameContext.setWorkshopManagers(workshopManagerUsers);
 
             offeredWorkshopManagerNameContexts.add(offeredWorkshopManagerNameContext);
         }
@@ -212,16 +222,25 @@ public class WorkshopRestController {
 
         offeredWorkshopUserListsContext.setOfferedWorkshop(offeredWorkshop);
 
-        for ( User user : users ){
+        List<User> managerUsers = new ArrayList<User>();
 
-            WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+        for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
 
-            if (workshopManager.getId() == offeredWorkshop.getWorkshopManager().getId()){
+            WorkshopManager workshopManager1 = workshopManagerInfo.getWorkshopManager();
 
-                offeredWorkshopUserListsContext.setWorkshopManagerUser(user);
-                break;
+            for ( User user : users ){
+
+                WorkshopManager workshopManager = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager.getId() == workshopManager1.getId()){
+
+                    managerUsers.add(user);
+                    break;
+                }
             }
         }
+
+        offeredWorkshopUserListsContext.setWorkshopManagerUser(managerUsers);
 
         List<User> attendeeUsers = new ArrayList<User>();
         for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()){
@@ -265,6 +284,10 @@ public class WorkshopRestController {
 
             Optional<Workshop> optionalWorkshop = workshopRepository.findById(offeredWorkshopRelationDetail.getWorkshop().getId());
 
+            if (!optionalWorkshop.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
             Workshop workshop = optionalWorkshop.get();
 
             preReqs.add(workshop.getName());
@@ -281,6 +304,7 @@ public class WorkshopRestController {
         return new ResponseEntity<>(offeredWorkshopUserListsContext, HttpStatus.OK);
     }
 
+    //TODO STUFF
 
     @GetMapping("/offeringWorkshops/popular")
     public ResponseEntity<Object> showFirstFivePopularWorkshops(){
@@ -391,6 +415,7 @@ public class WorkshopRestController {
 
         return new ResponseEntity<>(workshopFileGETContext, HttpStatus.OK);
     }
+
 
 
 
