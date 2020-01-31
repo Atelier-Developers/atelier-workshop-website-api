@@ -734,7 +734,7 @@ public class WorkshopManagerController {
 
         Request request = optionalRequest.get();
 
-        if (request.getState() == RequestState.Accepted) {
+        if (request.getState() == RequestState.Accepted || request.getState() == RequestState.Rejected ) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -782,6 +782,7 @@ public class WorkshopManagerController {
         }
         else if(request.getState() == RequestState.Rejected){
             requestRepository.save(request);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
 
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

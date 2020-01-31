@@ -410,7 +410,7 @@ public class AttenderController {
         for (WorkshopAttenderInfo attInfo : attendeeGroup.getAttenderInfos()){
             for (User user : users ){
                 Attender attender = (Attender) user.getRole("Attender");
-                if (attender.getAttenderWorkshopConnection().getId() == workshopAttenderInfo.getWorkshopAttender().getId()){
+                if (attender.getAttenderWorkshopConnection().getId() == attInfo.getWorkshopAttender().getId()){
                     attendeeUsers.add(user);
                     break;
                 }
