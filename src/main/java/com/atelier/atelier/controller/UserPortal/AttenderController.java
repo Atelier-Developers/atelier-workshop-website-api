@@ -250,7 +250,7 @@ public class AttenderController {
         request.addRequestData(attenderRegisterForm);
         request.setState(RequestState.Pending);
         requestRepository.save(request);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(request.getId(), HttpStatus.OK);
     }
 
     @PostMapping("/attendee/request/{id}/payments")
