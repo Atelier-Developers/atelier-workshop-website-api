@@ -1,6 +1,7 @@
 package com.atelier.atelier.controller.UserPortal;
 
 
+import com.atelier.atelier.context.EditUserContext;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.repository.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -69,6 +71,30 @@ public class UserController {
         User user = User.getUser(authentication, userRepository);
         List<Role> roles = user.getRoles();
         return roles;
+    }
+
+    @PutMapping("/user/{userId}")
+    public ResponseEntity<Object> changeEmailAndName(@PathVariable long userId, @RequestBody EditUserContext editUserContext){
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (!optionalUser.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        User user = optionalUser.get();
+
+        if (editUserContext.getName() != null ){
+            user.setName(editUserContext.getName());
+        }
+
+        if (editUserContext.getEmail() != null ){
+            user.setEmail(editUserContext.getEmail());
+        }
+
+        userRepository.save(user);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

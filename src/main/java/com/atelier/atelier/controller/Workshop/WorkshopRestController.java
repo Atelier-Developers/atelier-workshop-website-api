@@ -1,14 +1,16 @@
 package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.context.*;
+import com.atelier.atelier.entity.RequestService.Request;
+import com.atelier.atelier.entity.RequestService.Requester;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
+import com.atelier.atelier.repository.Request.RequesterRepository;
 import com.atelier.atelier.repository.user.FileRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopFileRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -32,14 +34,16 @@ public class WorkshopRestController {
     private UserRepository userRepository;
     private WorkshopFileRepository workshopFileRepository;
     private FileRepository fileRepository;
+    private RequesterRepository requesterRepository;
 
     @Autowired
-    public WorkshopRestController(FileRepository fileRepository, WorkshopFileRepository workshopFileRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopRepository workshopRepository) {
+    public WorkshopRestController(RequesterRepository requesterRepository, FileRepository fileRepository, WorkshopFileRepository workshopFileRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopRepository workshopRepository) {
         this.workshopRepository = workshopRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
         this.workshopFileRepository = workshopFileRepository;
         this.fileRepository = fileRepository;
+        this.requesterRepository = requesterRepository;
     }
 
 
@@ -293,13 +297,49 @@ public class WorkshopRestController {
 
         }
 
-
         offeredWorkshopUserListsContext.setAttendeeUsers(attendeeUsers);
         offeredWorkshopUserListsContext.setGraderUsers(graderUsers);
         offeredWorkshopUserListsContext.setPreRequisites(preReqs);
 
-
         return new ResponseEntity<>(offeredWorkshopUserListsContext, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshops/{offeringWorkshopId}/requestStatus/{userId}")
+    public ResponseEntity<Object> getUserRequestStatusAtOfferingWorkshop(@PathVariable long offeringWorkshopId, @PathVariable long userId){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (!optionalUser.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        User user = optionalUser.get();
+        Attender attender = (Attender) user.getRole("Attender");
+        Grader grader = (Grader) user.getRole("Grader");
+
+        for (Request request : offeredWorkshop.getRequests()){
+
+            Requester requester = request.getRequester();
+
+            if (requester.getId() == attender.getId()){
+                return new ResponseEntity<>(request, HttpStatus.OK);
+            }
+
+            else if (requester.getId() == grader.getId()){
+                return new ResponseEntity<>(request, HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 

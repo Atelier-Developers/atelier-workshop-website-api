@@ -616,7 +616,7 @@ public class WorkshopManagerController {
     }
 
 
-    @PostMapping("/offeringWorkshop/form/{id}/result")
+    @GetMapping("/offeringWorkshop/form/{id}/result")
     public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody RequesterIdContext requesterId) {
 
         Optional<Form> optionalForm = formRepository.findById(id);
@@ -673,12 +673,14 @@ public class WorkshopManagerController {
             }
             return new ResponseEntity<>(formResultContexts, HttpStatus.OK);
 
-        } else {
+        }
+        else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
 
     }
+
 
 
 //<<<<<<< HEAD

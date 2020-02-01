@@ -1,13 +1,8 @@
 package com.atelier.atelier.entity.FormService;
 
-
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 
 import javax.persistence.*;
-import javax.persistence.criteria.From;
 import java.util.ArrayList;
 import java.util.List;
 

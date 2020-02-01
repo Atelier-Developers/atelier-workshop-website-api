@@ -6,12 +6,12 @@ import com.atelier.atelier.entity.WorkshopManagment.AttenderRequestPaymentTab;
 import com.atelier.atelier.entity.WorkshopManagment.GraderRequestForm;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.xml.bind.v2.TODO;
-import org.hibernate.annotations.Any;
-import org.hibernate.annotations.AnyMetaDef;
-import org.hibernate.annotations.ManyToAny;
-import org.hibernate.annotations.MetaValue;
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.CascadeType;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -14,9 +14,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "REQUESTABLE_TYPE")
 @DiscriminatorOptions(force = true)
-
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-
 public abstract class Requestable {
 
     @Id
