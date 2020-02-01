@@ -982,6 +982,8 @@ public class WorkshopManagerController {
     }
 
 
+
+    //TODO DELETE GROUPS
     @DeleteMapping("/offeringWorkshop/group/{groupId}")
     public ResponseEntity<Object> deleteGroupWithoutDeletingInfos(@PathVariable long groupId){
 

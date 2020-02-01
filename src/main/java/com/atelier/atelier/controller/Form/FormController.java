@@ -6,8 +6,6 @@ import com.atelier.atelier.entity.FormService.Answer;
 import com.atelier.atelier.entity.FormService.Form;
 import com.atelier.atelier.entity.FormService.FormApplicant;
 import com.atelier.atelier.entity.FormService.Question;
-import com.atelier.atelier.entity.UserPortalManagment.Attender;
-import com.atelier.atelier.entity.UserPortalManagment.Grader;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.FormApplicantRepository;
 import com.atelier.atelier.repository.Form.FormRepository;
@@ -17,8 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
-import java.lang.reflect.AnnotatedArrayType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -80,6 +76,7 @@ public class FormController {
     }
 
 
+    //TODO SEE AN APPLICANT'S FORM STATUS
     @GetMapping("/form/{formId}/result/{appId}")
     public ResponseEntity<Object> showApplicantResultForAForm(@PathVariable long formId, @PathVariable long appId){
 

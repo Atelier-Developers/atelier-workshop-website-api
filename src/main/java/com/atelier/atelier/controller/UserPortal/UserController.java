@@ -73,6 +73,7 @@ public class UserController {
         return roles;
     }
 
+    //TODO EDIT USER
     @PutMapping("/user/{userId}")
     public ResponseEntity<Object> changeEmailAndName(@PathVariable long userId, @RequestBody EditUserContext editUserContext){
 

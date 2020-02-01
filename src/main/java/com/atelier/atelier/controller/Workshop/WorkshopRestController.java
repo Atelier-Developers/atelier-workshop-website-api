@@ -305,6 +305,7 @@ public class WorkshopRestController {
     }
 
 
+    //TODO USER REQUEST STATUS
     @GetMapping("/offeringWorkshops/{offeringWorkshopId}/requestStatus/{userId}")
     public ResponseEntity<Object> getUserRequestStatusAtOfferingWorkshop(@PathVariable long offeringWorkshopId, @PathVariable long userId){
 
