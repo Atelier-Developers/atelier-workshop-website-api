@@ -523,9 +523,8 @@ public class WorkshopManagerController {
         }
 
         List<Question> questions = formQuestionContext.getQuestion();
-        form.setQuestions(questions);
 
-        for (Question question : questions) {
+            for (Question question : questions) {
             List<Answerable> answerables = question.getAnswerables();
             if (answerables != null) {
                 for (Answerable answerable : answerables) {
@@ -534,6 +533,7 @@ public class WorkshopManagerController {
             }
 
             question.setForm(form);
+            form.addQuestion(question);
             questionRepsoitory.save(question);
         }
         if (form instanceof GraderRequestForm) {
@@ -980,6 +980,33 @@ public class WorkshopManagerController {
     }
 
 
+    @DeleteMapping("/offeringWorkshop/group/{groupId}")
+    public ResponseEntity<Object> deleteGroupWithoutDeletingInfos(@PathVariable long groupId){
+
+        Optional<WorkshopGroup> optionalGroup = workshopGroupRepository.findById(groupId);
+
+        if (!optionalGroup.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopGroup workshopGroup = optionalGroup.get();
+
+        for(WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
+            workshopGraderInfo.setWorkshopGroup(null);
+            workshopGraderInfoRepository.save(workshopGraderInfo);
+        }
+
+        for(WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()){
+            workshopAttenderInfo.setWorkshopGroup(null);
+            workshopAttenderInfoRepository.save(workshopAttenderInfo);
+        }
+
+        workshopGroupRepository.delete(workshopGroup);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
     @PostMapping("/offeringWorkshop/group/{groupId}/att")
     public ResponseEntity<Object> addAttToGroup(@PathVariable long groupId, @RequestBody RequesterIdContext attInfo) {
 
@@ -1012,7 +1039,6 @@ public class WorkshopManagerController {
     }
 
 
-    // TODO CONTINUE REFACTORING THE WORKSHOP MANAGER
     @PostMapping("/offeringWorkshop/group/{groupId}/grader")
     public ResponseEntity<Object> addGraderToGroup(@PathVariable long groupId, @RequestBody RequesterIdContext graderInfo) {
 

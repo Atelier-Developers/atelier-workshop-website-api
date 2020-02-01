@@ -34,7 +34,7 @@ public class Answer {
     private List<AnswerData> answerData;
 
     @ManyToOne
-    @JoinColumn(name = "question_id" , nullable = false)
+    @JoinColumn(name = "question_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Question question;
 

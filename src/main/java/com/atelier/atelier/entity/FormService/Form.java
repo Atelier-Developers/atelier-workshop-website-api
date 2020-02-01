@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import org.hibernate.annotations.DiscriminatorOptions;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,7 +14,6 @@ import java.util.List;
 @DiscriminatorColumn(name = "form_type" )
 @DiscriminatorOptions(force = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-
 public abstract class Form {
 
     @Id
@@ -26,6 +26,7 @@ public abstract class Form {
 
     @OneToMany(mappedBy = "form", cascade = CascadeType.ALL)
     private List<Question> questions;
+
 
     public long getId() {
         return id;
@@ -49,5 +50,12 @@ public abstract class Form {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
+    }
+
+    public void addQuestion(Question question) {
+        if (questions == null) {
+            questions = new ArrayList<Question>();
+        }
+        questions.add(question);
     }
 }
