@@ -46,6 +46,10 @@ public class UserController {
         user.addRole(grader);
 
         user.addRole(new ManagerWorkshopConnection()); //TODO REMEMBER TO DELETE THESE AND ADD A PATH FOR ADDING SUCH ROLES TO A USER
+
+        UserChatterConnection userChatterConnection = new UserChatterConnection();
+        userChatterConnection.setUser(user);
+        user.setUserChatterConnection(userChatterConnection);
         try {
             userRepository.save(user);
         }
@@ -56,8 +60,9 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<Object>  showUser(Authentication authentication) {
+    public ResponseEntity<Object> showUser(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
+        System.out.println(user.getName());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

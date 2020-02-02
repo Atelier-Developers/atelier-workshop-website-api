@@ -2,11 +2,15 @@ package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.context.*;
 import com.atelier.atelier.entity.FormService.*;
+import com.atelier.atelier.entity.MessagingSystem.Chatroom;
+import com.atelier.atelier.entity.MessagingSystem.Chatter;
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.RequestState;
 import com.atelier.atelier.entity.RequestService.Requester;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
+import com.atelier.atelier.repository.ChatService.ChatroomRepository;
+import com.atelier.atelier.repository.ChatService.ChatterRepository;
 import com.atelier.atelier.repository.Form.*;
 import com.atelier.atelier.repository.Request.RequestRepository;
 import com.atelier.atelier.repository.Request.RequestableRepository;
@@ -55,10 +59,14 @@ public class WorkshopManagerController {
     private FileRepository fileRepository;
     private WorkshopManagerInfoRepository workshopManagerInfoRepository;
     private RequestableRepository requestableRepository;
+    private ChatroomRepository chatroomRepository;
+    private ChatterRepository chatterRepository;
 
 
-    public WorkshopManagerController(RequestableRepository requestableRepository, WorkshopManagerInfoRepository workshopManagerInfoRepository, WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+    public WorkshopManagerController(ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, RequestableRepository requestableRepository, WorkshopManagerInfoRepository workshopManagerInfoRepository, WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
+        this.chatroomRepository = chatroomRepository;
+        this.chatterRepository = chatterRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.userRepository = userRepository;
         this.questionRepsoitory = questionRepsoitory;
@@ -193,6 +201,47 @@ public class WorkshopManagerController {
                 workshop1.addOfferingWorkshopRelation(offeredWorkshopRelationDetail);
                 offeredWorkshop.addOfferingWorkshopRelations(offeredWorkshopRelationDetail);
             }
+        }
+
+        List<User> users = userRepository.findAll();
+        List<User> managerUsers = new ArrayList<>();
+
+        for(WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+            WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
+            for (User user : users){
+                WorkshopManager workshopManager1 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+                if (workshopManager1.getId() == workshopManager.getId()){
+                    managerUsers.add(user);
+                    break;
+                }
+            }
+        }
+
+        OfferedWorkshopChatroom attRoom = new OfferedWorkshopChatroom();
+        attRoom.setOfferedWorkshop(offeredWorkshop);
+        attRoom.setName("Attendees' Chatroom");
+        offeredWorkshop.setAttendeesChatroom(attRoom);
+
+        chatroomRepository.save(attRoom);
+
+        OfferedWorkshopChatroom graderRoom = new OfferedWorkshopChatroom();
+        graderRoom.setOfferedWorkshop(offeredWorkshop);
+        graderRoom.setName("Graders' Chatroom");
+        offeredWorkshop.setGradersChatroom(graderRoom);
+
+        chatroomRepository.save(graderRoom);
+
+        for (User user : managerUsers){
+            Chatter chatter = user.getUserChatterConnection();
+            attRoom.addChatter(chatter);
+            chatter.addChatroom(attRoom);
+            chatterRepository.save(chatter);
+            chatroomRepository.save(attRoom);
+
+            graderRoom.addChatter(chatter);
+            chatter.addChatroom(graderRoom);
+            chatterRepository.save(chatter);
+            chatroomRepository.save(graderRoom);
         }
 
         offeringWorkshopRepository.save(offeredWorkshop);
@@ -616,7 +665,7 @@ public class WorkshopManagerController {
     }
 
 
-    @GetMapping("/offeringWorkshop/form/{id}/result")
+    @PostMapping("/offeringWorkshop/form/{id}/result")
     public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody RequesterIdContext requesterId) {
 
         Optional<Form> optionalForm = formRepository.findById(id);
@@ -983,7 +1032,6 @@ public class WorkshopManagerController {
 
 
 
-    //TODO DELETE GROUPS
     @DeleteMapping("/offeringWorkshop/group/{groupId}")
     public ResponseEntity<Object> deleteGroupWithoutDeletingInfos(@PathVariable long groupId){
 
@@ -1401,6 +1449,23 @@ public class WorkshopManagerController {
         workshopGrader.addGraderInfo(workshopGraderInfo);
         workshopGraderInfoRepository.save(workshopGraderInfo);
 
+        List<User> users = userRepository.findAll();
+        OfferedWorkshopChatroom offeredWorkshopChatroom = offeredWorkshop.getGradersChatroom();
+
+        for (User user : users){
+
+            Grader grader = (Grader) user.getRole("Grader");
+
+            if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+                Chatter chatter = user.getUserChatterConnection();
+                offeredWorkshopChatroom.addChatter(chatter);
+                chatter.addChatroom(offeredWorkshopChatroom);
+                chatterRepository.save(chatter);
+                chatroomRepository.save(offeredWorkshopChatroom);
+                break;
+            }
+        }
+
         return workshopGraderInfo;
     }
 
@@ -1411,6 +1476,24 @@ public class WorkshopManagerController {
         workshopAttender.addWorkshopAttenderInfo(workshopAttenderInfo);
         offeredWorkshop.addWorkshopAttenderInfo(workshopAttenderInfo);
         workshopAttenderInfoRepository.save(workshopAttenderInfo);
+
+        List<User> users = userRepository.findAll();
+        OfferedWorkshopChatroom offeredWorkshopChatroom = offeredWorkshop.getAttendeesChatroom();
+
+        for (User user : users){
+
+            Attender attender = (Attender) user.getRole("Attender");
+
+            if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
+                Chatter chatter = user.getUserChatterConnection();
+                offeredWorkshopChatroom.addChatter(chatter);
+                chatter.addChatroom(offeredWorkshopChatroom);
+                chatterRepository.save(chatter);
+                chatroomRepository.save(offeredWorkshopChatroom);
+                break;
+            }
+        }
+
         return workshopAttenderInfo;
     }
 

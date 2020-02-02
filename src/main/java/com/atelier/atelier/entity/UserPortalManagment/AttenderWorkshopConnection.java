@@ -4,11 +4,9 @@ import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopAttender;
 import com.atelier.atelier.entity.WorkshopManagment.WorkshopAttenderInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @DiscriminatorValue(value = "AttenderWorkshopConnection")

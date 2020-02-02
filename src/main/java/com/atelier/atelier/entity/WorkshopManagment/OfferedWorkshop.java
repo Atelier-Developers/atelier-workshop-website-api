@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.FormService.FileAnswer;
+import com.atelier.atelier.entity.MessagingSystem.Chatroom;
 import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.Requestable;
 import com.atelier.atelier.entity.UserPortalManagment.File;
@@ -59,11 +60,23 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
 
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private List<OfferedWorkshopChatroom> offeredWorkshopChatrooms;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private OfferedWorkshopChatroom attendeesChatroom;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private OfferedWorkshopChatroom gradersChatroom;
+
     @OneToOne(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     private GraderEvaluationForm graderEvaluationForm;
 
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "grader_request_form_id")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private GraderRequestForm graderRequestForm;
@@ -186,6 +199,30 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     }
 
 
+    public List<OfferedWorkshopChatroom> getOfferedWorkshopChatrooms() {
+        return offeredWorkshopChatrooms;
+    }
+
+    public void setOfferedWorkshopChatrooms(List<OfferedWorkshopChatroom> offeredWorkshopChatrooms) {
+        this.offeredWorkshopChatrooms = offeredWorkshopChatrooms;
+    }
+
+    public OfferedWorkshopChatroom getAttendeesChatroom() {
+        return attendeesChatroom;
+    }
+
+    public void setAttendeesChatroom(OfferedWorkshopChatroom attendeesChatroom) {
+        this.attendeesChatroom = attendeesChatroom;
+    }
+
+    public OfferedWorkshopChatroom getGradersChatroom() {
+        return gradersChatroom;
+    }
+
+    public void setGradersChatroom(OfferedWorkshopChatroom gradersChatroom) {
+        this.gradersChatroom = gradersChatroom;
+    }
+
     public List<OfferedWorkshopRelationDetail> getWorkshopRelationDetails() {
         return workshopRelationDetails;
     }
@@ -301,6 +338,15 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
             workshopGroups.add(workshopAttenderInfo.getWorkshopGroup());
         }
         return workshopGroups;
+    }
+
+    public void addToWorkshopChatrooms(OfferedWorkshopChatroom chatroom){
+
+        if (offeredWorkshopChatrooms == null){
+            offeredWorkshopChatrooms = new ArrayList<OfferedWorkshopChatroom>();
+        }
+
+        offeredWorkshopChatrooms.add(chatroom);
     }
 
 

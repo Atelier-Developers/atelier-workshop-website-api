@@ -7,10 +7,7 @@ import com.atelier.atelier.entity.FormService.Form;
 import com.atelier.atelier.entity.FormService.FormApplicant;
 import com.atelier.atelier.entity.FormService.Question;
 import com.atelier.atelier.entity.WorkshopManagment.*;
-import com.atelier.atelier.repository.Form.FormApplicantRepository;
-import com.atelier.atelier.repository.Form.FormRepository;
-import com.atelier.atelier.repository.Form.GraderRequestFormRepository;
-import com.atelier.atelier.repository.Form.QuestionRepsoitory;
+import com.atelier.atelier.repository.Form.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,13 +23,15 @@ public class FormController {
     private FormRepository formRepository;
     private QuestionRepsoitory questionRepsoitory;
     private GraderRequestFormRepository graderRequestFormRepository;
+    private GraderEvaluationFormRepository graderEvaluationFormRepository;
     private FormApplicantRepository formApplicantRepository;
 
-    public FormController(FormApplicantRepository formApplicantRepository, GraderRequestFormRepository graderRequestFormRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory) {
+    public FormController(GraderEvaluationFormRepository graderEvaluationFormRepository, FormApplicantRepository formApplicantRepository, GraderRequestFormRepository graderRequestFormRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory) {
         this.formRepository = formRepository;
         this.questionRepsoitory = questionRepsoitory;
         this.graderRequestFormRepository = graderRequestFormRepository;
         this.formApplicantRepository = formApplicantRepository;
+        this.graderEvaluationFormRepository = graderEvaluationFormRepository;
     }
 
     @GetMapping("/form")
@@ -62,21 +61,21 @@ public class FormController {
     }
 
 
-    //TODO fix delete path for form
+    //TODO fix delete path for form (IS OKAY FOR WORKSHOP AND EVALUATION, BUT NOT OKAY FOR REGISTER AND REQUEST CUZ THEY HAVE NULL AS OFFERING WORKSHOP)
     @DeleteMapping("/form/{formId}")
     public ResponseEntity<Object> deleteForm(@PathVariable long formId){
         Optional<Form> optionalForm = formRepository.findById(formId);
         if (!optionalForm.isPresent()){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        GraderRequestForm form = (GraderRequestForm) optionalForm.get();
 
-        graderRequestFormRepository.delete(form);
+        Form form = optionalForm.get();
+
+        formRepository.delete(form);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
-    //TODO SEE AN APPLICANT'S FORM STATUS
     @GetMapping("/form/{formId}/result/{appId}")
     public ResponseEntity<Object> showApplicantResultForAForm(@PathVariable long formId, @PathVariable long appId){
 

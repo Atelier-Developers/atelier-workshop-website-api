@@ -37,6 +37,9 @@ public class User {
     @OneToOne
     private File pic;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    private UserChatterConnection userChatterConnection;
+
 
     @ManyToAny(metaColumn = @Column(name = "role_type"))
     @AnyMetaDef(idType = "long", metaType = "string",
@@ -60,6 +63,14 @@ public class User {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public UserChatterConnection getUserChatterConnection() {
+        return userChatterConnection;
+    }
+
+    public void setUserChatterConnection(UserChatterConnection userChatterConnection) {
+        this.userChatterConnection = userChatterConnection;
     }
 
     public String getName() {
