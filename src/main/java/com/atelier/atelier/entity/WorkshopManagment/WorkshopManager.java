@@ -17,7 +17,7 @@ public abstract class WorkshopManager {
     @GeneratedValue
     private long id;
 
-    @OneToMany(mappedBy = "workshopManager")
+    @OneToMany(mappedBy = "workshopManager", cascade = CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopManagerInfo> workshopManagerInfos;
 

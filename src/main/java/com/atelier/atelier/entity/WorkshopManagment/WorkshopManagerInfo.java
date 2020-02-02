@@ -9,7 +9,7 @@ public class WorkshopManagerInfo {
     @GeneratedValue
     private long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "workshop_manager_id",  nullable = false)
     private WorkshopManager workshopManager;
 

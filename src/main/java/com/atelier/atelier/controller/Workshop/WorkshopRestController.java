@@ -307,11 +307,11 @@ public class WorkshopRestController {
 
     //TODO USER REQUEST STATUS
     @GetMapping("/offeringWorkshops/{offeringWorkshopId}/requestStatus/{userId}")
-    public ResponseEntity<Object> getUserRequestStatusAtOfferingWorkshop(@PathVariable long offeringWorkshopId, @PathVariable long userId){
+    public ResponseEntity<Object> getUserRequestStatusAtOfferingWorkshop(@PathVariable long offeringWorkshopId, @PathVariable long userId) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -319,28 +319,23 @@ public class WorkshopRestController {
 
         Optional<User> optionalUser = userRepository.findById(userId);
 
-        if (!optionalUser.isPresent()){
+        if (!optionalUser.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         User user = optionalUser.get();
         Attender attender = (Attender) user.getRole("Attender");
         Grader grader = (Grader) user.getRole("Grader");
-
-        for (Request request : offeredWorkshop.getRequests()){
-
+        GradAttRequestStatus gradAttRequestStatus = new GradAttRequestStatus();
+        for (Request request : offeredWorkshop.getRequests()) {
             Requester requester = request.getRequester();
-
-            if (requester.getId() == attender.getId()){
-                return new ResponseEntity<>(request, HttpStatus.OK);
-            }
-
-            else if (requester.getId() == grader.getId()){
-                return new ResponseEntity<>(request, HttpStatus.OK);
+            if (requester.getId() == attender.getId()) {
+                gradAttRequestStatus.setAttReq(request);
+            } else if (requester.getId() == grader.getId()) {
+                gradAttRequestStatus.setGraderReq(request);
             }
         }
-
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(gradAttRequestStatus, HttpStatus.OK);
     }
 
 
@@ -425,7 +420,7 @@ public class WorkshopRestController {
 
     // Get a workshop file's file download URI, title, description, receivers list
     @GetMapping("/offeringWorkshops/workshopFile/{workshopFileId}")
-    public ResponseEntity<Object> getDownloadUriForAFile(@PathVariable long workshopFileId){
+    public ResponseEntity<Object> getDownloadUriForAFile(@PathVariable long workshopFileId) {
 
 
         Optional<WorkshopFile> optionalWorkshopFile = workshopFileRepository.findById(workshopFileId);
@@ -469,12 +464,12 @@ public class WorkshopRestController {
 
 
     @GetMapping("/offeringWorkshops/{offeringWorkshopId}/workshopFiles/attendees")
-    public ResponseEntity<Object> getAttendeeWorkshopFiles(@PathVariable long offeringWorkshopId){
+    public ResponseEntity<Object> getAttendeeWorkshopFiles(@PathVariable long offeringWorkshopId) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -485,9 +480,9 @@ public class WorkshopRestController {
 
         List<WorkshopFileGETContext> workshopFileGETContexts = new ArrayList<>();
 
-        for(WorkshopFile workshopFile : workshopFiles){
+        for (WorkshopFile workshopFile : workshopFiles) {
 
-            if (workshopFile.getReceivers().contains(WorkshopFileReceiver.Attendee)){
+            if (workshopFile.getReceivers().contains(WorkshopFileReceiver.Attendee)) {
 
 
                 WorkshopFileGETContext workshopFileGETContext = new WorkshopFileGETContext();
@@ -496,17 +491,13 @@ public class WorkshopRestController {
                 workshopFileGETContext.setDescription(workshopFile.getDescription());
 
                 List<String> workshopFileReceivers = new ArrayList<String>();
-                for (WorkshopFileReceiver workshopFileReceiver : workshopFile.getReceivers()){
+                for (WorkshopFileReceiver workshopFileReceiver : workshopFile.getReceivers()) {
 
-                    if (workshopFileReceiver.equals(WorkshopFileReceiver.Attendee)){
+                    if (workshopFileReceiver.equals(WorkshopFileReceiver.Attendee)) {
                         workshopFileReceivers.add("Attendee");
-                    }
-
-                    else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)){
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)) {
                         workshopFileReceivers.add("Grader");
-                    }
-
-                    else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)){
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)) {
                         workshopFileReceivers.add("Manager");
                     }
                 }
@@ -533,11 +524,11 @@ public class WorkshopRestController {
 
 
     @GetMapping("/offeringWorkshops/{offeringWorkshopId}/workshopFiles/graders")
-    public ResponseEntity<Object> getGraderWorkshopFiles(@PathVariable long offeringWorkshopId){
+    public ResponseEntity<Object> getGraderWorkshopFiles(@PathVariable long offeringWorkshopId) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -546,9 +537,9 @@ public class WorkshopRestController {
         List<WorkshopFile> workshopFiles = offeredWorkshop.getWorkshopFiles();
 
         List<WorkshopFileGETContext> workshopFileGETContexts = new ArrayList<>();
-        for (WorkshopFile workshopFile: workshopFiles){
+        for (WorkshopFile workshopFile : workshopFiles) {
 
-            if (workshopFile.getReceivers().contains(WorkshopFileReceiver.Grader)){
+            if (workshopFile.getReceivers().contains(WorkshopFileReceiver.Grader)) {
 
                 WorkshopFileGETContext workshopFileGETContext = new WorkshopFileGETContext();
 
@@ -556,17 +547,13 @@ public class WorkshopRestController {
                 workshopFileGETContext.setDescription(workshopFile.getDescription());
 
                 List<String> workshopFileReceivers = new ArrayList<String>();
-                for (WorkshopFileReceiver workshopFileReceiver : workshopFile.getReceivers()){
+                for (WorkshopFileReceiver workshopFileReceiver : workshopFile.getReceivers()) {
 
-                    if (workshopFileReceiver.equals(WorkshopFileReceiver.Attendee)){
+                    if (workshopFileReceiver.equals(WorkshopFileReceiver.Attendee)) {
                         workshopFileReceivers.add("Attendee");
-                    }
-
-                    else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)){
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)) {
                         workshopFileReceivers.add("Grader");
-                    }
-
-                    else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)){
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)) {
                         workshopFileReceivers.add("Manager");
                     }
                 }
@@ -588,7 +575,6 @@ public class WorkshopRestController {
 
         return new ResponseEntity<>(workshopFileGETContexts, HttpStatus.OK);
     }
-
 
 
     @GetMapping("/offeringWorkshops/download/{fileId}")
