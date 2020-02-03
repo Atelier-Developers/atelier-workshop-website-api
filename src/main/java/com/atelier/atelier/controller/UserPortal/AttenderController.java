@@ -398,6 +398,10 @@ public class AttenderController {
 
         WorkshopGroup attendeeGroup = workshopAttenderInfo.getWorkshopGroup();
 
+        if (attendeeGroup == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         GroupUsersContext groupUsersContext = new GroupUsersContext();
 
         groupUsersContext.setGroupName(attendeeGroup.getName());

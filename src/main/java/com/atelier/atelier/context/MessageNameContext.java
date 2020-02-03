@@ -4,41 +4,32 @@ import java.util.Calendar;
 
 public class MessageNameContext {
 
-    private long messageId;
-    private String message;
-    private Calendar time;
-    private String senderName;
+    private long participantId;
+    private String content;
+    private MessageTimestampContext timestamp;
 
 
-    public long getMessageId() {
-        return messageId;
+    public long getParticipantId() {
+        return participantId;
     }
 
-    public void setMessageId(long messageId) {
-        this.messageId = messageId;
+    public void setParticipantId(long participantId) {
+        this.participantId = participantId;
     }
 
-    public String getMessage() {
-        return message;
+    public String getContent() {
+        return content;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public Calendar getTime() {
-        return time;
+    public MessageTimestampContext getTimestamp() {
+        return timestamp;
     }
 
-    public void setTime(Calendar time) {
-        this.time = time;
-    }
-
-    public String getSenderName() {
-        return senderName;
-    }
-
-    public void setSenderName(String senderName) {
-        this.senderName = senderName;
+    public void setTimestamp(MessageTimestampContext timestamp) {
+        this.timestamp = timestamp;
     }
 }

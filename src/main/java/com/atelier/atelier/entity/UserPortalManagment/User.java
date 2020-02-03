@@ -38,7 +38,7 @@ public class User {
     private File pic;
 
     @OneToOne(cascade = CascadeType.ALL)
-    private UserChatterConnection userChatterConnection;
+        private UserChatterConnection userChatterConnection;
 
 
     @ManyToAny(metaColumn = @Column(name = "role_type"))

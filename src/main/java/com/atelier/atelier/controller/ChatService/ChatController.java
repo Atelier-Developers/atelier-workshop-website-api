@@ -3,6 +3,7 @@ package com.atelier.atelier.controller.ChatService;
 import com.atelier.atelier.context.*;
 import com.atelier.atelier.entity.MessagingSystem.*;
 import com.atelier.atelier.entity.UserPortalManagment.User;
+import com.atelier.atelier.entity.UserPortalManagment.UserChatterConnection;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshopChatroom;
 import com.atelier.atelier.repository.ChatService.ChatroomRepository;
@@ -96,6 +97,40 @@ public class ChatController {
         chatterChatroomIdsContext.setChatroomIds(chatroomsId);
 
         return new ResponseEntity<>(chatterChatroomIdsContext, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{offeringWorkshopId}/chatter/{chatterId}")
+    public ResponseEntity<Object> getAChattersChatroomsForOfferingWorkshop(@PathVariable long offeringWorkshopId, @PathVariable long chatterId){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        Optional<Chatter> optionalChatter = chatterRepository.findById(chatterId);
+
+
+        if (!optionalChatter.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Chatter chatter = optionalChatter.get();
+        List<OfferedWorkshopChatroom> offeredWorkshopChatrooms = new ArrayList<>();
+
+        for (OfferedWorkshopChatroom offeredWorkshopChatroom: offeredWorkshop.getOfferedWorkshopChatrooms()){
+
+            if (offeredWorkshopChatroom.getChatters().contains(chatter)){
+                offeredWorkshopChatrooms.add(offeredWorkshopChatroom);
+            }
+
+        }
+
+
+        return new ResponseEntity<>(offeredWorkshopChatrooms, HttpStatus.OK);
     }
 
 
@@ -349,33 +384,64 @@ public class ChatController {
 
             MessageNameContext messageNameContext = new MessageNameContext();
 
-            messageNameContext.setMessage(message.getText());
-            messageNameContext.setMessageId(message.getId());
-            messageNameContext.setTime(message.getTime());
+            messageNameContext.setContent(message.getText());
+            User user = findMessageSender(message);
+            messageNameContext.setParticipantId(user.getUserChatterConnection().getId());
+            MessageTimestampContext messageTimestampContext = new MessageTimestampContext(message.getTime());
+            messageNameContext.setTimestamp(messageTimestampContext);
 
-            for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
-
-                if (chatterMessageRelation.getMessageRelation().equals(MessageRelation.Sender)){
-
-                    Chatter chatter = chatterMessageRelation.getChatter();
-
-                    for (User user: users){
-
-                        if (user.getUserChatterConnection().getId() == chatter.getId()){
-                            messageNameContext.setSenderName(user.getName());
-                            break;
-                        }
-
-                    }
-
-                    break;
-                }
-            }
+//            for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
+//
+//                if (chatterMessageRelation.getMessageRelation().equals(MessageRelation.Sender)){
+//
+//                    Chatter chatter = chatterMessageRelation.getChatter();
+//
+//                    for (User user: users){
+//
+//                        if (user.getUserChatterConnection().getId() == chatter.getId()){
+//                            messageNameContext.setSenderName(user.getName());
+//                            break;
+//                        }
+//
+//                    }
+//
+//                    break;
+//                }
+//            }
 
             messageNameContexts.add(messageNameContext);
         }
 
         return new ResponseEntity<>(messageNameContexts, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/chat/{chatId}/participants")
+    public ResponseEntity<Object> getParticipantNamesWithChatterId(@PathVariable long chatId){
+
+        Optional<Chatroom> optionalChatroom = chatroomRepository.findById(chatId);
+
+        if (!optionalChatroom.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshopChatroom offeredWorkshopChatroom = (OfferedWorkshopChatroom) optionalChatroom.get();
+
+        List<NameChatterContext> nameChatterContexts = new ArrayList<>();
+
+        for (Chatter chatter : offeredWorkshopChatroom.getChatters()){
+
+            UserChatterConnection userChatterConnection = (UserChatterConnection) chatter;
+
+            NameChatterContext nameChatterContext = new NameChatterContext();
+
+            nameChatterContext.setName(userChatterConnection.getUser().getName());
+            nameChatterContext.setId(chatter.getId());
+
+            nameChatterContexts.add(nameChatterContext);
+        }
+
+        return new ResponseEntity<>(nameChatterContexts, HttpStatus.OK);
     }
 
 
@@ -411,7 +477,7 @@ public class ChatController {
 
                     for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
 
-                        Chatter relatedChatter = chatterMessageRelation.getChatter();
+                        UserChatterConnection relatedChatter = (UserChatterConnection) chatterMessageRelation.getChatter();
 
                         if ((relatedChatter.getId() == chatter.getId()) && (chatterMessageRelation.getMessageReadStatus().equals(MessageReadStatus.Unseen))){
 
@@ -421,11 +487,11 @@ public class ChatController {
 
                             MessageNameContext messageNameContext = new MessageNameContext();
 
-                            messageNameContext.setTime(message.getTime());
-                            messageNameContext.setMessageId(message.getId());
-                            messageNameContext.setMessage(message.getText());
+                            MessageTimestampContext messageTimestampContext = new MessageTimestampContext(message.getTime());
+                            messageNameContext.setTimestamp(messageTimestampContext);
                             User sender = findMessageSender(message);
-                            messageNameContext.setSenderName(sender.getName());
+                            messageNameContext.setParticipantId(sender.getUserChatterConnection().getId());
+                            messageNameContext.setContent(" * " + message.getText());
 
                             messageNameContexts.add(messageNameContext);
 
@@ -474,17 +540,17 @@ public class ChatController {
 
                     for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
 
-                        Chatter relatedChatter = chatterMessageRelation.getChatter();
+                        UserChatterConnection relatedChatter = (UserChatterConnection) chatterMessageRelation.getChatter();
 
                         if ((relatedChatter.getId() == chatter.getId()) && (chatterMessageRelation.getMessageReadStatus().equals(MessageReadStatus.Seen))){
 
                             MessageNameContext messageNameContext = new MessageNameContext();
 
-                            messageNameContext.setTime(message.getTime());
-                            messageNameContext.setMessageId(message.getId());
-                            messageNameContext.setMessage(message.getText());
+                            MessageTimestampContext messageTimestampContext = new MessageTimestampContext(message.getTime());
+                            messageNameContext.setTimestamp(messageTimestampContext);
                             User sender = findMessageSender(message);
-                            messageNameContext.setSenderName(sender.getName());
+                            messageNameContext.setParticipantId(sender.getUserChatterConnection().getId());
+                            messageNameContext.setContent(message.getText());
 
                             messageNameContexts.add(messageNameContext);
 

@@ -166,6 +166,10 @@ public class WorkshopGraderController {
 
         WorkshopGroup graderGroup = workshopGraderInfo.getWorkshopGroup();
 
+        if (graderGroup == null){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         GroupUsersContext groupUsersContext = new GroupUsersContext();
 
         groupUsersContext.setGroupName(graderGroup.getName());
