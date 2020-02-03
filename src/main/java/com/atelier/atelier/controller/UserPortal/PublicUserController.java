@@ -3,6 +3,8 @@ package com.atelier.atelier.controller.UserPortal;
 
 import com.atelier.atelier.context.OfferedWorkshopManagerNameContext;
 import com.atelier.atelier.context.UserHitsoryContext;
+import com.atelier.atelier.context.WorkshopUserContext;
+import com.atelier.atelier.context.WorkshopUserElementContext;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.role.AttenderRepository;
@@ -346,6 +348,88 @@ public class PublicUserController {
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+
+    @GetMapping("/offeringWorkshop/{id}/info/users")
+    public ResponseEntity<Object> getAttAndGraderAndManagerUsers(@PathVariable long id){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        WorkshopUserContext workshopUserContext = new WorkshopUserContext();
+        List<User> users = userRepository.findAll();
+        List<WorkshopUserElementContext> attUser = new ArrayList<>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()){
+            WorkshopAttender workshopAttender = workshopAttenderInfo.getWorkshopAttender();
+            for (User user : users){
+                Attender attender = (Attender) user.getRole("Attender");
+                if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
+                    WorkshopUserElementContext workshopUserElementContext = new WorkshopUserElementContext();
+                    workshopUserElementContext.setName(user.getName());
+                    workshopUserElementContext.setUserId(user.getId());
+                    attUser.add(workshopUserElementContext);
+                    break;
+                }
+
+            }
+        }
+
+        workshopUserContext.setAttUsers(attUser);
+
+        List<WorkshopUserElementContext> graderUser = new ArrayList<>();
+
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()){
+
+            WorkshopGrader workshopGrader = workshopGraderInfo.getWorkshopGrader();
+
+            for (User user : users) {
+                Grader grader = (Grader) user.getRole("Grader");
+
+                if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+                    WorkshopUserElementContext workshopUserElementContext = new WorkshopUserElementContext();
+                    workshopUserElementContext.setName(user.getName());
+                    workshopUserElementContext.setUserId(user.getId());
+                    graderUser.add(workshopUserElementContext);
+                    break;
+                }
+            }
+        }
+
+        workshopUserContext.setGraderUsers(graderUser);
+
+
+        List<WorkshopUserElementContext> managerUser = new ArrayList<>();
+
+        for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+
+            WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
+
+            for (User user : users) {
+                WorkshopManager workshopManager1 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
+
+                if (workshopManager1.getId() == workshopManager.getId()){
+                    WorkshopUserElementContext workshopUserElementContext = new WorkshopUserElementContext();
+                    workshopUserElementContext.setName(user.getName());
+                    workshopUserElementContext.setUserId(user.getId());
+                    managerUser.add(workshopUserElementContext);
+                    break;
+                }
+            }
+        }
+
+        workshopUserContext.setManagerUsers(managerUser);
+
+
+        return new ResponseEntity<>(workshopUserContext, HttpStatus.OK);
+
     }
 
 
