@@ -141,25 +141,17 @@ public class SystemAdminController {
     @PutMapping("/attendeePaymentTab/{id}")
     public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id, Authentication authentication){
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
-
         if ( systemAdmin == null ){
-
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-
         }
-
         Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
-
         if ( !optionalAttenderPaymentTab.isPresent() ){
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-
         AttenderPaymentTab attenderPaymentTab = optionalAttenderPaymentTab.get();
-
         attenderPaymentTab.setPaid(true);
         attenderPaymentTabRepository.save(attenderPaymentTab);
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
 

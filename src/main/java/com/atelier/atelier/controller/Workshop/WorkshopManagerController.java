@@ -135,7 +135,7 @@ public class WorkshopManagerController {
 
 
     @PutMapping("/offeringWorkshop/{offeringWorkshopId}")
-    public ResponseEntity<Object> editOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody OfferingWorkshopContext offeringWorkshopContext){
+    public ResponseEntity<Object> editOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody WorkshopEditContext workshopEditContext) throws ParseException {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
@@ -145,31 +145,29 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        List<Workshop> requisites = new ArrayList<>();
-
-        if (offeringWorkshopContext.getPreRequisiteId() != null) {
-
-            for (Long id : offeringWorkshopContext.getPreRequisiteId()) {
-                Optional<Workshop> optionalWorkshop1 = workshopRepository.findById(id);
-                if (!optionalWorkshop1.isPresent()) {
-                    return new ResponseEntity<>("Workshop not found!", HttpStatus.BAD_REQUEST);
-                }
-                workshops.add(optionalWorkshop1.get());
-            }
-            for (Workshop workshop1 : workshops) {
-                OfferedWorkshopRelationDetail offeredWorkshopRelationDetail = new OfferedWorkshopRelationDetail();
-                offeredWorkshopRelationDetail.setWorkshop(workshop1);
-                offeredWorkshopRelationDetail.setOfferedWorkshop(offeredWorkshop);
-                offeredWorkshopRelationDetail.setDependencyType(DependencyType.PREREQUISITE);
-                workshop1.addOfferingWorkshopRelation(offeredWorkshopRelationDetail);
-                offeredWorkshop.addOfferingWorkshopRelations(offeredWorkshopRelationDetail);
-            }
+        offeredWorkshop.setName(workshopEditContext.getName());
 
 
-        }
+        String start = workshopEditContext.getStartTime();
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        cal.setTime(dateFormat.parse(start));
 
+        String end = workshopEditContext.getEndTime();
+        Calendar cal2 = Calendar.getInstance();
+        SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        cal2.setTime(dateFormat1.parse(end));
 
+        offeredWorkshop.setStartTime(cal);
+        offeredWorkshop.setEndTime(cal2);
 
+        offeredWorkshop.setDescription(workshopEditContext.getDescription());
+
+        offeredWorkshop.setPrice(workshopEditContext.getPrice());
+
+        offeringWorkshopRepository.save(offeredWorkshop);
+
+        return new ResponseEntity<>(offeredWorkshop.getId(), HttpStatus.OK);
 
     }
 
@@ -541,8 +539,6 @@ public class WorkshopManagerController {
                         fileAnswer.setFileType(multipartFile.getContentType());
                         fileAnswer.setData(multipartFile.getBytes());
                         answerData = fileAnswer;
-//                        // ADDED FILE STUFF HERE
-//                        fileAnswerRepository.save(fileAnswer);
                     } else {
                         return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
                     }
@@ -1408,7 +1404,6 @@ public class WorkshopManagerController {
     @GetMapping("/offeringWorkshop/{id}/requests/pending/attPayments")
     public ResponseEntity<Object> showPendingAttendeePayments(@PathVariable long id, Authentication authentication) {
 
-//        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
@@ -1416,19 +1411,28 @@ public class WorkshopManagerController {
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
-//        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
-//        if (workshopManagerInfo == null) {
-//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-//        }
 
-        List<AttenderRequestPaymentTab> attendees = new ArrayList<>();
+
+        List<PaymentNameContext> attendees = new ArrayList<>();
+        List<User> users = userRepository.findAll();
 
 
         for (Request request : offeredWorkshop.getRequests()) {
             if (request.getRequester() instanceof Attender) {
                 if (request.getState().equals(RequestState.Pending)) {
+                    PaymentNameContext paymentNameContext = new PaymentNameContext();
+                    Attender attender = (Attender) request.getRequester();
+                    WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+                    for (User user : users) {
+                        Attender userAttender = (Attender) user.getRole("Attender");
+                        if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
+                            paymentNameContext.setName(user.getName());
+                            break;
+                        }
+                    }
                     AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
-                    attendees.add(attenderRequestPaymentTab);
+                    paymentNameContext.setPays(attenderRequestPaymentTab.getAttenderPaymentTabList());
+                    attendees.add(paymentNameContext);
                 }
             }
         }

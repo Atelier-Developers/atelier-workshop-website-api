@@ -169,7 +169,7 @@ public class AttenderController {
         List<OfferedWorkshopRelationDetail> offeredWorkshopRelationDetails = offeredWorkshop.getWorkshopRelationDetails();
         for (OfferedWorkshopRelationDetail offeredWorkshopRelationDetail : offeredWorkshopRelationDetails) {
             if (!attenderWorkshopConnection.hasPassedWorkshop(offeredWorkshopRelationDetail.getWorkshop())) {
-                return new ResponseEntity<>("This attendee hasn't passed the prerequisite of this workshop", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("This attendee hasn't passed the prerequisite of this workshop", HttpStatus.I_AM_A_TEAPOT);
             }
         }
         AttenderRegisterForm attenderRegisterForm = offeredWorkshop.getAttenderRegisterForm();
@@ -306,7 +306,6 @@ public class AttenderController {
                 attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
                 attenderRequestPaymentTab.addPayment(attenderPaymentTab);
             }
-            // TODO CHECK FOR THE TYPE OF EXCEPTION
             catch (IllegalArgumentException | ParseException e) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -333,7 +332,6 @@ public class AttenderController {
                     attenderRequestPaymentTab.addPayment(attenderPaymentTab);
                     total = total.add(price);
                 }
-                // TODO CHECK FOR THE TYPE OF EXCEPTION
                 catch (IllegalArgumentException | ParseException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
