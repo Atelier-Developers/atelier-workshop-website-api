@@ -162,14 +162,14 @@ public class AttenderController {
 
         for (WorkshopAttenderInfo workshopAttenderInfo : attenderWorkshopConnection.getWorkshopAttenderInfos()) {
             if (OfferedWorkshop.doTwoOfferedWorkshopTimeIntervalsOverlap(workshopAttenderInfo.getOfferedWorkshop(), offeredWorkshop)) {
-                return new ResponseEntity<>("Attender' workshop overlaps ", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Attender' workshop overlaps ", HttpStatus.CONFLICT);
             }
         }
 
         List<OfferedWorkshopRelationDetail> offeredWorkshopRelationDetails = offeredWorkshop.getWorkshopRelationDetails();
         for (OfferedWorkshopRelationDetail offeredWorkshopRelationDetail : offeredWorkshopRelationDetails) {
             if (!attenderWorkshopConnection.hasPassedWorkshop(offeredWorkshopRelationDetail.getWorkshop())) {
-                return new ResponseEntity<>("This attendee hasn't passed the prerequisite of this workshop", HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>("This attendee hasn't passed the prerequisite of this workshop", HttpStatus.I_AM_A_TEAPOT);
             }
         }
         AttenderRegisterForm attenderRegisterForm = offeredWorkshop.getAttenderRegisterForm();
@@ -298,15 +298,24 @@ public class AttenderController {
                 attenderPaymentTab.setPaid(false);
 
                 String date = paymentElementRequest.getDueDate();
-                Calendar cal = Calendar.getInstance();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-                cal.setTime(dateFormat.parse(date));
 
-                attenderPaymentTab.setPaymentDate(cal);
+                if (date != null){
+                    Calendar cal = Calendar.getInstance();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+                    cal.setTime(dateFormat.parse(date));
+
+                    attenderPaymentTab.setPaymentDate(cal);
+                }
+                else {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.YEAR, 1); // to get previous year add -1
+                    attenderPaymentTab.setPaymentDate(cal);
+                }
+
+
                 attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
                 attenderRequestPaymentTab.addPayment(attenderPaymentTab);
             }
-            // TODO CHECK FOR THE TYPE OF EXCEPTION
             catch (IllegalArgumentException | ParseException e) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -333,7 +342,6 @@ public class AttenderController {
                     attenderRequestPaymentTab.addPayment(attenderPaymentTab);
                     total = total.add(price);
                 }
-                // TODO CHECK FOR THE TYPE OF EXCEPTION
                 catch (IllegalArgumentException | ParseException e) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }

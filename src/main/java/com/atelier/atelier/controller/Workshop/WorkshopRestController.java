@@ -20,8 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
@@ -611,6 +609,26 @@ public class WorkshopRestController {
         }
 
         return new ResponseEntity<>(resultOfferedWorkshop, HttpStatus.OK);
+    }
+
+
+
+    @DeleteMapping("/offeringWorkshops/workshopFile/{workshopFileId}")
+    public ResponseEntity<Object> deleteWorkshopFile(@PathVariable long workshopFileId){
+
+        Optional<WorkshopFile> optionalWorkshopFile = workshopFileRepository.findById(workshopFileId);
+
+        if (!optionalWorkshopFile.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopFile workshopFile = optionalWorkshopFile.get();
+
+        workshopFile.setOfferedWorkshop(null);
+
+        workshopFileRepository.delete(workshopFile);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

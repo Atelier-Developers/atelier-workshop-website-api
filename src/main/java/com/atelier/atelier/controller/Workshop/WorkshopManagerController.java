@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -129,6 +130,45 @@ public class WorkshopManagerController {
         }
 
         return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
+    }
+
+
+
+    @PutMapping("/offeringWorkshop/{offeringWorkshopId}")
+    public ResponseEntity<Object> editOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody WorkshopEditContext workshopEditContext) throws ParseException {
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        offeredWorkshop.setName(workshopEditContext.getName());
+
+
+        String start = workshopEditContext.getStartTime();
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        cal.setTime(dateFormat.parse(start));
+
+        String end = workshopEditContext.getEndTime();
+        Calendar cal2 = Calendar.getInstance();
+        SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+        cal2.setTime(dateFormat1.parse(end));
+
+        offeredWorkshop.setStartTime(cal);
+        offeredWorkshop.setEndTime(cal2);
+
+        offeredWorkshop.setDescription(workshopEditContext.getDescription());
+
+        offeredWorkshop.setPrice(workshopEditContext.getPrice());
+
+        offeringWorkshopRepository.save(offeredWorkshop);
+
+        return new ResponseEntity<>(offeredWorkshop.getId(), HttpStatus.OK);
+
     }
 
 
@@ -499,8 +539,6 @@ public class WorkshopManagerController {
                         fileAnswer.setFileType(multipartFile.getContentType());
                         fileAnswer.setData(multipartFile.getBytes());
                         answerData = fileAnswer;
-//                        // ADDED FILE STUFF HERE
-//                        fileAnswerRepository.save(fileAnswer);
                     } else {
                         return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
                     }
@@ -732,15 +770,8 @@ public class WorkshopManagerController {
 
 
 
-//<<<<<<< HEAD
     @GetMapping("/offeringWorkshop/{id}/requester/{requesterId}")
     public ResponseEntity<Object> getRequesterRequest(@PathVariable long id, Authentication authentication, @PathVariable long requesterId) {
-//=======
-//    @PostMapping("/offeringWorkshop/{id}/request")
-//    public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody List<RequestStatusContext> requestStatusContexts) {
-//
-//
-//>>>>>>> workshop_manager_fix
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
@@ -760,7 +791,6 @@ public class WorkshopManagerController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // TODO CHECK FOR THE LIST
     @PostMapping("/offeringWorkshop/{id}/request")
     public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody RequestStatusContext requestStatusContext) {
 
@@ -1361,6 +1391,48 @@ public class WorkshopManagerController {
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        return new ResponseEntity<>(attendees, HttpStatus.OK);
+
+    }
+
+
+    // Returns the Requesting Attendees User Objects with Request status as pending
+    @GetMapping("/offeringWorkshop/{id}/requests/pending/attPayments")
+    public ResponseEntity<Object> showPendingAttendeePayments(@PathVariable long id, Authentication authentication) {
+
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+
+        List<PaymentNameContext> attendees = new ArrayList<>();
+        List<User> users = userRepository.findAll();
+
+
+        for (Request request : offeredWorkshop.getRequests()) {
+            if (request.getRequester() instanceof Attender) {
+                if (request.getState().equals(RequestState.Pending)) {
+                    PaymentNameContext paymentNameContext = new PaymentNameContext();
+                    Attender attender = (Attender) request.getRequester();
+                    WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+                    for (User user : users) {
+                        Attender userAttender = (Attender) user.getRole("Attender");
+                        if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
+                            paymentNameContext.setName(user.getName());
+                            break;
+                        }
+                    }
+                    AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
+                    paymentNameContext.setPays(attenderRequestPaymentTab.getAttenderPaymentTabList());
+                    attendees.add(paymentNameContext);
                 }
             }
         }
