@@ -36,6 +36,7 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private String description;
 
     @OneToOne
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private File profileImage;
 
 

@@ -35,6 +35,7 @@ public class User {
     private String email;
 
     @OneToOne
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private File pic;
 
     @OneToOne(cascade = CascadeType.ALL)

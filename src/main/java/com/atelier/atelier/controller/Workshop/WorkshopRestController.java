@@ -20,10 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @RestController
 @RequestMapping("/workshop")
@@ -592,6 +591,26 @@ public class WorkshopRestController {
                 .contentType(MediaType.parseMediaType(file.getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
                 .body(new ByteArrayResource(file.getData()));
+    }
+
+
+    @GetMapping("/offeringWorkshop/upcoming")
+    public ResponseEntity<Object> getUpcomingWorkshops(){
+
+        List<OfferedWorkshop> offeredWorkshops = offeringWorkshopRepository.findAll();
+
+        List<OfferedWorkshop> resultOfferedWorkshop = new ArrayList<>();
+
+        Calendar now = Calendar.getInstance();
+
+        for (OfferedWorkshop offeredWorkshop : offeredWorkshops){
+
+            if (offeredWorkshop.getStartTime().after(now)){
+                resultOfferedWorkshop.add(offeredWorkshop);
+            }
+        }
+
+        return new ResponseEntity<>(resultOfferedWorkshop, HttpStatus.OK);
     }
 
 
