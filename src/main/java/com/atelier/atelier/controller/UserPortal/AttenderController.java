@@ -162,7 +162,7 @@ public class AttenderController {
 
         for (WorkshopAttenderInfo workshopAttenderInfo : attenderWorkshopConnection.getWorkshopAttenderInfos()) {
             if (OfferedWorkshop.doTwoOfferedWorkshopTimeIntervalsOverlap(workshopAttenderInfo.getOfferedWorkshop(), offeredWorkshop)) {
-                return new ResponseEntity<>("Attender' workshop overlaps ", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>("Attender' workshop overlaps ", HttpStatus.CONFLICT);
             }
         }
 
@@ -298,11 +298,21 @@ public class AttenderController {
                 attenderPaymentTab.setPaid(false);
 
                 String date = paymentElementRequest.getDueDate();
-                Calendar cal = Calendar.getInstance();
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-                cal.setTime(dateFormat.parse(date));
 
-                attenderPaymentTab.setPaymentDate(cal);
+                if (date != null){
+                    Calendar cal = Calendar.getInstance();
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+                    cal.setTime(dateFormat.parse(date));
+
+                    attenderPaymentTab.setPaymentDate(cal);
+                }
+                else {
+                    Calendar cal = Calendar.getInstance();
+                    cal.add(Calendar.YEAR, 1); // to get previous year add -1
+                    attenderPaymentTab.setPaymentDate(cal);
+                }
+
+
                 attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
                 attenderRequestPaymentTab.addPayment(attenderPaymentTab);
             }
