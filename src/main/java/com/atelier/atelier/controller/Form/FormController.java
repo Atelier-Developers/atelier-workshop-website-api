@@ -64,7 +64,6 @@ public class FormController {
     }
 
 
-    //TODO fix delete path for form (IS OKAY FOR WORKSHOP AND EVALUATION, BUT NOT OKAY FOR REGISTER AND REQUEST CUZ THEY HAVE NULL AS OFFERING WORKSHOP)
     @DeleteMapping("/form/{formId}")
     public ResponseEntity<Object> deleteForm(@PathVariable long formId) {
         Optional<Form> optionalForm = formRepository.findById(formId);
@@ -77,6 +76,9 @@ public class FormController {
             GraderRequestForm gform = (GraderRequestForm) form;
             List<OfferedWorkshop> offeredWorkshops = offeringWorkshopRepository.findAll();
             for (OfferedWorkshop offeredWorkshop : offeredWorkshops) {
+                if (offeredWorkshop.getGraderRequestForm() == null){
+                    continue;
+                }
                 if (offeredWorkshop.getGraderRequestForm().getId() == gform.getId()) {
                     offeredWorkshop.setGraderRequestForm(null);
                     offeringWorkshopRepository.save(offeredWorkshop);
@@ -88,6 +90,9 @@ public class FormController {
             AttenderRegisterForm gform = (AttenderRegisterForm) form;
             List<OfferedWorkshop> offeredWorkshops = offeringWorkshopRepository.findAll();
             for (OfferedWorkshop offeredWorkshop : offeredWorkshops) {
+                if (offeredWorkshop.getAttenderRegisterForm() == null){
+                    continue;
+                }
                 if (offeredWorkshop.getAttenderRegisterForm().getId() == gform.getId()) {
                     offeredWorkshop.setAttenderRegisterForm(null);
                     offeringWorkshopRepository.save(offeredWorkshop);
@@ -103,7 +108,6 @@ public class FormController {
             offeringWorkshopRepository.save(offeredWorkshop);
             formRepository.delete(graderEvaluationForm);
         } else {
-
             formRepository.delete(form);
         }
         return new ResponseEntity<>(HttpStatus.OK);

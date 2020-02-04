@@ -1,20 +1,26 @@
 package com.atelier.atelier.controller.UserPortal;
 
 import com.atelier.atelier.entity.MessagingSystem.Chatroom;
+import com.atelier.atelier.entity.MessagingSystem.Chatter;
 import com.atelier.atelier.entity.UserPortalManagment.SystemAdmin;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderPaymentTab;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
+import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshopChatroom;
 import com.atelier.atelier.entity.WorkshopManagment.Workshop;
+import com.atelier.atelier.repository.ChatService.ChatroomRepository;
+import com.atelier.atelier.repository.ChatService.ChatterRepository;
 import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
+import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,9 +32,13 @@ public class SystemAdminController {
     private UserRepository userRepository;
     private AttenderPaymentTabRepository attenderPaymentTabRepository;
     private OfferingWorkshopRepository offeringWorkshopRepository;
+    private ChatroomRepository chatroomRepository;
+    private ChatterRepository chatterRepository;
 
-    public SystemAdminController(OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
+    public SystemAdminController(ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
         this.workshopRepository = workshopRepository;
+        this.chatroomRepository = chatroomRepository;
+        this.chatterRepository = chatterRepository;
         this.userRepository = userRepository;
         this.attenderPaymentTabRepository = attenderPaymentTabRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
@@ -67,11 +77,36 @@ public class SystemAdminController {
     public ResponseEntity<Object> deleteOfferedWorkshop(@PathVariable long id, Authentication authentication) {
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
+
         if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        offeringWorkshopRepository.deleteById(id);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        for (OfferedWorkshopChatroom offeredWorkshopChatroom : offeredWorkshop.getOfferedWorkshopChatrooms()){
+
+            for (Chatter chatter : offeredWorkshopChatroom.getChatters()){
+
+                chatter.getChatrooms().remove(offeredWorkshopChatroom);
+
+                chatterRepository.save(chatter);
+            }
+
+            offeredWorkshopChatroom.setChatters(null);
+
+            chatroomRepository.save(offeredWorkshopChatroom);
+
+        }
+
+        offeringWorkshopRepository.delete(offeredWorkshop);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -123,7 +158,7 @@ public class SystemAdminController {
 
         if (systemAdmin == null) {
 
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
         }
 
@@ -134,7 +169,27 @@ public class SystemAdminController {
             return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
         }
 
-        workshopRepository.delete(optionalWorkshop.get());
+        Workshop workshop = optionalWorkshop.get();
+
+        for (OfferedWorkshop offeredWorkshop : workshop.getOfferedWorkshops()){
+
+            for (OfferedWorkshopChatroom offeredWorkshopChatroom : offeredWorkshop.getOfferedWorkshopChatrooms()){
+
+                for (Chatter chatter : offeredWorkshopChatroom.getChatters()){
+
+                    chatter.getChatrooms().remove(offeredWorkshopChatroom);
+
+                    chatterRepository.save(chatter);
+                }
+
+                offeredWorkshopChatroom.setChatters(null);
+
+                chatroomRepository.save(offeredWorkshopChatroom);
+
+            }
+        }
+
+        workshopRepository.delete(workshop);
 
         return new ResponseEntity<>("Item was deleted", HttpStatus.OK);
 
