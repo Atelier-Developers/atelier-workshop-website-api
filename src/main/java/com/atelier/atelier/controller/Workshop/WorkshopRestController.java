@@ -614,4 +614,24 @@ public class WorkshopRestController {
     }
 
 
+
+    @DeleteMapping("/offeringWorkshops/workshopFile/{workshopFileId}")
+    public ResponseEntity<Object> deleteWorkshopFile(@PathVariable long workshopFileId){
+
+        Optional<WorkshopFile> optionalWorkshopFile = workshopFileRepository.findById(workshopFileId);
+
+        if (!optionalWorkshopFile.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopFile workshopFile = optionalWorkshopFile.get();
+
+        workshopFile.setOfferedWorkshop(null);
+
+        workshopFileRepository.delete(workshopFile);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
 }
