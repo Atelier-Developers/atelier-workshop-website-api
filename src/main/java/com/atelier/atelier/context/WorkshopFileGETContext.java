@@ -6,11 +6,20 @@ import java.util.List;
 
 public class WorkshopFileGETContext {
 
+    private long id;
     private String title;
     private String description;
     private List<String> receivers;
     private String downloadURI;
 
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public List<String> getReceivers() {
         return receivers;

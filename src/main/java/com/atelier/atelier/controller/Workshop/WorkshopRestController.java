@@ -509,6 +509,8 @@ public class WorkshopRestController {
                         .toUriString();
 
                 workshopFileGETContext.setDownloadURI(fileDownloadUri);
+                workshopFileGETContext.setId(workshopFile.getId());
+
 
                 workshopFileGETContexts.add(workshopFileGETContext);
 
@@ -565,6 +567,7 @@ public class WorkshopRestController {
                         .toUriString();
 
                 workshopFileGETContext.setDownloadURI(fileDownloadUri);
+                workshopFileGETContext.setId(workshopFile.getId());
 
                 workshopFileGETContexts.add(workshopFileGETContext);
             }
