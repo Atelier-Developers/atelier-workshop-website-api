@@ -1405,8 +1405,8 @@ public class WorkshopManagerController {
 
 
     // Returns the Requesting Attendees User Objects with Request status as pending
-    @GetMapping("/offeringWorkshop/{id}/requests/pending/attendeeReqs")
-    public ResponseEntity<Object> showPendingAttendeeRequests(@PathVariable long id, Authentication authentication) {
+    @GetMapping("/offeringWorkshop/{id}/requests/pending/attPayments")
+    public ResponseEntity<Object> showPendingAttendeePayments(@PathVariable long id, Authentication authentication) {
 
 //        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
@@ -1421,13 +1421,14 @@ public class WorkshopManagerController {
 //            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 //        }
 
-        List<Request> attendees = new ArrayList<Request>();
+        List<AttenderRequestPaymentTab> attendees = new ArrayList<>();
 
 
         for (Request request : offeredWorkshop.getRequests()) {
             if (request.getRequester() instanceof Attender) {
                 if (request.getState().equals(RequestState.Pending)) {
-                    attendees.add(request);
+                    AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
+                    attendees.add(attenderRequestPaymentTab);
                 }
             }
         }
