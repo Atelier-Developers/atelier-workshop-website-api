@@ -10,7 +10,7 @@ import javax.persistence.*;
 
 public class AttenderRegisterForm extends Form implements RequestData {
 
-    @OneToOne(mappedBy = "attenderRegisterForm")
+    @OneToOne(mappedBy = "attenderRegisterForm", orphanRemoval = true)
     private OfferedWorkshop offeredWorkshop;
 
     public OfferedWorkshop getOfferedWorkshop() {

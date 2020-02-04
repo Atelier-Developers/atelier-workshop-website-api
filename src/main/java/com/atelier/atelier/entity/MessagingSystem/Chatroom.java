@@ -23,10 +23,10 @@ public abstract class Chatroom {
     @Column
     private String name;
 
-    @ManyToMany(mappedBy = "chatrooms")
+    @ManyToMany(mappedBy = "chatrooms", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private List<Chatter> chatters;
 
-    @OneToMany(mappedBy = "chatroom")
+    @OneToMany(mappedBy = "chatroom", cascade = CascadeType.ALL)
     private List<Message> messages;
 
     public long getId() {
@@ -73,5 +73,10 @@ public abstract class Chatroom {
             messages = new ArrayList<>();
         }
         messages.add(message);
+    }
+    public void removeChatroom(){
+        for(Chatter chatter : chatters){
+            chatter.getChatrooms().remove(this);
+        }
     }
 }

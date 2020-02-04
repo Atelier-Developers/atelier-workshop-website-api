@@ -1,8 +1,10 @@
 package com.atelier.atelier.controller.UserPortal;
 
+import com.atelier.atelier.entity.MessagingSystem.Chatroom;
 import com.atelier.atelier.entity.UserPortalManagment.SystemAdmin;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderPaymentTab;
+import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
 import com.atelier.atelier.repository.user.UserRepository;
@@ -34,9 +36,9 @@ public class SystemAdminController {
 
     // TODO for test remove for production
     @PostMapping("/makeAdmin")
-    public ResponseEntity<Object> makeAdmin(Authentication authentication){
+    public ResponseEntity<Object> makeAdmin(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
-        if(user.getUsername().equals("admin")){
+        if (user.getUsername().equals("admin")) {
             SystemAdmin systemAdmin = new SystemAdmin();
             user.addRole(systemAdmin);
             userRepository.save(user);
@@ -46,11 +48,11 @@ public class SystemAdminController {
     }
 
     @GetMapping("/workshops")
-    public ResponseEntity<Object> getWorkshops(Authentication authentication){
+    public ResponseEntity<Object> getWorkshops(Authentication authentication) {
 
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
-        if (systemAdmin == null ){
+        if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -62,10 +64,10 @@ public class SystemAdminController {
     }
 
     @DeleteMapping("/offeringWorkshop/{id}")
-    public ResponseEntity<Object> deleteOfferedWorkshop(@PathVariable long id, Authentication authentication){
+    public ResponseEntity<Object> deleteOfferedWorkshop(@PathVariable long id, Authentication authentication) {
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
-        if ( systemAdmin == null ){
+        if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -74,11 +76,11 @@ public class SystemAdminController {
     }
 
     @PostMapping("/workshops")
-    public ResponseEntity<Object> save(@RequestBody Workshop workshop, Authentication authentication){
+    public ResponseEntity<Object> save(@RequestBody Workshop workshop, Authentication authentication) {
 
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
-        if ( systemAdmin == null ){
+        if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
@@ -93,11 +95,11 @@ public class SystemAdminController {
 
 
     @PutMapping("/workshops")
-    public ResponseEntity<Object> update(@RequestBody Workshop workshop, Authentication authentication){
+    public ResponseEntity<Object> update(@RequestBody Workshop workshop, Authentication authentication) {
 
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
-        if ( systemAdmin == null ){
+        if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -105,7 +107,7 @@ public class SystemAdminController {
 
         Optional<Workshop> optionalWorkshop = workshopRepository.findById(workshop.getId());
 
-        if ( !optionalWorkshop.isPresent() ){
+        if (!optionalWorkshop.isPresent()) {
             return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
         }
 
@@ -115,11 +117,11 @@ public class SystemAdminController {
     }
 
     @DeleteMapping("/workshops/{id}")
-    public ResponseEntity<Object> delete(@PathVariable long id, Authentication authentication){
+    public ResponseEntity<Object> delete(@PathVariable long id, Authentication authentication) {
 
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
-        if ( systemAdmin == null ){
+        if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -128,7 +130,7 @@ public class SystemAdminController {
 
         Optional<Workshop> optionalWorkshop = workshopRepository.findById(id);
 
-        if ( !optionalWorkshop.isPresent() ){
+        if (!optionalWorkshop.isPresent()) {
             return new ResponseEntity<>("No workshop with the id provided was found", HttpStatus.NO_CONTENT);
         }
 
@@ -139,10 +141,10 @@ public class SystemAdminController {
     }
 
     @PutMapping("/attendeePaymentTab/{id}")
-    public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id, Authentication authentication){
+    public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id, Authentication authentication) {
         SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
 
-        if ( systemAdmin == null ){
+        if (systemAdmin == null) {
 
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -150,7 +152,7 @@ public class SystemAdminController {
 
         Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
 
-        if ( !optionalAttenderPaymentTab.isPresent() ){
+        if (!optionalAttenderPaymentTab.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -163,7 +165,7 @@ public class SystemAdminController {
     }
 
 
-    private SystemAdmin getSysAdminRoleFromAuthentication(Authentication authentication){
+    private SystemAdmin getSysAdminRoleFromAuthentication(Authentication authentication) {
 
         User user = User.getUser(authentication, userRepository);
         SystemAdmin systemAdmin = (SystemAdmin) user.getRole("SystemAdmin");
