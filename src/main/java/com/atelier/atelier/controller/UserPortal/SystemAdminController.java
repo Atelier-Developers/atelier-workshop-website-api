@@ -2,6 +2,8 @@ package com.atelier.atelier.controller.UserPortal;
 
 import com.atelier.atelier.entity.MessagingSystem.Chatroom;
 import com.atelier.atelier.entity.MessagingSystem.Chatter;
+import com.atelier.atelier.entity.MessagingSystem.ChatterMessageRelation;
+import com.atelier.atelier.entity.MessagingSystem.Message;
 import com.atelier.atelier.entity.UserPortalManagment.SystemAdmin;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderPaymentTab;
@@ -9,6 +11,7 @@ import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshop;
 import com.atelier.atelier.entity.WorkshopManagment.OfferedWorkshopChatroom;
 import com.atelier.atelier.entity.WorkshopManagment.Workshop;
 import com.atelier.atelier.repository.ChatService.ChatroomRepository;
+import com.atelier.atelier.repository.ChatService.ChatterMessageRelationRepository;
 import com.atelier.atelier.repository.ChatService.ChatterRepository;
 import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
 import com.atelier.atelier.repository.user.UserRepository;
@@ -34,9 +37,11 @@ public class SystemAdminController {
     private OfferingWorkshopRepository offeringWorkshopRepository;
     private ChatroomRepository chatroomRepository;
     private ChatterRepository chatterRepository;
+    private ChatterMessageRelationRepository chatterMessageRelationRepository;
 
-    public SystemAdminController(ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
+    public SystemAdminController(ChatterMessageRelationRepository chatterMessageRelationRepository, ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
         this.workshopRepository = workshopRepository;
+        this.chatterMessageRelationRepository = chatterMessageRelationRepository;
         this.chatroomRepository = chatroomRepository;
         this.chatterRepository = chatterRepository;
         this.userRepository = userRepository;
@@ -100,6 +105,28 @@ public class SystemAdminController {
                 chatterRepository.save(chatter);
             }
 
+            for (Message message : offeredWorkshopChatroom.getMessages()){
+
+
+                for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
+
+                    Chatter chatter1 = chatterMessageRelation.getChatter();
+
+                    if (chatter1 == null) {
+                        continue;
+                    }
+
+                    chatter1.getChatterMessageRelations().remove(chatterMessageRelation);
+
+                    chatterRepository.save(chatter1);
+
+                    chatterMessageRelation.setChatter(null);
+
+                    chatterMessageRelationRepository.save(chatterMessageRelation);
+                }
+
+
+            }
             offeredWorkshopChatroom.setChatters(null);
 
             chatroomRepository.save(offeredWorkshopChatroom);
@@ -180,6 +207,28 @@ public class SystemAdminController {
                     chatter.getChatrooms().remove(offeredWorkshopChatroom);
 
                     chatterRepository.save(chatter);
+                }
+
+                for (Message message : offeredWorkshopChatroom.getMessages()){
+
+
+                    for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
+
+                        Chatter chatter1 = chatterMessageRelation.getChatter();
+
+                        if (chatter1 == null) {
+                            continue;
+                        }
+
+                        chatter1.getChatterMessageRelations().remove(chatterMessageRelation);
+
+                        chatterRepository.save(chatter1);
+
+                        chatterMessageRelation.setChatter(null);
+
+                        chatterMessageRelationRepository.save(chatterMessageRelation);
+                    }
+
                 }
 
                 offeredWorkshopChatroom.setChatters(null);

@@ -22,7 +22,7 @@ public class Message {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar time;
 
-    @OneToMany(mappedBy = "message")
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<ChatterMessageRelation> chatterMessageRelations;
 
