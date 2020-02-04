@@ -266,7 +266,7 @@ public class WorkshopManagerController {
 
         OfferedWorkshopChatroom graderRoom = new OfferedWorkshopChatroom();
         graderRoom.setOfferedWorkshop(offeredWorkshop);
-        graderRoom.setName("Graders' Chatroom");
+        graderRoom.setName("Assistants' Chatroom");
         offeredWorkshop.setGradersChatroom(graderRoom);
 
         chatroomRepository.save(graderRoom);
