@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -129,6 +130,47 @@ public class WorkshopManagerController {
         }
 
         return new ResponseEntity<>(offeredWorkshopManagerNameContexts, HttpStatus.OK);
+    }
+
+
+
+    @PutMapping("/offeringWorkshop/{offeringWorkshopId}")
+    public ResponseEntity<Object> editOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody OfferingWorkshopContext offeringWorkshopContext){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<Workshop> requisites = new ArrayList<>();
+
+        if (offeringWorkshopContext.getPreRequisiteId() != null) {
+
+            for (Long id : offeringWorkshopContext.getPreRequisiteId()) {
+                Optional<Workshop> optionalWorkshop1 = workshopRepository.findById(id);
+                if (!optionalWorkshop1.isPresent()) {
+                    return new ResponseEntity<>("Workshop not found!", HttpStatus.BAD_REQUEST);
+                }
+                workshops.add(optionalWorkshop1.get());
+            }
+            for (Workshop workshop1 : workshops) {
+                OfferedWorkshopRelationDetail offeredWorkshopRelationDetail = new OfferedWorkshopRelationDetail();
+                offeredWorkshopRelationDetail.setWorkshop(workshop1);
+                offeredWorkshopRelationDetail.setOfferedWorkshop(offeredWorkshop);
+                offeredWorkshopRelationDetail.setDependencyType(DependencyType.PREREQUISITE);
+                workshop1.addOfferingWorkshopRelation(offeredWorkshopRelationDetail);
+                offeredWorkshop.addOfferingWorkshopRelations(offeredWorkshopRelationDetail);
+            }
+
+
+        }
+
+
+
+
     }
 
 
@@ -732,15 +774,8 @@ public class WorkshopManagerController {
 
 
 
-//<<<<<<< HEAD
     @GetMapping("/offeringWorkshop/{id}/requester/{requesterId}")
     public ResponseEntity<Object> getRequesterRequest(@PathVariable long id, Authentication authentication, @PathVariable long requesterId) {
-//=======
-//    @PostMapping("/offeringWorkshop/{id}/request")
-//    public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody List<RequestStatusContext> requestStatusContexts) {
-//
-//
-//>>>>>>> workshop_manager_fix
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
@@ -760,7 +795,6 @@ public class WorkshopManagerController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // TODO CHECK FOR THE LIST
     @PostMapping("/offeringWorkshop/{id}/request")
     public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody RequestStatusContext requestStatusContext) {
 
@@ -1361,6 +1395,39 @@ public class WorkshopManagerController {
                             break;
                         }
                     }
+                }
+            }
+        }
+
+        return new ResponseEntity<>(attendees, HttpStatus.OK);
+
+    }
+
+
+    // Returns the Requesting Attendees User Objects with Request status as pending
+    @GetMapping("/offeringWorkshop/{id}/requests/pending/attendeeReqs")
+    public ResponseEntity<Object> showPendingAttendeeRequests(@PathVariable long id, Authentication authentication) {
+
+//        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+//        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
+//        if (workshopManagerInfo == null) {
+//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//        }
+
+        List<Request> attendees = new ArrayList<Request>();
+
+
+        for (Request request : offeredWorkshop.getRequests()) {
+            if (request.getRequester() instanceof Attender) {
+                if (request.getState().equals(RequestState.Pending)) {
+                    attendees.add(request);
                 }
             }
         }
