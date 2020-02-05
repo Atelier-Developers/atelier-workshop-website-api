@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -61,10 +62,12 @@ public class WorkshopManagerController {
     private RequestableRepository requestableRepository;
     private ChatroomRepository chatroomRepository;
     private ChatterRepository chatterRepository;
+    private OfferedWorkshopInstallmentRepository offeredWorkshopInstallmentRepository;
 
 
-    public WorkshopManagerController(ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, RequestableRepository requestableRepository, WorkshopManagerInfoRepository workshopManagerInfoRepository, WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
+    public WorkshopManagerController(OfferedWorkshopInstallmentRepository offeredWorkshopInstallmentRepository, ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, RequestableRepository requestableRepository, WorkshopManagerInfoRepository workshopManagerInfoRepository, WorkshopFileRepository workshopFileRepository, FileRepository fileRepository, AttenderRepository attenderRepository, GraderRepository graderRepository, FileAnswerRepository fileAnswerRepository, WorkshopGroupRepository workshopGroupRepository, RequesterRepository requesterRepository, GraderRequestFormRepository graderRequestFormRepository, AttenderRegisterFormRepository attenderRegisterFormRepository, WorkshopFormRepository workshopFormFormRepository, GraderEvaluationFormRepository graderEvaluationFormFormRepository, RequestRepository requestRepository, WorkshopRepository workshopRepository, OfferingWorkshopRepository offeringWorkshopRepository, UserRepository userRepository, FormRepository formRepository, QuestionRepsoitory questionRepsoitory, WorkshopGraderInfoRepository workshopGraderInfoRepository, AnswerRepository answerRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository) {
         this.workshopRepository = workshopRepository;
+        this.offeredWorkshopInstallmentRepository = offeredWorkshopInstallmentRepository;
         this.chatroomRepository = chatroomRepository;
         this.chatterRepository = chatterRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
@@ -286,6 +289,61 @@ public class WorkshopManagerController {
 
         offeringWorkshopRepository.save(offeredWorkshop);
         return new ResponseEntity<>(offeredWorkshop.getId(), HttpStatus.OK);
+    }
+
+
+    @PostMapping("/offeringWorkshop/{offeringWorkshopId}/installments")
+    public ResponseEntity<Object> addInstallmentPaymentsForOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody PaymentRequestContext paymentRequestContext){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        if (offeredWorkshop.getOfferedWorkshopInstallments() != null ){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<OfferedWorkshopInstallment> offeredWorkshopInstallments = new ArrayList<>();
+
+        BigDecimal total = new BigDecimal("0");
+        for (PaymentElementRequest paymentElementRequest : paymentRequestContext.getPayments()) {
+
+            OfferedWorkshopInstallment offeredWorkshopInstallment = new OfferedWorkshopInstallment();
+
+            try {
+                BigDecimal price = new BigDecimal(paymentElementRequest.getAmount());
+
+                offeredWorkshopInstallment.setValue(price);
+
+                String date = paymentElementRequest.getDueDate();
+                Calendar cal = Calendar.getInstance();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+                cal.setTime(dateFormat.parse(date));
+
+                offeredWorkshopInstallment.setPaymentDate(cal);
+                offeredWorkshopInstallment.setOfferedWorkshop(offeredWorkshop);
+                offeredWorkshopInstallmentRepository.save(offeredWorkshopInstallment);
+                offeredWorkshopInstallments.add(offeredWorkshopInstallment);
+                total = total.add(price);
+            }
+            catch (IllegalArgumentException | ParseException e) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }
+        if (offeredWorkshop.getInstallmentPrice().compareTo(total) != 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        offeredWorkshop.setOfferedWorkshopInstallments(offeredWorkshopInstallments);
+
+        offeringWorkshopRepository.save(offeredWorkshop);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+
     }
 
     @GetMapping("/offeringWorkshop/{id}")

@@ -63,6 +63,9 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private List<WorkshopGraderInfo> workshopGraderInfos;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+    private List<OfferedWorkshopInstallment> offeredWorkshopInstallments;
+
+    @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
     private List<OfferedWorkshopRelationDetail> workshopRelationDetails;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
@@ -103,6 +106,13 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
         this.name = name;
     }
 
+    public List<OfferedWorkshopInstallment> getOfferedWorkshopInstallments() {
+        return offeredWorkshopInstallments;
+    }
+
+    public void setOfferedWorkshopInstallments(List<OfferedWorkshopInstallment> offeredWorkshopInstallments) {
+        this.offeredWorkshopInstallments = offeredWorkshopInstallments;
+    }
 
     public Calendar getStartTime() {
         return startTime;
