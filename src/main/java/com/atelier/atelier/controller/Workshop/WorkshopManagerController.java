@@ -840,22 +840,18 @@ public class WorkshopManagerController {
                 Grader grader = (Grader) user.getRole("grader");
                 WorkshopAttenderInfo workshopAttenderInfo = enrollAttendeeWorkshop(attender.getAttenderWorkshopConnection(), offeredWorkshop);
                 requestRepository.save(request);
-                System.out.println(requestRepository.count());
                 offeredWorkshop.getRequests().removeIf(req -> req.getRequester().getId() == grader.getId() && req.getState() == RequestState.Pending);
                 requestableRepository.save(offeredWorkshop);
                 offeringWorkshopRepository.save(offeredWorkshop);
-                System.out.println(requestRepository.count());
                 return new ResponseEntity<>(workshopAttenderInfo.getId(), HttpStatus.OK);
 
             } else if (requester instanceof Grader) {
                 Grader grader = (Grader) requester;
                 Attender attendee = (Attender) user.getRole("attender");
                 WorkshopGraderInfo workshopGraderInfo = enrollGraderWorkshop(grader.getGraderWorkshopConnection(), offeredWorkshop);
-                System.out.println(requestRepository.count());
                 offeredWorkshop.getRequests().removeIf(req -> req.getRequester().getId() == attendee.getId() && req.getState() == RequestState.Pending);
                 requestableRepository.save(offeredWorkshop);
                 offeringWorkshopRepository.save(offeredWorkshop);
-                System.out.println(requestRepository.count());
                 requestRepository.save(request);
 
                 return new ResponseEntity<>(workshopGraderInfo.getId(), HttpStatus.OK);
@@ -1683,7 +1679,6 @@ public class WorkshopManagerController {
 
         offeringWorkshopRepository.save(offeredWorkshop);
 
-        System.out.println(workshopFile.getId());
 
         return new ResponseEntity<>(workshopFile.getId(), HttpStatus.CREATED);
     }

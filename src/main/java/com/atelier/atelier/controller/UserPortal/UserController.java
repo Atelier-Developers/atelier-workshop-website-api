@@ -62,7 +62,6 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<Object> showUser(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
-        System.out.println(user.getName());
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 

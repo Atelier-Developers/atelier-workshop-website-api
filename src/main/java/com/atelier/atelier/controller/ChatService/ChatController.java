@@ -390,24 +390,6 @@ public class ChatController {
             MessageTimestampContext messageTimestampContext = new MessageTimestampContext(message.getTime());
             messageNameContext.setTimestamp(messageTimestampContext);
 
-//            for (ChatterMessageRelation chatterMessageRelation : message.getChatterMessageRelations()){
-//
-//                if (chatterMessageRelation.getMessageRelation().equals(MessageRelation.Sender)){
-//
-//                    Chatter chatter = chatterMessageRelation.getChatter();
-//
-//                    for (User user: users){
-//
-//                        if (user.getUserChatterConnection().getId() == chatter.getId()){
-//                            messageNameContext.setSenderName(user.getName());
-//                            break;
-//                        }
-//
-//                    }
-//
-//                    break;
-//                }
-//            }
 
             messageNameContexts.add(messageNameContext);
         }
