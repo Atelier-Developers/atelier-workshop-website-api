@@ -374,8 +374,7 @@ public class AttenderController {
 
         OfferedWorkshop offeredWorkshop = (OfferedWorkshop) request.getRequestable();
         BigDecimal cashPrice = offeredWorkshop.getCashPrice();
-        BigDecimal installmentPrice = offeredWorkshop.getInstallmentPrice();
-        List<AttenderPaymentTab> attenderPaymentTabs = new ArrayList<>();
+//        BigDecimal installmentPrice = offeredWorkshop.getInstallmentPrice();
         AttenderRequestPaymentTab attenderRequestPaymentTab = new AttenderRequestPaymentTab();
 
         if (paymentRequestContext.getType().equalsIgnoreCase("Cash")) {
@@ -419,33 +418,33 @@ public class AttenderController {
 
 
         } else if (paymentRequestContext.getType().equalsIgnoreCase("Installment")) {
-            BigDecimal total = new BigDecimal("0");
-            for (PaymentElementRequest paymentElementRequest : paymentRequestContext.getPayments()) {
+//            BigDecimal total = new BigDecimal("0");
+            for (OfferedWorkshopInstallment offeredWorkshopInstallment : offeredWorkshop.getOfferedWorkshopInstallments()) {
                 AttenderPaymentTab attenderPaymentTab = new AttenderPaymentTab();
 
-                try {
-                    BigDecimal price = new BigDecimal(paymentElementRequest.getAmount());
+//                try {
+//                    BigDecimal price = offeredWorkshopInstallment.getValue();
 
-                    attenderPaymentTab.setValue(price);
+                    attenderPaymentTab.setValue(offeredWorkshopInstallment.getValue());
                     attenderPaymentTab.setPaid(false);
+//
+//                    String date = paymentElementRequest.getDueDate();
+//                    Calendar cal = Calendar.getInstance();
+//                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+//                    cal.setTime(dateFormat.parse(date));
 
-                    String date = paymentElementRequest.getDueDate();
-                    Calendar cal = Calendar.getInstance();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-                    cal.setTime(dateFormat.parse(date));
-
-                    attenderPaymentTab.setPaymentDate(cal);
+                    attenderPaymentTab.setPaymentDate(offeredWorkshopInstallment.getPaymentDate());
                     attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
                     attenderRequestPaymentTab.addPayment(attenderPaymentTab);
-                    total = total.add(price);
-                }
-                catch (IllegalArgumentException | ParseException e) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
+//                    total = total.add(price);
+//                }
+//                catch (IllegalArgumentException | ParseException e) {
+//                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//                }
             }
-            if (installmentPrice.compareTo(total) != 0) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+//            if (installmentPrice.compareTo(total) != 0) {
+//                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//            }
 
         } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
