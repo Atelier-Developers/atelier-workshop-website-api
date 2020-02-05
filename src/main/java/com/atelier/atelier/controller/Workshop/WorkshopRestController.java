@@ -302,7 +302,6 @@ public class WorkshopRestController {
     }
 
 
-    //TODO USER REQUEST STATUS
     @GetMapping("/offeringWorkshops/{offeringWorkshopId}/requestStatus/{userId}")
     public ResponseEntity<Object> getUserRequestStatusAtOfferingWorkshop(@PathVariable long offeringWorkshopId, @PathVariable long userId) {
 
@@ -440,7 +439,7 @@ public class WorkshopRestController {
                 workshopFileReceivers.add("Attendee");
             } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)) {
                 workshopFileReceivers.add("Grader");
-            } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)) {
+            } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Supervisor)) {
                 workshopFileReceivers.add("Manager");
             }
         }
@@ -494,7 +493,7 @@ public class WorkshopRestController {
                         workshopFileReceivers.add("Attendee");
                     } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)) {
                         workshopFileReceivers.add("Grader");
-                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)) {
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Supervisor)) {
                         workshopFileReceivers.add("Manager");
                     }
                 }
@@ -552,7 +551,64 @@ public class WorkshopRestController {
                         workshopFileReceivers.add("Attendee");
                     } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)) {
                         workshopFileReceivers.add("Grader");
-                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Manager)) {
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Supervisor)) {
+                        workshopFileReceivers.add("Manager");
+                    }
+                }
+
+                workshopFileGETContext.setReceivers(workshopFileReceivers);
+
+                File file = workshopFile.getFile();
+
+                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                        .path("/workshop/offeringWorkshops/download/")
+                        .path(Long.toString(file.getId()))
+                        .toUriString();
+
+                workshopFileGETContext.setDownloadURI(fileDownloadUri);
+                workshopFileGETContext.setId(workshopFile.getId());
+
+                workshopFileGETContexts.add(workshopFileGETContext);
+            }
+        }
+
+        return new ResponseEntity<>(workshopFileGETContexts, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshops/{offeringWorkshopId}/workshopFiles/managers")
+    public ResponseEntity<Object> getManagerWorkshopFiles(@PathVariable long offeringWorkshopId){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<WorkshopFile> workshopFiles = offeredWorkshop.getWorkshopFiles();
+
+        List<WorkshopFileGETContext> workshopFileGETContexts = new ArrayList<>();
+
+        for (WorkshopFile workshopFile : workshopFiles){
+
+            if(workshopFile.getReceivers().contains(WorkshopFileReceiver.Supervisor)){
+
+                WorkshopFileGETContext workshopFileGETContext = new WorkshopFileGETContext();
+
+                workshopFileGETContext.setTitle(workshopFile.getTitle());
+                workshopFileGETContext.setDescription(workshopFile.getDescription());
+
+
+                List<String> workshopFileReceivers = new ArrayList<String>();
+                for (WorkshopFileReceiver workshopFileReceiver : workshopFile.getReceivers()) {
+
+                    if (workshopFileReceiver.equals(WorkshopFileReceiver.Attendee)) {
+                        workshopFileReceivers.add("Attendee");
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Grader)) {
+                        workshopFileReceivers.add("Grader");
+                    } else if (workshopFileReceiver.equals(WorkshopFileReceiver.Supervisor)) {
                         workshopFileReceivers.add("Manager");
                     }
                 }

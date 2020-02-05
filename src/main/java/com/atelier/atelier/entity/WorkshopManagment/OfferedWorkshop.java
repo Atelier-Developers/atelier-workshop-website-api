@@ -29,8 +29,12 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private Calendar endTime;
 
     @Digits(integer = 5, fraction = 2)
-    @Column(name = "price", nullable = false)
-    private BigDecimal price;
+    @Column(name = "cash_price", nullable = false)
+    private BigDecimal cashPrice;
+
+    @Digits(integer = 5, fraction = 2)
+    @Column(name = "installment_price", nullable = false)
+    private BigDecimal installmentPrice;
 
     @Column(nullable = false)
     private String description;
@@ -175,12 +179,21 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
         this.graderEvaluationForm = graderEvaluationForm;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+
+    public BigDecimal getCashPrice() {
+        return cashPrice;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setCashPrice(BigDecimal cashPrice) {
+        this.cashPrice = cashPrice;
+    }
+
+    public BigDecimal getInstallmentPrice() {
+        return installmentPrice;
+    }
+
+    public void setInstallmentPrice(BigDecimal installmentPrice) {
+        this.installmentPrice = installmentPrice;
     }
 
     public File getProfileImage() {

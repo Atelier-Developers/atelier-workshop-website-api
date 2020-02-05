@@ -9,16 +9,14 @@ import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.RequestService.RequestState;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
-import com.atelier.atelier.repository.Form.AnswerRepository;
-import com.atelier.atelier.repository.Form.FileAnswerRepository;
-import com.atelier.atelier.repository.Form.FormRepository;
-import com.atelier.atelier.repository.Form.QuestionRepsoitory;
+import com.atelier.atelier.repository.Form.*;
 import com.atelier.atelier.repository.Request.RequestRepository;
 import com.atelier.atelier.repository.role.GraderRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
 import com.atelier.atelier.repository.workshop.WorkshopGraderInfoRepository;
+import com.atelier.atelier.repository.workshop.WorkshopGraderRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,7 +29,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-
 
 
 @RestController
@@ -47,10 +44,14 @@ public class GraderController {
     private QuestionRepsoitory questionRepsoitory;
     private AnswerRepository answerRepository;
     private RequestRepository requestRepository;
+    private WorkshopGraderRepository workshopGraderRepository;
     private FileAnswerRepository fileAnswerRepository;
+    private FormApplicantRepository formApplicantRepository;
 
-    public GraderController(FileAnswerRepository fileAnswerRepository, UserRepository userRepository, GraderRepository graderRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopGraderInfoRepository workshopGraderInfoRepository, FormRepository formRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository, RequestRepository requestRepository) {
+    public GraderController(FormApplicantRepository formApplicantRepository, WorkshopGraderRepository workshopGraderRepository, FileAnswerRepository fileAnswerRepository, UserRepository userRepository, GraderRepository graderRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopGraderInfoRepository workshopGraderInfoRepository, FormRepository formRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository, RequestRepository requestRepository) {
         this.userRepository = userRepository;
+        this.formApplicantRepository = formApplicantRepository;
+        this.workshopGraderRepository = workshopGraderRepository;
         this.graderRepository = graderRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.workshopGraderInfoRepository = workshopGraderInfoRepository;
@@ -58,7 +59,7 @@ public class GraderController {
         this.workshopAttenderInfoRepository = workshopAttenderInfoRepository;
         this.questionRepsoitory = questionRepsoitory;
         this.answerRepository = answerRepository;
-        this.requestRepository =  requestRepository;
+        this.requestRepository = requestRepository;
         this.fileAnswerRepository = fileAnswerRepository;
     }
 
@@ -102,14 +103,14 @@ public class GraderController {
 
             List<String> managerNames = new ArrayList<>();
 
-            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
                 WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
 
-                for (User currentUser : users){
+                for (User currentUser : users) {
 
                     WorkshopManager workshopManager1 = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
 
-                    if (workshopManager.getId() == workshopManager1.getId()){
+                    if (workshopManager.getId() == workshopManager1.getId()) {
                         managerNames.add(currentUser.getName());
                         break;
                     }
@@ -134,9 +135,9 @@ public class GraderController {
 
 
     @GetMapping("/grader/request/offeringWorkshop/{id}")
-    public ResponseEntity<Object> showGraderRequestForm(@PathVariable long id ){
+    public ResponseEntity<Object> showGraderRequestForm(@PathVariable long id) {
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
-        if ( !optionalOfferedWorkshop.isPresent() ){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -147,37 +148,37 @@ public class GraderController {
 
 
     @PostMapping("/grader/request/offeringWorkshop/{id}/answer")
-    public ResponseEntity<Object> answerGraderRequestForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext, @RequestParam(value = "file", required = false) MultipartFile multipartFile ) throws IOException {
+    public ResponseEntity<Object> answerGraderRequestForm(@PathVariable long id, Authentication authentication, @RequestBody RegisterRequestContext registerRequestContext, @RequestParam(value = "file", required = false) MultipartFile multipartFile) throws IOException {
 
 
         GraderWorkshopConnection graderWorkshopConnection = getGraderWorkshopConnectionFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
-        if ( !optionalOfferedWorkshop.isPresent() ){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (!offeredWorkshop.hasGraderRequested(graderWorkshopConnection)){
+        if (!offeredWorkshop.hasGraderRequested(graderWorkshopConnection)) {
             return new ResponseEntity<>("The grader is already in this workshop", HttpStatus.FORBIDDEN);
         }
-        for(WorkshopGraderInfo workshopGraderInfo : graderWorkshopConnection.getWorkshopGraderInfos()){
-            if(OfferedWorkshop.doTwoOfferedWorkshopTimeIntervalsOverlap(workshopGraderInfo.getOfferedWorkshop(), offeredWorkshop)){
-                return new ResponseEntity<>("This overlaps one of the workshops of the grader",HttpStatus.BAD_REQUEST);
+        for (WorkshopGraderInfo workshopGraderInfo : graderWorkshopConnection.getWorkshopGraderInfos()) {
+            if (OfferedWorkshop.doTwoOfferedWorkshopTimeIntervalsOverlap(workshopGraderInfo.getOfferedWorkshop(), offeredWorkshop)) {
+                return new ResponseEntity<>("This overlaps one of the workshops of the grader", HttpStatus.BAD_REQUEST);
             }
         }
         User user = User.getUser(authentication, userRepository);
         ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) user.getRole("ManagerWorkshopConnection");
         WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, managerWorkshopConnection);
-        if(workshopManagerInfo != null){
+        if (workshopManagerInfo != null) {
             return new ResponseEntity<>("You are the workshop manager", HttpStatus.FORBIDDEN);
         }
 
 
         AttenderWorkshopConnection attenderWorkshopConnection = ((Attender) user.getRole("Attender")).getAttenderWorkshopConnection();
 
-        if (!offeredWorkshop.hasAtendeeRequested(attenderWorkshopConnection)){
+        if (!offeredWorkshop.hasAtendeeRequested(attenderWorkshopConnection)) {
             return new ResponseEntity<>("The grader is already the attendee of this workshop", HttpStatus.FORBIDDEN);
         }
 
@@ -190,7 +191,7 @@ public class GraderController {
 
         List<Answer> answers = new ArrayList<>();
 
-        for ( AnswerQuestionContext answerQuestionContext : registerRequestContext.getAnswerQuestionContexts()){
+        for (AnswerQuestionContext answerQuestionContext : registerRequestContext.getAnswerQuestionContexts()) {
             Optional<Question> optionalQuestion = questionRepsoitory.findById(answerQuestionContext.getQuestionId());
 
             if (!optionalQuestion.isPresent()) {
@@ -199,7 +200,7 @@ public class GraderController {
 
             Question question = optionalQuestion.get();
 
-            if ( question.getForm().getId() != graderRequestForm.getId()){
+            if (question.getForm().getId() != graderRequestForm.getId()) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
 
@@ -209,18 +210,15 @@ public class GraderController {
             LinkedHashMap<String, Object> answerDataObject = answerQuestionContext.getAnswerData();
             AnswerData answerData = null;
 
-            if (type.equalsIgnoreCase("TextAnswer")){
+            if (type.equalsIgnoreCase("TextAnswer")) {
                 TextAnswer textAnswer = new TextAnswer();
                 textAnswer.setText((String) answerDataObject.get("text"));
                 answerData = textAnswer;
-            }
-
-            else if ( type.equalsIgnoreCase("ChoiceAnswer")){
+            } else if (type.equalsIgnoreCase("ChoiceAnswer")) {
                 ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                 choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                 answerData = choiceAnswer;
-            }
-            else if (type.equalsIgnoreCase("FileAnswer")) {
+            } else if (type.equalsIgnoreCase("FileAnswer")) {
                 FileAnswer fileAnswer = new FileAnswer();
 
                 String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
@@ -231,13 +229,10 @@ public class GraderController {
 
                 answerData = fileAnswer;
 
-//                // TODO ADDED FILE STUFF HERE
-//                fileAnswerRepository.save(fileAnswer);
-            }
-            else {
-                return new ResponseEntity<>("Type not supported",HttpStatus.BAD_REQUEST);
-            }
 
+            } else {
+                return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
+            }
 
 
             answer.addAnswerData(answerData);
@@ -251,7 +246,7 @@ public class GraderController {
             answers.add(answer);
 
         }
-        for(Answer answer: answers){
+        for (Answer answer : answers) {
             answerRepository.save(answer);
         }
 
@@ -267,7 +262,97 @@ public class GraderController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    //TODO api to give requests of a grader
+
+    @DeleteMapping("/grader/request/offeringWorkshop/{offeringWorkshopId}/request")
+    public ResponseEntity<Object> revertAGraderRequestForAnOfferedWorkshop(@PathVariable long offeringWorkshopId, Authentication authentication) {
+
+        GraderWorkshopConnection graderWorkshopConnection = getGraderWorkshopConnectionFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        Grader grader = graderWorkshopConnection.getGrader();
+        Request request = null;
+
+        for (Request request1 : offeredWorkshop.getRequests()) {
+
+            if (request1.getRequester().equals(grader)) {
+                request = request1;
+                break;
+            }
+
+        }
+
+        if (request == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        GraderRequestForm graderRequestForm = (GraderRequestForm) request.getRequestData().get(0);
+
+        List<Question> questions = graderRequestForm.getQuestions();
+
+        GraderFormApplicant graderFormApplicant = null;
+
+        List<Answer> answers = questions.get(0).getAnswers();
+        for (Answer answer : answers) {
+
+            if (graderWorkshopConnection.getGraderFormApplicants().contains(answer.getFormApplicant())) {
+                graderFormApplicant = (GraderFormApplicant) answer.getFormApplicant();
+                break;
+            }
+
+        }
+
+        if (graderFormApplicant == null){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        for (Answer answer : graderFormApplicant.getAnswers()){
+
+            Question answeredQuestion = answer.getQuestion();
+
+            answeredQuestion.getAnswers().remove(answer);
+
+            questionRepsoitory.save(answeredQuestion);
+
+            answer.setQuestion(null);
+            answerRepository.save(answer);
+        }
+
+        graderWorkshopConnection.getGraderFormApplicants().remove(graderFormApplicant);
+
+        workshopGraderRepository.save(graderWorkshopConnection);
+
+        graderFormApplicant.setWorkshopGrader(null);
+
+        formApplicantRepository.save(graderFormApplicant);
+
+        formApplicantRepository.delete(graderFormApplicant);
+
+        offeredWorkshop.getRequests().remove(request);
+
+        offeringWorkshopRepository.save(offeredWorkshop);
+
+        request.setRequestable(null);
+
+        grader.getRequests().remove(request);
+
+        graderRepository.save(grader);
+
+        request.setRequester(null);
+
+        request.setRequestData(null);
+
+        requestRepository.delete(request);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+
+    }
+
 
     public WorkshopManagerInfo findWorkshopManagerInfoOfWorkshop(OfferedWorkshop offeredWorkshop, WorkshopManager workshopManager) {
 

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -163,7 +162,8 @@ public class WorkshopManagerController {
 
         offeredWorkshop.setDescription(workshopEditContext.getDescription());
 
-        offeredWorkshop.setPrice(workshopEditContext.getPrice());
+        offeredWorkshop.setCashPrice(workshopEditContext.getCashPrice());
+        offeredWorkshop.setInstallmentPrice(workshopEditContext.getInstallmentPrice());
 
         offeringWorkshopRepository.save(offeredWorkshop);
 
@@ -794,9 +794,6 @@ public class WorkshopManagerController {
     @PostMapping("/offeringWorkshop/{id}/request")
     public ResponseEntity<Object> setRequestStatus(@PathVariable long id, Authentication authentication, @RequestBody RequestStatusContext requestStatusContext) {
 
-
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
-
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -918,7 +915,6 @@ public class WorkshopManagerController {
 
     @PutMapping("/offeringWorkshop/{id}/groups")
     public ResponseEntity<Object> editGroup(@PathVariable long id, Authentication authentication, @RequestBody EditGroupContext editGroupContext) {
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
@@ -976,7 +972,6 @@ public class WorkshopManagerController {
     @PostMapping("/offeringWorkshop/{id}/groups")
     public ResponseEntity<Object> addGroups(@PathVariable long id, Authentication authentication, @RequestBody List<GroupWorkshopContext> groupWorkshopContexts) {
 
-        ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
@@ -1646,12 +1641,12 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        WorkshopManager workshopManager = getMangerFromAuthentication(authentication);
+//        WorkshopManager workshopManager = getMangerFromAuthentication(authentication);
 
-        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, workshopManager);
-        if (workshopManagerInfo == null) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+//        WorkshopManagerInfo workshopManagerInfo = findWorkshopManagerInfoOfWorkshop(offeredWorkshop, workshopManager);
+//        if (workshopManagerInfo == null) {
+//            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+//        }
 
         WorkshopFile workshopFile = new WorkshopFile();
 
@@ -1666,8 +1661,8 @@ public class WorkshopManagerController {
                 workshopFileReceivers.add(WorkshopFileReceiver.Attendee);
             } else if (receiver.equalsIgnoreCase("Grader")) {
                 workshopFileReceivers.add(WorkshopFileReceiver.Grader);
-            } else if (receiver.equalsIgnoreCase("Manager")) {
-                workshopFileReceivers.add(WorkshopFileReceiver.Manager);
+            } else if (receiver.equalsIgnoreCase("Supervisor")) {
+                workshopFileReceivers.add(WorkshopFileReceiver.Supervisor);
             }
         }
 

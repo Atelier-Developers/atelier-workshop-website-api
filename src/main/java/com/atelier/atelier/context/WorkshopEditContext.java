@@ -8,7 +8,8 @@ public class WorkshopEditContext {
     private String startTime;
     private String endTime;
     private String description;
-    private BigDecimal price;
+    private BigDecimal cashPrice;
+    private BigDecimal installmentPrice;
 
     public String getName() {
         return name;
@@ -42,11 +43,20 @@ public class WorkshopEditContext {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+
+    public BigDecimal getCashPrice() {
+        return cashPrice;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setCashPrice(BigDecimal cashPrice) {
+        this.cashPrice = cashPrice;
+    }
+
+    public BigDecimal getInstallmentPrice() {
+        return installmentPrice;
+    }
+
+    public void setInstallmentPrice(BigDecimal installmentPrice) {
+        this.installmentPrice = installmentPrice;
     }
 }

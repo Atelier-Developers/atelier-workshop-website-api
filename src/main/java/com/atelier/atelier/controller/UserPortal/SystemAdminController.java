@@ -17,13 +17,11 @@ import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
-import org.hibernate.jdbc.Work;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +47,6 @@ public class SystemAdminController {
         this.offeringWorkshopRepository = offeringWorkshopRepository;
     }
 
-    // TODO for test remove for production
     @PostMapping("/makeAdmin")
     public ResponseEntity<Object> makeAdmin(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);

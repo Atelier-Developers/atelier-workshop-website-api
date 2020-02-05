@@ -9,6 +9,7 @@ import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
 import com.atelier.atelier.repository.Form.AnswerRepository;
 import com.atelier.atelier.repository.Form.FileAnswerRepository;
+import com.atelier.atelier.repository.Form.FormApplicantRepository;
 import com.atelier.atelier.repository.Form.QuestionRepsoitory;
 import com.atelier.atelier.repository.Request.AttenderRequestPaymentTabRepository;
 import com.atelier.atelier.repository.Request.RequestRepository;
@@ -16,6 +17,7 @@ import com.atelier.atelier.repository.role.AttenderRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopAttenderInfoRepository;
+import com.atelier.atelier.repository.workshop.WorkshopAttenderRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +44,14 @@ public class AttenderController {
     private AnswerRepository answerRepository;
     private RequestRepository requestRepository;
     private AttenderRequestPaymentTabRepository attenderRequestPaymentTabRepository;
+    private WorkshopAttenderRepository workshopAttenderRepository;
     private FileAnswerRepository fileAnswerRepository;
+    private FormApplicantRepository formApplicantRepository;
 
-    public AttenderController(FileAnswerRepository fileAnswerRepository, AttenderRequestPaymentTabRepository attenderRequestPaymentTabRepository, AttenderRepository attenderRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository, RequestRepository requestRepository) {
+    public AttenderController(FormApplicantRepository formApplicantRepository, WorkshopAttenderRepository workshopAttenderRepository, FileAnswerRepository fileAnswerRepository, AttenderRequestPaymentTabRepository attenderRequestPaymentTabRepository, AttenderRepository attenderRepository, UserRepository userRepository, OfferingWorkshopRepository offeringWorkshopRepository, WorkshopAttenderInfoRepository workshopAttenderInfoRepository, QuestionRepsoitory questionRepsoitory, AnswerRepository answerRepository, RequestRepository requestRepository) {
         this.attenderRepository = attenderRepository;
+        this.formApplicantRepository = formApplicantRepository;
+        this.workshopAttenderRepository = workshopAttenderRepository;
         this.userRepository = userRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
         this.workshopAttenderInfoRepository = workshopAttenderInfoRepository;
@@ -217,16 +223,9 @@ public class AttenderController {
 
                 answerData = fileAnswer;
 
-//                // TODO ADDED FILE STUFF HERE
-//                fileAnswerRepository.save(fileAnswer);
-
             } else {
                 return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
             }
-
-
-
-
             answer.addAnswerData(answerData);
 
             answer.setFormApplicant(attenderFormApplicant);
@@ -238,9 +237,12 @@ public class AttenderController {
             answers.add(answer);
 
         }
+
         for (Answer answer : answers) {
             answerRepository.save(answer);
         }
+
+
         Request request = new Request();
         request.setRequestable(offeredWorkshop);
         offeredWorkshop.addRequest(request);
@@ -251,6 +253,99 @@ public class AttenderController {
         request.setState(RequestState.Pending);
         requestRepository.save(request);
         return new ResponseEntity<>(request.getId(), HttpStatus.OK);
+    }
+
+
+    @DeleteMapping("/attendee/request/offeringWorkshop/{offeringWorkshopId}/request")
+    public ResponseEntity<Object> revertAttendeeRegisterRequestForAnOfferingWorkshop(@PathVariable long offeringWorkshopId, Authentication authentication){
+
+        AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        Attender attender = attenderWorkshopConnection.getAttender();
+        Request request = null;
+
+        for (Request request1 : offeredWorkshop.getRequests()) {
+
+            if (request1.getRequester().equals(attender)) {
+                request = request1;
+                break;
+            }
+
+        }
+
+        if (request == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        AttenderRegisterForm attenderRegisterForm = (AttenderRegisterForm) request.getRequestData().get(0);
+
+        List<Question> questions = attenderRegisterForm.getQuestions();
+
+        AttenderFormApplicant attenderFormApplicant = null;
+
+        List<Answer> answers = questions.get(0).getAnswers();
+        for (Answer answer : answers) {
+
+            if (attenderWorkshopConnection.getAttenderFormApplicants().contains(answer.getFormApplicant())) {
+                attenderFormApplicant = (AttenderFormApplicant) answer.getFormApplicant();
+                break;
+            }
+
+        }
+
+        if (attenderFormApplicant == null){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        for (Answer answer : attenderFormApplicant.getAnswers()){
+
+            Question answeredQuestion = answer.getQuestion();
+
+            answeredQuestion.getAnswers().remove(answer);
+
+            questionRepsoitory.save(answeredQuestion);
+
+            answer.setQuestion(null);
+            answerRepository.save(answer);
+        }
+
+        attenderWorkshopConnection.getAttenderFormApplicants().remove(attenderFormApplicant);
+
+        workshopAttenderRepository.save(attenderWorkshopConnection);
+
+        attenderFormApplicant.setWorkshopAttender(null);
+
+        formApplicantRepository.save(attenderFormApplicant);
+
+        formApplicantRepository.delete(attenderFormApplicant);
+
+        offeredWorkshop.getRequests().remove(request);
+
+        offeringWorkshopRepository.save(offeredWorkshop);
+
+        request.setRequestable(null);
+
+        attender.getRequests().remove(request);
+
+        attenderRepository.save(attender);
+
+        request.setRequester(null);
+
+        request.setRequestData(null);
+
+        requestRepository.delete(request);
+
+
+        //TODO SHOULD DELETE PAYMENTS AS WELL?
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/attendee/request/{id}/payments")
@@ -277,7 +372,8 @@ public class AttenderController {
         }
 
         OfferedWorkshop offeredWorkshop = (OfferedWorkshop) request.getRequestable();
-        BigDecimal workshopPrice = offeredWorkshop.getPrice();
+        BigDecimal cashPrice = offeredWorkshop.getCashPrice();
+        BigDecimal installmentPrice = offeredWorkshop.getInstallmentPrice();
         List<AttenderPaymentTab> attenderPaymentTabs = new ArrayList<>();
         AttenderRequestPaymentTab attenderRequestPaymentTab = new AttenderRequestPaymentTab();
 
@@ -290,7 +386,7 @@ public class AttenderController {
             try {
                 BigDecimal price = new BigDecimal(paymentElementRequest.getAmount());
 
-                if (workshopPrice.compareTo(price) != 0) {
+                if (cashPrice.compareTo(price) != 0) {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
 
@@ -308,7 +404,7 @@ public class AttenderController {
                 }
                 else {
                     Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.YEAR, 1); // to get previous year add -1
+                    cal.add(Calendar.YEAR, 1);
                     attenderPaymentTab.setPaymentDate(cal);
                 }
 
@@ -346,7 +442,7 @@ public class AttenderController {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
-            if (workshopPrice.compareTo(total) != 0) {
+            if (installmentPrice.compareTo(total) != 0) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
@@ -449,7 +545,6 @@ public class AttenderController {
 
 
 
-    //TODO api to give all the requests of an attendee
 
     private AttenderWorkshopConnection getAttendeeWorkshopConnectionFromAuthentication(Authentication authentication) {
         User user = User.getUser(authentication, userRepository);
