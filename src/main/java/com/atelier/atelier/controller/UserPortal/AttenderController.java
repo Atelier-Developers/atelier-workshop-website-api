@@ -338,12 +338,13 @@ public class AttenderController {
 
         request.setRequester(null);
 
+        AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
+
+        attenderRequestPaymentTabRepository.delete(attenderRequestPaymentTab);
+
         request.setRequestData(null);
 
         requestRepository.delete(request);
-
-
-        //TODO SHOULD DELETE PAYMENTS AS WELL?
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

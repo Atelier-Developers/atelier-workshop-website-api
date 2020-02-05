@@ -2,7 +2,6 @@ package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.PaymentService.Payment;
 import com.atelier.atelier.entity.RequestService.RequestData;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.ArrayList;
