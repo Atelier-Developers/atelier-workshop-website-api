@@ -2,6 +2,7 @@ package com.atelier.atelier.controller.UserPortal;
 
 
 import com.atelier.atelier.context.EditUserContext;
+import com.atelier.atelier.context.UserSignUpContext;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.repository.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,7 +29,9 @@ public class UserController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<Object> signUp(@RequestBody User user) {
+    public ResponseEntity<Object> signUp(@RequestBody UserSignUpContext userSignUpContext) {
+
+        User user = userSignUpContext.getUser();
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
@@ -45,11 +48,26 @@ public class UserController {
         grader.setGraderWorkshopConnection(graderWorkshopConnection);
         user.addRole(grader);
 
-        user.addRole(new ManagerWorkshopConnection()); //TODO REMEMBER TO DELETE THESE AND ADD A PATH FOR ADDING SUCH ROLES TO A USER
+        user.addRole(new ManagerWorkshopConnection());
 
         UserChatterConnection userChatterConnection = new UserChatterConnection();
         userChatterConnection.setUser(user);
         user.setUserChatterConnection(userChatterConnection);
+
+        String gender = userSignUpContext.getGender();
+
+
+        if (gender.equalsIgnoreCase("Female")){
+            user.setGender(Gender.Female);
+        }
+        else if (gender.equalsIgnoreCase("Male")){
+            user.setGender(Gender.Male);
+        }
+        else {
+            user.setGender(Gender.Other);
+        }
+
+
         try {
             userRepository.save(user);
         }
@@ -78,7 +96,6 @@ public class UserController {
         return roles;
     }
 
-    //TODO EDIT USER
     @PutMapping("/user/{userId}")
     public ResponseEntity<Object> changeEmailAndName(@PathVariable long userId, @RequestBody EditUserContext editUserContext){
 

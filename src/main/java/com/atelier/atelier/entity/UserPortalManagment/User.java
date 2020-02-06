@@ -1,7 +1,6 @@
 package com.atelier.atelier.entity.UserPortalManagment;
 
 import com.atelier.atelier.repository.user.UserRepository;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.AnyMetaDef;
 import org.hibernate.annotations.Cascade;
@@ -39,7 +38,10 @@ public class User {
     private File pic;
 
     @OneToOne(cascade = CascadeType.ALL)
-        private UserChatterConnection userChatterConnection;
+    private UserChatterConnection userChatterConnection;
+
+    @Enumerated(EnumType.ORDINAL)
+    private Gender gender;
 
 
     @ManyToAny(metaColumn = @Column(name = "role_type"))
@@ -64,6 +66,14 @@ public class User {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public UserChatterConnection getUserChatterConnection() {
