@@ -5,6 +5,7 @@ import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +25,12 @@ public class WorkshopFile {
 
     @OneToOne(cascade = CascadeType.ALL)
     private File file;
+
+    @Column
+    private URL urlLink;
+
+    @Enumerated(EnumType.ORDINAL)
+    private WorkshopFileType workshopFileType;
 
     @ElementCollection(targetClass = WorkshopFileReceiver.class)
     @JoinTable(name = "receivers", joinColumns = @JoinColumn(name = "workshop_file_id"))
@@ -51,6 +58,22 @@ public class WorkshopFile {
 
     public void setOfferedWorkshop(OfferedWorkshop offeredWorkshop) {
         this.offeredWorkshop = offeredWorkshop;
+    }
+
+    public URL getUrlLink() {
+        return urlLink;
+    }
+
+    public void setUrlLink(URL urlLink) {
+        this.urlLink = urlLink;
+    }
+
+    public WorkshopFileType getWorkshopFileType() {
+        return workshopFileType;
+    }
+
+    public void setWorkshopFileType(WorkshopFileType workshopFileType) {
+        this.workshopFileType = workshopFileType;
     }
 
     public Long getId() {
