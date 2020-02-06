@@ -303,7 +303,7 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (offeredWorkshop.getOfferedWorkshopInstallments() != null ){
+        if (offeredWorkshop.getOfferedWorkshopInstallments() == null || !offeredWorkshop.getOfferedWorkshopInstallments().isEmpty()){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
