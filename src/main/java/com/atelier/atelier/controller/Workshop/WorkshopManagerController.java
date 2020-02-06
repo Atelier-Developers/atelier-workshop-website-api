@@ -758,6 +758,7 @@ public class WorkshopManagerController {
             }
         }
 
+
         return new ResponseEntity<>(requests, HttpStatus.OK);
     }
 
@@ -1425,7 +1426,8 @@ public class WorkshopManagerController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<User> attendees = new ArrayList<User>();
+        List<RequestPaymentStatusContext> attendees = new ArrayList<RequestPaymentStatusContext>();
+
 
         List<User> users = userRepository.findAll();
 
@@ -1437,7 +1439,29 @@ public class WorkshopManagerController {
                     for (User user : users) {
                         Attender userAttender = (Attender) user.getRole("Attender");
                         if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
-                            attendees.add(user);
+                            RequestPaymentStatusContext requestPaymentStatusContext = new RequestPaymentStatusContext();
+                            requestPaymentStatusContext.setUser(user);
+                            if (request.getState().equals(RequestState.Accepted)){
+                                requestPaymentStatusContext.setRequestStatus("Accepted");
+                                requestPaymentStatusContext.setPaymentState(true);
+                            }
+                            else if (request.getState().equals(RequestState.Pending)){
+                                requestPaymentStatusContext.setRequestStatus("Pending");
+                                AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
+                                boolean payState = true;
+                                for (AttenderPaymentTab attenderPaymentTab : attenderRequestPaymentTab.getAttenderPaymentTabList()){
+                                    if (!attenderPaymentTab.isPaid()) {
+                                        payState = false;
+                                        break;
+                                    }
+                                }
+                                requestPaymentStatusContext.setPaymentState(payState);
+                            }
+                            else if (request.getState().equals(RequestState.Rejected)){
+                                requestPaymentStatusContext.setRequestStatus("Rejected");
+                                requestPaymentStatusContext.setPaymentState(false);
+                            }
+                            attendees.add(requestPaymentStatusContext);
                             break;
                         }
                     }
