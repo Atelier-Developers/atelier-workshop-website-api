@@ -8,8 +8,26 @@ public class WorkshopFileContext {
 
     private String title;
     private String description;
+    private String type;
+    private String link;
     private List<String> receiverList;
 
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
 
     public String getTitle() {
         return title;

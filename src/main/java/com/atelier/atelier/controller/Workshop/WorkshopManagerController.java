@@ -31,6 +31,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -1711,6 +1712,18 @@ public class WorkshopManagerController {
         workshopFile.setTitle(workshopFileContext.getTitle());
         workshopFile.setDescription(workshopFileContext.getDescription());
         workshopFile.setOfferedWorkshop(offeredWorkshop);
+
+        if (workshopFileContext.getType().equals("Link")){
+            URL url = new URL(workshopFileContext.getLink());
+            workshopFile.setUrlLink(url);
+            workshopFile.setWorkshopFileType(WorkshopFileType.Link);
+        }
+        else if (workshopFileContext.getType().equals("File")){
+            workshopFile.setWorkshopFileType(WorkshopFileType.File);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         List<WorkshopFileReceiver> workshopFileReceivers = new ArrayList<>();
         for (String receiver : workshopFileContext.getReceiverList()) {

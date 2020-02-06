@@ -445,17 +445,40 @@ public class WorkshopRestController {
         }
 
         workshopFileGETContext.setReceivers(workshopFileReceivers);
+        workshopFileGETContext.setId(workshopFile.getId());
 
-        File file = workshopFile.getFile();
+        if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.File)){
 
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/workshop/offeringWorkshops/download/")
-                .path(Long.toString(file.getId()))
-                .toUriString();
+            workshopFileGETContext.setType("File");
 
-        workshopFileGETContext.setDownloadURI(fileDownloadUri);
+            File file = workshopFile.getFile();
 
-        return new ResponseEntity<>(workshopFileGETContext, HttpStatus.OK);
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/workshop/offeringWorkshops/download/")
+                    .path(Long.toString(file.getId()))
+                    .toUriString();
+
+            workshopFileGETContext.setDownloadURI(fileDownloadUri);
+
+            return new ResponseEntity<>(workshopFileGETContext, HttpStatus.OK);
+        }
+
+        else if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.Link)){
+
+            workshopFileGETContext.setType("Link");
+
+            String urlLink = workshopFile.getUrlLink().toString();
+
+            workshopFileGETContext.setDownloadURI(urlLink);
+
+            return new ResponseEntity<>(workshopFileGETContext, HttpStatus.OK);
+
+        }
+
+        else {
+
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
 
@@ -499,16 +522,30 @@ public class WorkshopRestController {
                 }
 
                 workshopFileGETContext.setReceivers(workshopFileReceivers);
-
-                File file = workshopFile.getFile();
-
-                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/workshop/offeringWorkshops/download/")
-                        .path(Long.toString(file.getId()))
-                        .toUriString();
-
-                workshopFileGETContext.setDownloadURI(fileDownloadUri);
                 workshopFileGETContext.setId(workshopFile.getId());
+
+                if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.File)){
+
+                    workshopFileGETContext.setType("File");
+
+                    File file = workshopFile.getFile();
+
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/workshop/offeringWorkshops/download/")
+                            .path(Long.toString(file.getId()))
+                            .toUriString();
+
+                    workshopFileGETContext.setDownloadURI(fileDownloadUri);
+                }
+
+                else if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.Link)){
+
+                    workshopFileGETContext.setType("Link");
+
+                    String urlLink = workshopFile.getUrlLink().toString();
+
+                    workshopFileGETContext.setDownloadURI(urlLink);
+                }
 
 
                 workshopFileGETContexts.add(workshopFileGETContext);
@@ -557,16 +594,30 @@ public class WorkshopRestController {
                 }
 
                 workshopFileGETContext.setReceivers(workshopFileReceivers);
-
-                File file = workshopFile.getFile();
-
-                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/workshop/offeringWorkshops/download/")
-                        .path(Long.toString(file.getId()))
-                        .toUriString();
-
-                workshopFileGETContext.setDownloadURI(fileDownloadUri);
                 workshopFileGETContext.setId(workshopFile.getId());
+
+                if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.File)){
+
+                    workshopFileGETContext.setType("File");
+                    File file = workshopFile.getFile();
+
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/workshop/offeringWorkshops/download/")
+                            .path(Long.toString(file.getId()))
+                            .toUriString();
+
+                    workshopFileGETContext.setDownloadURI(fileDownloadUri);
+
+                }
+                else if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.Link)){
+
+                    workshopFileGETContext.setType("Link");
+
+                    String urlLink = workshopFile.getUrlLink().toString();
+
+                    workshopFileGETContext.setDownloadURI(urlLink);
+                }
+
 
                 workshopFileGETContexts.add(workshopFileGETContext);
             }
@@ -614,16 +665,31 @@ public class WorkshopRestController {
                 }
 
                 workshopFileGETContext.setReceivers(workshopFileReceivers);
-
-                File file = workshopFile.getFile();
-
-                String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                        .path("/workshop/offeringWorkshops/download/")
-                        .path(Long.toString(file.getId()))
-                        .toUriString();
-
-                workshopFileGETContext.setDownloadURI(fileDownloadUri);
                 workshopFileGETContext.setId(workshopFile.getId());
+
+
+                if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.File)){
+
+                    workshopFileGETContext.setType("File");
+                    File file = workshopFile.getFile();
+
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/workshop/offeringWorkshops/download/")
+                            .path(Long.toString(file.getId()))
+                            .toUriString();
+
+                    workshopFileGETContext.setDownloadURI(fileDownloadUri);
+
+                }
+
+                else if (workshopFile.getWorkshopFileType().equals(WorkshopFileType.Link)){
+
+                    workshopFileGETContext.setType("Link");
+                    String urlLink = workshopFile.getUrlLink().toString();
+
+                    workshopFileGETContext.setDownloadURI(urlLink);
+                }
+
 
                 workshopFileGETContexts.add(workshopFileGETContext);
             }
