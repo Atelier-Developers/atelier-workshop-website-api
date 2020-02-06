@@ -429,11 +429,7 @@ public class AttenderController {
 
                 attenderPaymentTab.setValue(offeredWorkshopInstallment.getValue());
                 attenderPaymentTab.setPaid(false);
-//
-//                    String date = paymentElementRequest.getDueDate();
-//                    Calendar cal = Calendar.getInstance();
-//                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-//                    cal.setTime(dateFormat.parse(date));
+
 
                 attenderPaymentTab.setPaymentDate(offeredWorkshopInstallment.getPaymentDate());
                 attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);

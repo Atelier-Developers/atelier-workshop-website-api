@@ -1,6 +1,5 @@
 package com.atelier.atelier.context;
 
-import com.atelier.atelier.entity.RequestService.Request;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 
 public class RequestPaymentStatusContext {

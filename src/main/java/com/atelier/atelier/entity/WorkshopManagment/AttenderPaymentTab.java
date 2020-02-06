@@ -1,6 +1,7 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
 import com.atelier.atelier.entity.PaymentService.Payment;
+import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
@@ -29,6 +30,29 @@ public class AttenderPaymentTab implements Payment {
 
     @Column(nullable = false)
     private boolean isPaid;
+
+    @Column
+    private String comment;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private File file;
+
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
+    }
 
     public boolean isPaid() {
         return isPaid;

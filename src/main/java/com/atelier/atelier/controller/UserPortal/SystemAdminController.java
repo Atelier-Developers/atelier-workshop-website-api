@@ -4,6 +4,7 @@ import com.atelier.atelier.entity.MessagingSystem.Chatroom;
 import com.atelier.atelier.entity.MessagingSystem.Chatter;
 import com.atelier.atelier.entity.MessagingSystem.ChatterMessageRelation;
 import com.atelier.atelier.entity.MessagingSystem.Message;
+import com.atelier.atelier.entity.UserPortalManagment.File;
 import com.atelier.atelier.entity.UserPortalManagment.SystemAdmin;
 import com.atelier.atelier.entity.UserPortalManagment.User;
 import com.atelier.atelier.entity.WorkshopManagment.AttenderPaymentTab;
@@ -14,14 +15,21 @@ import com.atelier.atelier.repository.ChatService.ChatroomRepository;
 import com.atelier.atelier.repository.ChatService.ChatterMessageRelationRepository;
 import com.atelier.atelier.repository.ChatService.ChatterRepository;
 import com.atelier.atelier.repository.Request.AttenderPaymentTabRepository;
+import com.atelier.atelier.repository.user.FileRepository;
 import com.atelier.atelier.repository.user.UserRepository;
 import com.atelier.atelier.repository.workshop.OfferingWorkshopRepository;
 import com.atelier.atelier.repository.workshop.WorkshopRepository;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,8 +44,9 @@ public class SystemAdminController {
     private ChatroomRepository chatroomRepository;
     private ChatterRepository chatterRepository;
     private ChatterMessageRelationRepository chatterMessageRelationRepository;
+    private FileRepository fileRepository;
 
-    public SystemAdminController(ChatterMessageRelationRepository chatterMessageRelationRepository, ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
+    public SystemAdminController(FileRepository fileRepository, ChatterMessageRelationRepository chatterMessageRelationRepository, ChatterRepository chatterRepository, ChatroomRepository chatroomRepository, OfferingWorkshopRepository offeringWorkshopRepository, AttenderPaymentTabRepository attenderPaymentTabRepository, WorkshopRepository workshopRepository, UserRepository userRepository) {
         this.workshopRepository = workshopRepository;
         this.chatterMessageRelationRepository = chatterMessageRelationRepository;
         this.chatroomRepository = chatroomRepository;
@@ -45,6 +54,7 @@ public class SystemAdminController {
         this.userRepository = userRepository;
         this.attenderPaymentTabRepository = attenderPaymentTabRepository;
         this.offeringWorkshopRepository = offeringWorkshopRepository;
+        this.fileRepository = fileRepository;
     }
 
     @PostMapping("/makeAdmin")
@@ -242,12 +252,8 @@ public class SystemAdminController {
     }
 
     @PutMapping("/attendeePaymentTab/{id}")
-    public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id, Authentication authentication) {
-        SystemAdmin systemAdmin = getSysAdminRoleFromAuthentication(authentication);
+    public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id ,@RequestBody String comment, Authentication authentication) {
 
-        if ( systemAdmin == null ){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
         Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
 
         if ( !optionalAttenderPaymentTab.isPresent() ){
@@ -255,9 +261,61 @@ public class SystemAdminController {
         }
         AttenderPaymentTab attenderPaymentTab = optionalAttenderPaymentTab.get();
         attenderPaymentTab.setPaid(true);
+
+        attenderPaymentTab.setComment(comment);
+
         attenderPaymentTabRepository.save(attenderPaymentTab);
+        return new ResponseEntity<>(attenderPaymentTab.getId(), HttpStatus.OK);
+    }
+
+
+    @PostMapping("/attendeePaymentTab/{id}/file")
+    public ResponseEntity<Object> uploadPaymentFile(@PathVariable long id, @RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
+
+        Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
+
+        if ( !optionalAttenderPaymentTab.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        AttenderPaymentTab attenderPaymentTab = optionalAttenderPaymentTab.get();
+
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+        File uploadedFile = new File();
+
+        uploadedFile.setFileName(fileName);
+        uploadedFile.setData(file.getBytes());
+        uploadedFile.setFileType(file.getContentType());
+
+        fileRepository.save(uploadedFile);
+
+        attenderPaymentTab.setFile(uploadedFile);
+
+        attenderPaymentTabRepository.save(attenderPaymentTab);
+
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/attendeePaymentTab/{id}/file")
+    public ResponseEntity<Object> getPaymentFile(@PathVariable long id){
+        Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
+
+        if ( !optionalAttenderPaymentTab.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        AttenderPaymentTab attenderPaymentTab = optionalAttenderPaymentTab.get();
+
+        if(attenderPaymentTab.getFile() == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        File uploadedFile = attenderPaymentTab.getFile();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(uploadedFile.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + uploadedFile.getFileName() + "\"")
+                .body(new ByteArrayResource(uploadedFile.getData()));
+    }
+
 
 
     private SystemAdmin getSysAdminRoleFromAuthentication(Authentication authentication) {

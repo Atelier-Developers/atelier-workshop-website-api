@@ -1880,12 +1880,78 @@ public class WorkshopManagerController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-//    @GetMapping
-//    getOfferedWorkshopStarredGraders
+    @GetMapping("/offeringWorkshop/{offId}/starredGraders")
+    public ResponseEntity<Object> getOfferingWorkshopStarredGraders(@PathVariable long offId){
 
-//    @GetMapping
-//    getWorkshopGroupStarredGraders
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
 
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<User> users = userRepository.findAll();
+
+        List<User> starredGraders = new ArrayList<>();
+
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()){
+
+            if (workshopGraderInfo.isStarred()){
+
+                WorkshopGrader workshopGrader = workshopGraderInfo.getWorkshopGrader();
+
+                for (User user : users){
+
+                    Grader grader = (Grader) user.getRole("Grader");
+
+                    if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+
+                        starredGraders.add(user);
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        return new ResponseEntity<>(starredGraders, HttpStatus.OK);
+
+    }
+
+
+    @GetMapping("/workshopGroup/{groupId}/starredGraders")
+    public ResponseEntity<Object> getWorkshopGroupStarredGraders(@PathVariable long groupId){
+
+        Optional<WorkshopGroup> optionalWorkshopGroup = workshopGroupRepository.findById(groupId);
+
+        if (!optionalWorkshopGroup.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        WorkshopGroup workshopGroup = optionalWorkshopGroup.get();
+
+        List<User> users = userRepository.findAll();
+
+        List<User> starredGraders = new ArrayList<>();
+
+        for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
+
+            WorkshopGrader workshopGrader = workshopGraderInfo.getWorkshopGrader();
+
+            for (User user : users){
+
+                Grader grader = (Grader) user.getRole("Grader");
+
+                if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+                    starredGraders.add(user);
+                    break;
+                }
+            }
+        }
+
+        return new ResponseEntity<>(starredGraders, HttpStatus.OK);
+    }
 
 
 
