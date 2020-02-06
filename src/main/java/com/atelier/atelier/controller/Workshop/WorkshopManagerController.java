@@ -1713,12 +1713,12 @@ public class WorkshopManagerController {
         workshopFile.setDescription(workshopFileContext.getDescription());
         workshopFile.setOfferedWorkshop(offeredWorkshop);
 
-        if (workshopFileContext.getType().equals("Link")){
+        if (workshopFileContext.getType().equalsIgnoreCase("Link")){
             URL url = new URL(workshopFileContext.getLink());
             workshopFile.setUrlLink(url);
             workshopFile.setWorkshopFileType(WorkshopFileType.Link);
         }
-        else if (workshopFileContext.getType().equals("File")){
+        else if (workshopFileContext.getType().equalsIgnoreCase("File")){
             workshopFile.setWorkshopFileType(WorkshopFileType.File);
         }
         else {
