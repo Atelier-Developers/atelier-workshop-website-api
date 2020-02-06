@@ -100,15 +100,15 @@ public class AttenderController {
 
             List<String> managerNames = new ArrayList<>();
 
-            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
 
                 WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
 
-                for(User currentUser : users){
+                for (User currentUser : users) {
 
                     WorkshopManager workshopManager1 = (WorkshopManager) currentUser.getRole("ManagerWorkshopConnection");
 
-                    if (workshopManager.getId() == workshopManager1.getId()){
+                    if (workshopManager.getId() == workshopManager1.getId()) {
                         managerNames.add(currentUser.getName());
                         break;
                     }
@@ -213,7 +213,7 @@ public class AttenderController {
                 ChoiceAnswer choiceAnswer = new ChoiceAnswer();
                 choiceAnswer.setChoice((Integer) answerDataObject.get("choice"));
                 answerData = choiceAnswer;
-            } else if (type.equalsIgnoreCase("FileAnswer")){
+            } else if (type.equalsIgnoreCase("FileAnswer")) {
                 FileAnswer fileAnswer = new FileAnswer();
                 String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
 
@@ -257,7 +257,7 @@ public class AttenderController {
 
 
     @DeleteMapping("/attendee/request/offeringWorkshop/{offeringWorkshopId}/request")
-    public ResponseEntity<Object> revertAttendeeRegisterRequestForAnOfferingWorkshop(@PathVariable long offeringWorkshopId, Authentication authentication){
+    public ResponseEntity<Object> revertAttendeeRegisterRequestForAnOfferingWorkshop(@PathVariable long offeringWorkshopId, Authentication authentication) {
 
         AttenderWorkshopConnection attenderWorkshopConnection = getAttendeeWorkshopConnectionFromAuthentication(authentication);
 
@@ -300,11 +300,11 @@ public class AttenderController {
 
         }
 
-        if (attenderFormApplicant == null){
+        if (attenderFormApplicant == null) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        for (Answer answer : attenderFormApplicant.getAnswers()){
+        for (Answer answer : attenderFormApplicant.getAnswers()) {
 
             Question answeredQuestion = answer.getQuestion();
 
@@ -349,6 +349,31 @@ public class AttenderController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+
+    @GetMapping("/attendee/{id}/offeringWorkshop/{offId}/payment")
+    public ResponseEntity<Object> getRequestPaymentOfAttendee(@PathVariable long id, @PathVariable long offId) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        User user = optionalUser.get();
+        Attender attender = (Attender) user.getRole("Attender");
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<Request> requests = requestRepository.findAll();
+        for (Request request : requests) {
+            if (request.getRequester().getId() == attender.getId() && request.getRequestable().getId() == offeredWorkshop.getId()) {
+                return new ResponseEntity<>(request.getRequestData().get(1), HttpStatus.OK);
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
     @PostMapping("/attendee/request/{id}/payments")
     public ResponseEntity<Object> addPayments(@PathVariable long id, @RequestBody PaymentRequestContext paymentRequestContext, Authentication authentication) {
 
@@ -373,48 +398,25 @@ public class AttenderController {
         }
 
         OfferedWorkshop offeredWorkshop = (OfferedWorkshop) request.getRequestable();
-        BigDecimal cashPrice = offeredWorkshop.getCashPrice();
-//        BigDecimal installmentPrice = offeredWorkshop.getInstallmentPrice();
         AttenderRequestPaymentTab attenderRequestPaymentTab = new AttenderRequestPaymentTab();
 
         if (paymentRequestContext.getType().equalsIgnoreCase("Cash")) {
 
-            PaymentElementRequest paymentElementRequest = paymentRequestContext.getPayments().get(0);
 
             AttenderPaymentTab attenderPaymentTab = new AttenderPaymentTab();
 
-            try {
-                BigDecimal price = new BigDecimal(paymentElementRequest.getAmount());
+            BigDecimal price = offeredWorkshop.getCashPrice();
 
-                if (cashPrice.compareTo(price) != 0) {
-                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-                }
-
-                attenderPaymentTab.setValue(price);
-                attenderPaymentTab.setPaid(false);
-
-                String date = paymentElementRequest.getDueDate();
-
-                if (date != null){
-                    Calendar cal = Calendar.getInstance();
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
-                    cal.setTime(dateFormat.parse(date));
-
-                    attenderPaymentTab.setPaymentDate(cal);
-                }
-                else {
-                    Calendar cal = Calendar.getInstance();
-                    cal.add(Calendar.YEAR, 1);
-                    attenderPaymentTab.setPaymentDate(cal);
-                }
+            attenderPaymentTab.setValue(price);
+            attenderPaymentTab.setPaid(false);
 
 
-                attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
-                attenderRequestPaymentTab.addPayment(attenderPaymentTab);
-            }
-            catch (IllegalArgumentException | ParseException e) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            }
+            Calendar cal = Calendar.getInstance();
+            attenderPaymentTab.setPaymentDate(cal);
+
+
+            attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
+            attenderRequestPaymentTab.addPayment(attenderPaymentTab);
 
 
         } else if (paymentRequestContext.getType().equalsIgnoreCase("Installment")) {
@@ -425,17 +427,17 @@ public class AttenderController {
 //                try {
 //                    BigDecimal price = offeredWorkshopInstallment.getValue();
 
-                    attenderPaymentTab.setValue(offeredWorkshopInstallment.getValue());
-                    attenderPaymentTab.setPaid(false);
+                attenderPaymentTab.setValue(offeredWorkshopInstallment.getValue());
+                attenderPaymentTab.setPaid(false);
 //
 //                    String date = paymentElementRequest.getDueDate();
 //                    Calendar cal = Calendar.getInstance();
 //                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 //                    cal.setTime(dateFormat.parse(date));
 
-                    attenderPaymentTab.setPaymentDate(offeredWorkshopInstallment.getPaymentDate());
-                    attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
-                    attenderRequestPaymentTab.addPayment(attenderPaymentTab);
+                attenderPaymentTab.setPaymentDate(offeredWorkshopInstallment.getPaymentDate());
+                attenderPaymentTab.setAttenderRequestPaymentTab(attenderRequestPaymentTab);
+                attenderRequestPaymentTab.addPayment(attenderPaymentTab);
 //                    total = total.add(price);
 //                }
 //                catch (IllegalArgumentException | ParseException e) {
@@ -476,7 +478,7 @@ public class AttenderController {
         if (request.getRequester().getId() != attender.getId()) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
-        if (request.getRequestData().size() < 1+2) {
+        if (request.getRequestData().size() < 1 + 2) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -487,7 +489,7 @@ public class AttenderController {
 
     // Returns the attendee groupName, and graders and attendee users of the same group as this user
     @GetMapping("/offeringWorkshop/{id}/groupDetails")
-    public ResponseEntity<Object> showUsersOfTheSameGroupAsThisUser(@PathVariable long id, Authentication authentication){
+    public ResponseEntity<Object> showUsersOfTheSameGroupAsThisUser(@PathVariable long id, Authentication authentication) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(id);
         if (!optionalOfferedWorkshop.isPresent()) {
@@ -515,10 +517,10 @@ public class AttenderController {
 
         List<User> attendeeUsers = new ArrayList<User>();
 
-        for (WorkshopAttenderInfo attInfo : attendeeGroup.getAttenderInfos()){
-            for (User user : users ){
+        for (WorkshopAttenderInfo attInfo : attendeeGroup.getAttenderInfos()) {
+            for (User user : users) {
                 Attender attender = (Attender) user.getRole("Attender");
-                if (attender.getAttenderWorkshopConnection().getId() == attInfo.getWorkshopAttender().getId()){
+                if (attender.getAttenderWorkshopConnection().getId() == attInfo.getWorkshopAttender().getId()) {
                     attendeeUsers.add(user);
                     break;
                 }
@@ -528,10 +530,10 @@ public class AttenderController {
         groupUsersContext.setAttendees(attendeeUsers);
 
         List<User> graderUsers = new ArrayList<User>();
-        for (WorkshopGraderInfo workshopGraderInfo1 : attendeeGroup.getGraderInfos()){
-            for(User user : users){
+        for (WorkshopGraderInfo workshopGraderInfo1 : attendeeGroup.getGraderInfos()) {
+            for (User user : users) {
                 Grader grader = (Grader) user.getRole("Grader");
-                if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo1.getWorkshopGrader().getId()){
+                if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo1.getWorkshopGrader().getId()) {
                     graderUsers.add(user);
                     break;
                 }
@@ -542,8 +544,6 @@ public class AttenderController {
 
         return new ResponseEntity<>(groupUsersContext, HttpStatus.OK);
     }
-
-
 
 
     private AttenderWorkshopConnection getAttendeeWorkshopConnectionFromAuthentication(Authentication authentication) {
