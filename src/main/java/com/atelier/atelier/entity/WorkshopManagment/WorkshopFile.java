@@ -6,8 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @Entity

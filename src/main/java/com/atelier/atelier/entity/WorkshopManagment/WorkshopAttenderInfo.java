@@ -31,6 +31,8 @@ public class WorkshopAttenderInfo {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private WorkshopGroup workshopGroup;
 
+    @OneToMany(mappedBy = "workshopAttenderInfo")
+    private List<PersonalFile> personalFiles;
 
     @Enumerated(EnumType.ORDINAL)
     private AttendeeStatusType attendeeStatusType;
