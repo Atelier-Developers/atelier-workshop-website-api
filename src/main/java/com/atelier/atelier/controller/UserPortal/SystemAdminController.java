@@ -1,5 +1,6 @@
 package com.atelier.atelier.controller.UserPortal;
 
+import com.atelier.atelier.context.CommentContext;
 import com.atelier.atelier.entity.MessagingSystem.Chatroom;
 import com.atelier.atelier.entity.MessagingSystem.Chatter;
 import com.atelier.atelier.entity.MessagingSystem.ChatterMessageRelation;
@@ -252,7 +253,7 @@ public class SystemAdminController {
     }
 
     @PutMapping("/attendeePaymentTab/{id}")
-    public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id ,@RequestBody String comment, Authentication authentication) {
+    public ResponseEntity<Object> acceptPaymentTabState(@PathVariable long id , @RequestBody CommentContext commentContext, Authentication authentication) {
 
         Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
 
@@ -262,7 +263,7 @@ public class SystemAdminController {
         AttenderPaymentTab attenderPaymentTab = optionalAttenderPaymentTab.get();
         attenderPaymentTab.setPaid(true);
 
-        attenderPaymentTab.setComment(comment);
+        attenderPaymentTab.setComment(commentContext.getComment());
 
         attenderPaymentTabRepository.save(attenderPaymentTab);
         return new ResponseEntity<>(attenderPaymentTab.getId(), HttpStatus.OK);

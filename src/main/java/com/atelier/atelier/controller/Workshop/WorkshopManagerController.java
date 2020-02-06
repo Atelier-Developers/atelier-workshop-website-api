@@ -136,13 +136,12 @@ public class WorkshopManagerController {
     }
 
 
-
     @PutMapping("/offeringWorkshop/{offeringWorkshopId}")
     public ResponseEntity<Object> editOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody WorkshopEditContext workshopEditContext) throws ParseException {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -250,11 +249,11 @@ public class WorkshopManagerController {
         List<User> users = userRepository.findAll();
         List<User> managerUsers = new ArrayList<>();
 
-        for(WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()){
+        for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
             WorkshopManager workshopManager = workshopManagerInfo.getWorkshopManager();
-            for (User user : users){
+            for (User user : users) {
                 WorkshopManager workshopManager1 = (WorkshopManager) user.getRole("ManagerWorkshopConnection");
-                if (workshopManager1.getId() == workshopManager.getId()){
+                if (workshopManager1.getId() == workshopManager.getId()) {
                     managerUsers.add(user);
                     break;
                 }
@@ -275,7 +274,7 @@ public class WorkshopManagerController {
 
         chatroomRepository.save(graderRoom);
 
-        for (User user : managerUsers){
+        for (User user : managerUsers) {
             Chatter chatter = user.getUserChatterConnection();
             attRoom.addChatter(chatter);
             chatter.addChatroom(attRoom);
@@ -294,17 +293,17 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop/{offeringWorkshopId}/installments")
-    public ResponseEntity<Object> addInstallmentPaymentsForOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody PaymentRequestContext paymentRequestContext){
+    public ResponseEntity<Object> addInstallmentPaymentsForOfferingWorkshop(@PathVariable long offeringWorkshopId, @RequestBody PaymentRequestContext paymentRequestContext) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        if (offeredWorkshop.getOfferedWorkshopInstallments() == null || !offeredWorkshop.getOfferedWorkshopInstallments().isEmpty()){
+        if (offeredWorkshop.getOfferedWorkshopInstallments() == null || !offeredWorkshop.getOfferedWorkshopInstallments().isEmpty()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -330,8 +329,7 @@ public class WorkshopManagerController {
                 offeredWorkshopInstallmentRepository.save(offeredWorkshopInstallment);
                 offeredWorkshopInstallments.add(offeredWorkshopInstallment);
                 total = total.add(price);
-            }
-            catch (IllegalArgumentException | ParseException e) {
+            } catch (IllegalArgumentException | ParseException e) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
@@ -670,7 +668,7 @@ public class WorkshopManagerController {
 
         List<Question> questions = formQuestionContext.getQuestion();
 
-            for (Question question : questions) {
+        for (Question question : questions) {
             List<Answerable> answerables = question.getAnswerables();
             if (answerables != null) {
                 for (Answerable answerable : answerables) {
@@ -820,14 +818,12 @@ public class WorkshopManagerController {
             }
             return new ResponseEntity<>(formResultContexts, HttpStatus.OK);
 
-        }
-        else {
+        } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
 
     }
-
 
 
     @GetMapping("/offeringWorkshop/{id}/requester/{requesterId}")
@@ -872,7 +868,7 @@ public class WorkshopManagerController {
 
         Request request = optionalRequest.get();
 
-        if (request.getState() == RequestState.Accepted || request.getState() == RequestState.Rejected ) {
+        if (request.getState() == RequestState.Accepted || request.getState() == RequestState.Rejected) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -913,8 +909,7 @@ public class WorkshopManagerController {
 
                 return new ResponseEntity<>(workshopGraderInfo.getId(), HttpStatus.OK);
             }
-        }
-        else if(request.getState() == RequestState.Rejected){
+        } else if (request.getState() == RequestState.Rejected) {
             requestRepository.save(request);
             return new ResponseEntity<>(HttpStatus.OK);
         }
@@ -1112,24 +1107,23 @@ public class WorkshopManagerController {
     }
 
 
-
     @DeleteMapping("/offeringWorkshop/group/{groupId}")
-    public ResponseEntity<Object> deleteGroupWithoutDeletingInfos(@PathVariable long groupId){
+    public ResponseEntity<Object> deleteGroupWithoutDeletingInfos(@PathVariable long groupId) {
 
         Optional<WorkshopGroup> optionalGroup = workshopGroupRepository.findById(groupId);
 
-        if (!optionalGroup.isPresent()){
+        if (!optionalGroup.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         WorkshopGroup workshopGroup = optionalGroup.get();
 
-        for(WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
+        for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()) {
             workshopGraderInfo.setWorkshopGroup(null);
             workshopGraderInfoRepository.save(workshopGraderInfo);
         }
 
-        for(WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()){
+        for (WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()) {
             workshopAttenderInfo.setWorkshopGroup(null);
             workshopAttenderInfoRepository.save(workshopAttenderInfo);
         }
@@ -1411,7 +1405,7 @@ public class WorkshopManagerController {
 
     // Returns the Requesting Attendees User Objects with Request status as pending
     @GetMapping("/offeringWorkshop/{id}/requests/pending/attendees")
-    public ResponseEntity<Object> showPendingAttendeeRequestsUsers(@PathVariable long id, Authentication authentication) {
+    public ResponseEntity<Object> showPendingAttendeeRequestsUsers(@PathVariable long id,  Authentication authentication) {
 
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
@@ -1441,26 +1435,45 @@ public class WorkshopManagerController {
                         if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
                             RequestPaymentStatusContext requestPaymentStatusContext = new RequestPaymentStatusContext();
                             requestPaymentStatusContext.setUser(user);
-                            if (request.getState().equals(RequestState.Accepted)){
-                                requestPaymentStatusContext.setRequestStatus("Accepted");
-                                requestPaymentStatusContext.setPaymentState(true);
-                            }
-                            else if (request.getState().equals(RequestState.Pending)){
-                                requestPaymentStatusContext.setRequestStatus("Pending");
-                                AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
-                                boolean payState = true;
-                                for (AttenderPaymentTab attenderPaymentTab : attenderRequestPaymentTab.getAttenderPaymentTabList()){
-                                    if (!attenderPaymentTab.isPaid()) {
-                                        payState = false;
-                                        break;
-                                    }
+                            requestPaymentStatusContext.setRequestStatus("Pending");
+                            AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
+                            boolean payState = true;
+                            for (AttenderPaymentTab attenderPaymentTab : attenderRequestPaymentTab.getAttenderPaymentTabList()) {
+                                if (!attenderPaymentTab.isPaid()) {
+                                    payState = false;
+                                    break;
                                 }
-                                requestPaymentStatusContext.setPaymentState(payState);
                             }
-                            else if (request.getState().equals(RequestState.Rejected)){
-                                requestPaymentStatusContext.setRequestStatus("Rejected");
-                                requestPaymentStatusContext.setPaymentState(false);
-                            }
+                            requestPaymentStatusContext.setPaymentState(payState);
+                            attendees.add(requestPaymentStatusContext);
+                            break;
+                        }
+                    }
+                } else if (request.getState().equals(RequestState.Accepted)) {
+                    Attender attender = (Attender) request.getRequester();
+                    WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+                    for (User user : users) {
+                        Attender userAttender = (Attender) user.getRole("Attender");
+                        if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
+                            RequestPaymentStatusContext requestPaymentStatusContext = new RequestPaymentStatusContext();
+                            requestPaymentStatusContext.setUser(user);
+                            requestPaymentStatusContext.setRequestStatus("Accepted");
+                            requestPaymentStatusContext.setPaymentState(true);
+                            attendees.add(requestPaymentStatusContext);
+                            break;
+                        }
+                    }
+                } else if (request.getState().equals(RequestState.Rejected)) {
+
+                    Attender attender = (Attender) request.getRequester();
+                    WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+                    for (User user : users) {
+                        Attender userAttender = (Attender) user.getRole("Attender");
+                        if (userAttender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
+                            RequestPaymentStatusContext requestPaymentStatusContext = new RequestPaymentStatusContext();
+                            requestPaymentStatusContext.setUser(user);
+                            requestPaymentStatusContext.setRequestStatus("Rejected");
+                            requestPaymentStatusContext.setPaymentState(false);
                             attendees.add(requestPaymentStatusContext);
                             break;
                         }
@@ -1599,11 +1612,11 @@ public class WorkshopManagerController {
         List<User> users = userRepository.findAll();
         OfferedWorkshopChatroom offeredWorkshopChatroom = offeredWorkshop.getGradersChatroom();
 
-        for (User user : users){
+        for (User user : users) {
 
             Grader grader = (Grader) user.getRole("Grader");
 
-            if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+            if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()) {
                 Chatter chatter = user.getUserChatterConnection();
                 offeredWorkshopChatroom.addChatter(chatter);
                 chatter.addChatroom(offeredWorkshopChatroom);
@@ -1616,7 +1629,8 @@ public class WorkshopManagerController {
         return workshopGraderInfo;
     }
 
-    private WorkshopAttenderInfo enrollAttendeeWorkshop(WorkshopAttender workshopAttender, OfferedWorkshop offeredWorkshop) {
+    private WorkshopAttenderInfo enrollAttendeeWorkshop(WorkshopAttender workshopAttender, OfferedWorkshop
+            offeredWorkshop) {
         WorkshopAttenderInfo workshopAttenderInfo = new WorkshopAttenderInfo();
         workshopAttenderInfo.setOfferedWorkshop(offeredWorkshop);
         workshopAttenderInfo.setWorkshopAttender(workshopAttender);
@@ -1627,11 +1641,11 @@ public class WorkshopManagerController {
         List<User> users = userRepository.findAll();
         OfferedWorkshopChatroom offeredWorkshopChatroom = offeredWorkshop.getAttendeesChatroom();
 
-        for (User user : users){
+        for (User user : users) {
 
             Attender attender = (Attender) user.getRole("Attender");
 
-            if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
+            if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()) {
                 Chatter chatter = user.getUserChatterConnection();
                 offeredWorkshopChatroom.addChatter(chatter);
                 chatter.addChatroom(offeredWorkshopChatroom);
@@ -1715,7 +1729,8 @@ public class WorkshopManagerController {
 
     // API to create workshop file (GET method in WorkshopRestController)
     @PostMapping("/offeringWorkshop/{offeringWorkshopId}/workshopFile/create")
-    public ResponseEntity<Object> createWorkshopFile(@PathVariable long offeringWorkshopId, @RequestBody WorkshopFileContext workshopFileContext, Authentication authentication) throws IOException {
+    public ResponseEntity<Object> createWorkshopFile(@PathVariable long offeringWorkshopId,
+                                                     @RequestBody WorkshopFileContext workshopFileContext, Authentication authentication) throws IOException {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
 
@@ -1738,15 +1753,13 @@ public class WorkshopManagerController {
         workshopFile.setDescription(workshopFileContext.getDescription());
         workshopFile.setOfferedWorkshop(offeredWorkshop);
 
-        if (workshopFileContext.getType().equalsIgnoreCase("Link")){
+        if (workshopFileContext.getType().equalsIgnoreCase("Link")) {
             URL url = new URL(workshopFileContext.getLink());
             workshopFile.setUrlLink(url);
             workshopFile.setWorkshopFileType(WorkshopFileType.Link);
-        }
-        else if (workshopFileContext.getType().equalsIgnoreCase("File")){
+        } else if (workshopFileContext.getType().equalsIgnoreCase("File")) {
             workshopFile.setWorkshopFileType(WorkshopFileType.File);
-        }
-        else {
+        } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -1776,7 +1789,8 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop/workshopFile/{workshopFileId}/upload")
-    public ResponseEntity<Object> uploadWorkshopFile(@PathVariable long workshopFileId, @RequestParam(value = "file") MultipartFile multipartFile, Authentication authentication) throws IOException {
+    public ResponseEntity<Object> uploadWorkshopFile(@PathVariable long workshopFileId,
+                                                     @RequestParam(value = "file") MultipartFile multipartFile, Authentication authentication) throws IOException {
 
 
         Optional<WorkshopFile> optionalWorkshopFile = workshopFileRepository.findById(workshopFileId);
@@ -1812,20 +1826,21 @@ public class WorkshopManagerController {
 
 
     @PutMapping("/offeringWorkshop/{offId}/starredGraders/star")
-    public ResponseEntity<Object> starGraders(@PathVariable long offId, @RequestBody UserIdListContext userIdListContext){
+    public ResponseEntity<Object> starGraders(@PathVariable long offId,
+                                              @RequestBody UserIdListContext userIdListContext) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        for (Long userId : userIdListContext.getUserIds()){
+        for (Long userId : userIdListContext.getUserIds()) {
             Optional<User> optionalUser = userRepository.findById(userId);
 
-            if (!optionalUser.isPresent()){
+            if (!optionalUser.isPresent()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
@@ -1846,21 +1861,22 @@ public class WorkshopManagerController {
     }
 
     @PutMapping("/offeringWorkshop/{offId}/starredGraders/unstar")
-    public ResponseEntity<Object> unstarGraders(@PathVariable long offId, @RequestBody UserIdListContext userIdListContext){
+    public ResponseEntity<Object> unstarGraders(@PathVariable long offId,
+                                                @RequestBody UserIdListContext userIdListContext) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
 
-        for (Long userId : userIdListContext.getUserIds()){
+        for (Long userId : userIdListContext.getUserIds()) {
 
             Optional<User> optionalUser = userRepository.findById(userId);
 
-            if (!optionalUser.isPresent()){
+            if (!optionalUser.isPresent()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
@@ -1881,11 +1897,11 @@ public class WorkshopManagerController {
     }
 
     @GetMapping("/offeringWorkshop/{offId}/starredGraders")
-    public ResponseEntity<Object> getOfferingWorkshopStarredGraders(@PathVariable long offId){
+    public ResponseEntity<Object> getOfferingWorkshopStarredGraders(@PathVariable long offId) {
 
         Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
 
-        if (!optionalOfferedWorkshop.isPresent()){
+        if (!optionalOfferedWorkshop.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -1895,17 +1911,17 @@ public class WorkshopManagerController {
 
         List<User> starredGraders = new ArrayList<>();
 
-        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()){
+        for (WorkshopGraderInfo workshopGraderInfo : offeredWorkshop.getWorkshopGraderInfos()) {
 
-            if (workshopGraderInfo.isStarred()){
+            if (workshopGraderInfo.isStarred()) {
 
                 WorkshopGrader workshopGrader = workshopGraderInfo.getWorkshopGrader();
 
-                for (User user : users){
+                for (User user : users) {
 
                     Grader grader = (Grader) user.getRole("Grader");
 
-                    if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+                    if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()) {
 
                         starredGraders.add(user);
                         break;
@@ -1921,11 +1937,11 @@ public class WorkshopManagerController {
 
 
     @GetMapping("/workshopGroup/{groupId}/starredGraders")
-    public ResponseEntity<Object> getWorkshopGroupStarredGraders(@PathVariable long groupId){
+    public ResponseEntity<Object> getWorkshopGroupStarredGraders(@PathVariable long groupId) {
 
         Optional<WorkshopGroup> optionalWorkshopGroup = workshopGroupRepository.findById(groupId);
 
-        if (!optionalWorkshopGroup.isPresent()){
+        if (!optionalWorkshopGroup.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -1935,15 +1951,15 @@ public class WorkshopManagerController {
 
         List<User> starredGraders = new ArrayList<>();
 
-        for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()){
+        for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()) {
 
             WorkshopGrader workshopGrader = workshopGraderInfo.getWorkshopGrader();
 
-            for (User user : users){
+            for (User user : users) {
 
                 Grader grader = (Grader) user.getRole("Grader");
 
-                if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()){
+                if (grader.getGraderWorkshopConnection().getId() == workshopGrader.getId()) {
                     starredGraders.add(user);
                     break;
                 }
@@ -1952,8 +1968,6 @@ public class WorkshopManagerController {
 
         return new ResponseEntity<>(starredGraders, HttpStatus.OK);
     }
-
-
 
 
     public List<OfferedWorkshop> getManagersOfferedWorkshops(WorkshopManager workshopManager) {
@@ -1968,7 +1982,8 @@ public class WorkshopManagerController {
     }
 
 
-    public WorkshopManagerInfo findWorkshopManagerInfoOfWorkshop(OfferedWorkshop offeredWorkshop, WorkshopManager workshopManager) {
+    public WorkshopManagerInfo findWorkshopManagerInfoOfWorkshop(OfferedWorkshop offeredWorkshop, WorkshopManager
+            workshopManager) {
 
         for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
 

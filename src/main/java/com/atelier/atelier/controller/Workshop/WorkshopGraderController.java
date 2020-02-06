@@ -118,8 +118,6 @@ public class WorkshopGraderController {
 
                     answerData = fileAnswer;
 
-//                    // TODO ADDED FILE STUFF HERE
-//                    fileAnswerRepository.save(fileAnswer);
                 }
                 else {
                     return new ResponseEntity<>("Type not supported", HttpStatus.BAD_REQUEST);
