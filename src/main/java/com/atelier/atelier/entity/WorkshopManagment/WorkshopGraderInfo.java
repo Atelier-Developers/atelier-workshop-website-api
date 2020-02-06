@@ -36,7 +36,17 @@ public class WorkshopGraderInfo {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopGraderFormApplicant> workshopGraderFormApplicants;
 
+    @Column
+    private boolean isStarred;
 
+
+    public boolean isStarred() {
+        return isStarred;
+    }
+
+    public void setStarred(boolean starred) {
+        isStarred = starred;
+    }
 
     public long getId() {
         return id;

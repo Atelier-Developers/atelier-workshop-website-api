@@ -1567,6 +1567,7 @@ public class WorkshopManagerController {
         WorkshopGraderInfo workshopGraderInfo = new WorkshopGraderInfo();
         workshopGraderInfo.setWorkshopGrader(workshopGrader);
         workshopGraderInfo.setOfferedWorkshop(offeredWorkshop);
+        workshopGraderInfo.setStarred(false);
         offeredWorkshop.addWorkshopGraderrInfo(workshopGraderInfo);
         workshopGrader.addGraderInfo(workshopGraderInfo);
         workshopGraderInfoRepository.save(workshopGraderInfo);
@@ -1784,6 +1785,84 @@ public class WorkshopManagerController {
 
         return new ResponseEntity<>(fileDownloadUri, HttpStatus.OK);
     }
+
+
+    @PutMapping("/offeringWorkshop/{offId}/starredGraders/star")
+    public ResponseEntity<Object> starGraders(@PathVariable long offId, @RequestBody UserIdListContext userIdListContext){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        for (Long userId : userIdListContext.getUserIds()){
+            Optional<User> optionalUser = userRepository.findById(userId);
+
+            if (!optionalUser.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            User user = optionalUser.get();
+
+            Grader grader = (Grader) user.getRole("Grader");
+
+            GraderWorkshopConnection graderWorkshopConnection = grader.getGraderWorkshopConnection();
+
+            WorkshopGraderInfo workshopGraderInfo = graderWorkshopConnection.getWorkshopGraderInfoOfferedWorkshop(offeredWorkshop);
+
+            workshopGraderInfo.setStarred(true);
+
+            workshopGraderInfoRepository.save(workshopGraderInfo);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/offeringWorkshop/{offId}/starredGraders/unstar")
+    public ResponseEntity<Object> unstarGraders(@PathVariable long offId, @RequestBody UserIdListContext userIdListContext){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        for (Long userId : userIdListContext.getUserIds()){
+
+            Optional<User> optionalUser = userRepository.findById(userId);
+
+            if (!optionalUser.isPresent()){
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            User user = optionalUser.get();
+
+            Grader grader = (Grader) user.getRole("Grader");
+
+            GraderWorkshopConnection graderWorkshopConnection = grader.getGraderWorkshopConnection();
+
+            WorkshopGraderInfo workshopGraderInfo = graderWorkshopConnection.getWorkshopGraderInfoOfferedWorkshop(offeredWorkshop);
+
+            workshopGraderInfo.setStarred(false);
+
+            workshopGraderInfoRepository.save(workshopGraderInfo);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+//    @GetMapping
+//    getOfferedWorkshopStarredGraders
+
+//    @GetMapping
+//    getWorkshopGroupStarredGraders
+
+
 
 
 
