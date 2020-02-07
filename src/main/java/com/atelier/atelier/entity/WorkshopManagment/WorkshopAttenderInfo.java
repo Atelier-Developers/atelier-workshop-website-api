@@ -54,6 +54,14 @@ public class WorkshopAttenderInfo {
         this.offeredWorkshop = offeredWorkshop;
     }
 
+    public List<PersonalFile> getPersonalFiles() {
+        return personalFiles;
+    }
+
+    public void setPersonalFiles(List<PersonalFile> personalFiles) {
+        this.personalFiles = personalFiles;
+    }
+
     public List<WorkshopAttenderFormApplicant> getWorkshopAttenderFormApplicants() {
         return workshopAttenderFormApplicants;
     }

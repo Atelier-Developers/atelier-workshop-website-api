@@ -1,8 +1,9 @@
 package com.atelier.atelier.entity.WorkshopManagment;
 
-public enum PersonalFileType {
+public enum PersonalFileCorespondentType {
 
     StarredGrader,
-    Supervisor;
+    Supervisor,
+    Attender;
 
 }

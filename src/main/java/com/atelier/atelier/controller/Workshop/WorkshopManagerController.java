@@ -1405,7 +1405,7 @@ public class WorkshopManagerController {
 
     // Returns the Requesting Attendees User Objects with Request status as pending
     @GetMapping("/offeringWorkshop/{id}/requests/pending/attendees")
-    public ResponseEntity<Object> showPendingAttendeeRequestsUsers(@PathVariable long id,  Authentication authentication) {
+    public ResponseEntity<Object> showPendingAttendeeRequestsUsers(@PathVariable long id, Authentication authentication) {
 
         ManagerWorkshopConnection managerWorkshopConnection = getMangerFromAuthentication(authentication);
 
@@ -1967,6 +1967,47 @@ public class WorkshopManagerController {
         }
 
         return new ResponseEntity<>(starredGraders, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{offId}/starredGraders/{userId}")
+    public ResponseEntity<Object> isGraderStarred(@PathVariable long offId, @PathVariable long userId) {
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+        User user = optionalUser.get();
+
+        Grader grader = (Grader) user.getRole("Grader");
+
+        GraderWorkshopConnection graderWorkshopConnection = grader.getGraderWorkshopConnection();
+
+        for (WorkshopGraderInfo workshopGraderInfo : graderWorkshopConnection.getWorkshopGraderInfos()) {
+
+            if (workshopGraderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()) {
+                BooleanContext booleanContext = new BooleanContext();
+
+                if (workshopGraderInfo.isStarred()) {
+                    booleanContext.setState(true);
+                    return new ResponseEntity<>(booleanContext, HttpStatus.OK);
+                }
+
+                booleanContext.setState(false);
+                return new ResponseEntity<>(booleanContext, HttpStatus.OK);
+            }
+        }
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 

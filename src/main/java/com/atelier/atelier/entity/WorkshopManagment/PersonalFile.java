@@ -31,7 +31,13 @@ public class PersonalFile {
     private WorkshopFileType workshopFileType;
 
     @Enumerated(EnumType.ORDINAL)
-    private PersonalFileType personalFileType;
+    private PersonalFileCorespondentType senderType;
+
+    @ElementCollection(targetClass = PersonalFileCorespondentType.class)
+    @JoinTable(name = "receiverTypes", joinColumns = @JoinColumn(name = "personal_file_id"))
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private List<PersonalFileCorespondentType> receiverTypes;
 
     @ManyToOne
     @JoinColumn(name = "workshop_attender_info_id")
@@ -39,7 +45,7 @@ public class PersonalFile {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User sender;
 
     public long getId() {
         return id;
@@ -89,12 +95,20 @@ public class PersonalFile {
         this.workshopFileType = workshopFileType;
     }
 
-    public PersonalFileType getPersonalFileType() {
-        return personalFileType;
+    public List<PersonalFileCorespondentType> getReceiverTypes() {
+        return receiverTypes;
     }
 
-    public void setPersonalFileType(PersonalFileType personalFileType) {
-        this.personalFileType = personalFileType;
+    public void setReceiverTypes(List<PersonalFileCorespondentType> receiverTypes) {
+        this.receiverTypes = receiverTypes;
+    }
+
+    public PersonalFileCorespondentType getSenderType() {
+        return senderType;
+    }
+
+    public void setSenderType(PersonalFileCorespondentType personalFileType) {
+        this.senderType = personalFileType;
     }
 
     public WorkshopAttenderInfo getWorkshopAttenderInfo() {
@@ -105,12 +119,12 @@ public class PersonalFile {
         this.workshopAttenderInfo = workshopAttenderInfo;
     }
 
-    public User getUser() {
-        return user;
+    public User getSender() {
+        return sender;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setSender(User user) {
+        this.sender = user;
     }
 
 
