@@ -20,9 +20,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.swing.text.html.Option;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -754,15 +758,15 @@ public class WorkshopRestController {
 
         WorkshopAttenderInfo workshopAttenderInfo = null;
 
-        for (WorkshopAttenderInfo workshopAttenderInfo1 : attender.getAttenderWorkshopConnection().getWorkshopAttenderInfos()){
+        for (WorkshopAttenderInfo workshopAttenderInfo1 : attender.getAttenderWorkshopConnection().getWorkshopAttenderInfos()) {
 
-            if (workshopAttenderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()){
+            if (workshopAttenderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()) {
                 workshopAttenderInfo = workshopAttenderInfo1;
                 break;
             }
         }
 
-        if (workshopAttenderInfo == null){
+        if (workshopAttenderInfo == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
@@ -776,15 +780,13 @@ public class WorkshopRestController {
             personalFile.setSenderType(PersonalFileCorespondentType.Attender);
 
             List<PersonalFileCorespondentType> personalFileCorespondentTypes = new ArrayList<>();
-            for (String receiverType : personalFileCreationContext.getReceiverTypes()){
+            for (String receiverType : personalFileCreationContext.getReceiverTypes()) {
 
-                if (receiverType.equalsIgnoreCase("Supervisor")){
+                if (receiverType.equalsIgnoreCase("Supervisor")) {
                     personalFileCorespondentTypes.add(PersonalFileCorespondentType.Supervisor);
-                }
-                else if (receiverType.equalsIgnoreCase("StarredGrader")){
+                } else if (receiverType.equalsIgnoreCase("StarredGrader")) {
                     personalFileCorespondentTypes.add(PersonalFileCorespondentType.StarredGrader);
-                }
-                else {
+                } else {
                     return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
             }
@@ -793,22 +795,18 @@ public class WorkshopRestController {
             personalFile.setTitle(personalFileCreationContext.getTitle());
             personalFile.setDescription(personalFileCreationContext.getDescription());
 
-            if (personalFileCreationContext.getType().equalsIgnoreCase("Link")){
+            if (personalFileCreationContext.getType().equalsIgnoreCase("Link")) {
 
                 personalFile.setWorkshopFileType(WorkshopFileType.Link);
                 URL url = new URL(personalFileCreationContext.getLink());
                 personalFile.setUrlLink(url);
-            }
-
-            else if (personalFileCreationContext.getType().equalsIgnoreCase("File")){
+            } else if (personalFileCreationContext.getType().equalsIgnoreCase("File")) {
                 personalFile.setWorkshopFileType(WorkshopFileType.File);
             }
 
             personalFileRepository.save(personalFile);
 
-        }
-
-        else if (personalFileCreationContext.getSenderType().equalsIgnoreCase("StarredGrader")){
+        } else if (personalFileCreationContext.getSenderType().equalsIgnoreCase("StarredGrader")) {
 
             User graderUser = User.getUser(authentication, userRepository);
 
@@ -823,22 +821,18 @@ public class WorkshopRestController {
             personalFile.setTitle(personalFileCreationContext.getTitle());
             personalFile.setDescription(personalFileCreationContext.getDescription());
 
-            if (personalFileCreationContext.getType().equalsIgnoreCase("Link")){
+            if (personalFileCreationContext.getType().equalsIgnoreCase("Link")) {
 
                 personalFile.setWorkshopFileType(WorkshopFileType.Link);
                 URL url = new URL(personalFileCreationContext.getLink());
                 personalFile.setUrlLink(url);
-            }
-
-            else if (personalFileCreationContext.getType().equalsIgnoreCase("File")){
+            } else if (personalFileCreationContext.getType().equalsIgnoreCase("File")) {
                 personalFile.setWorkshopFileType(WorkshopFileType.File);
             }
 
             personalFileRepository.save(personalFile);
 
-        }
-
-        else if (personalFileCreationContext.getSenderType().equalsIgnoreCase("Supervisor")){
+        } else if (personalFileCreationContext.getSenderType().equalsIgnoreCase("Supervisor")) {
 
             User supervisorUser = User.getUser(authentication, userRepository);
 
@@ -850,27 +844,276 @@ public class WorkshopRestController {
 
             personalFile.setReceiverTypes(personalFileCorespondentTypes);
 
-            if (personalFileCreationContext.getType().equalsIgnoreCase("Link")){
+            if (personalFileCreationContext.getType().equalsIgnoreCase("Link")) {
 
                 personalFile.setWorkshopFileType(WorkshopFileType.Link);
                 URL url = new URL(personalFileCreationContext.getLink());
                 personalFile.setUrlLink(url);
-            }
-
-            else if (personalFileCreationContext.getType().equalsIgnoreCase("File")){
+            } else if (personalFileCreationContext.getType().equalsIgnoreCase("File")) {
                 personalFile.setWorkshopFileType(WorkshopFileType.File);
             }
 
             personalFileRepository.save(personalFile);
 
-        }
-
-        else {
+        } else {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
 
         return new ResponseEntity<>(personalFile.getId(), HttpStatus.CREATED);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{offId}/personalFiles/manager")
+    public ResponseEntity<Object> showManagerPersonalFiles(@PathVariable long offId) {
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<PersonalFileGETContext> personalFileGETContexts = new ArrayList<>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()) {
+
+            for (PersonalFile personalFile : workshopAttenderInfo.getPersonalFiles()) {
+
+                if (personalFile.getReceiverTypes().contains(PersonalFileCorespondentType.Supervisor) || personalFile.getSenderType().equals(PersonalFileCorespondentType.Supervisor)) {
+
+                    PersonalFileGETContext personalFileGETContext = new PersonalFileGETContext();
+
+
+                    personalFileGETContext.setDescription(personalFile.getDescription());
+                    personalFileGETContext.setTitle(personalFile.getTitle());
+                    personalFileGETContext.setId(personalFile.getId());
+
+                    personalFileGETContext.setSender(personalFile.getSender().getName());
+
+                    if (personalFile.getWorkshopFileType().equals(WorkshopFileType.File)) {
+
+                        personalFileGETContext.setType("File");
+
+                        File file = personalFile.getFile();
+
+                        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                                .path("/workshop/offeringWorkshops/download/")
+                                .path(Long.toString(file.getId()))
+                                .toUriString();
+
+                        personalFileGETContext.setDownloadURI(fileDownloadUri);
+
+                        personalFileGETContexts.add(personalFileGETContext);
+
+                    } else if (personalFile.getWorkshopFileType().equals(WorkshopFileType.Link)) {
+
+                        personalFileGETContext.setType("Link");
+
+                        String urlLink = personalFile.getUrlLink().toString();
+
+                        personalFileGETContext.setDownloadURI(urlLink);
+
+                        personalFileGETContexts.add(personalFileGETContext);
+                    } else {
+                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                    }
+
+                }
+
+
+            }
+        }
+
+        return new ResponseEntity<>(personalFileGETContexts, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{offId}/personalFiles/starredGrader")
+    public ResponseEntity<Object> showGraderPersonalFiles(@PathVariable long offId) {
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<PersonalFileGETContext> personalFileGETContexts = new ArrayList<>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()) {
+
+            for (PersonalFile personalFile : workshopAttenderInfo.getPersonalFiles()) {
+
+                if (personalFile.getReceiverTypes().contains(PersonalFileCorespondentType.StarredGrader) || personalFile.getSenderType().equals(PersonalFileCorespondentType.StarredGrader)) {
+
+                    PersonalFileGETContext personalFileGETContext = new PersonalFileGETContext();
+
+
+                    personalFileGETContext.setDescription(personalFile.getDescription());
+                    personalFileGETContext.setTitle(personalFile.getTitle());
+                    personalFileGETContext.setId(personalFile.getId());
+
+                    personalFileGETContext.setSender(personalFile.getSender().getName());
+
+                    if (personalFile.getWorkshopFileType().equals(WorkshopFileType.File)) {
+
+                        personalFileGETContext.setType("File");
+
+                        File file = personalFile.getFile();
+
+                        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                                .path("/workshop/offeringWorkshops/download/")
+                                .path(Long.toString(file.getId()))
+                                .toUriString();
+
+                        personalFileGETContext.setDownloadURI(fileDownloadUri);
+
+                        personalFileGETContexts.add(personalFileGETContext);
+
+                    } else if (personalFile.getWorkshopFileType().equals(WorkshopFileType.Link)) {
+
+                        personalFileGETContext.setType("Link");
+
+                        String urlLink = personalFile.getUrlLink().toString();
+
+                        personalFileGETContext.setDownloadURI(urlLink);
+
+                        personalFileGETContexts.add(personalFileGETContext);
+                    } else {
+                        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                    }
+
+                }
+
+
+            }
+        }
+
+        return new ResponseEntity<>(personalFileGETContexts, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{offId}/personalFiles/attendee/{userId}")
+    public ResponseEntity<Object> showAttenderPersonalFiles(@PathVariable long userId, @PathVariable long offId) {
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optionalUser.get();
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offId);
+
+        if (!optionalOfferedWorkshop.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<PersonalFileGETContext> personalFileGETContexts = new ArrayList<>();
+
+        WorkshopAttenderInfo workshopAttenderInfo = null;
+
+        Attender attender = (Attender) user.getRole("Attender");
+        WorkshopAttender workshopAttender = attender.getAttenderWorkshopConnection();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo1 : offeredWorkshop.getAttenderInfos()) {
+
+            if (workshopAttenderInfo1.getWorkshopAttender().getId() == workshopAttender.getId()) {
+                workshopAttenderInfo = workshopAttenderInfo1;
+                break;
+            }
+        }
+
+        for (PersonalFile personalFile : workshopAttenderInfo.getPersonalFiles()) {
+
+
+                PersonalFileGETContext personalFileGETContext = new PersonalFileGETContext();
+
+
+                personalFileGETContext.setDescription(personalFile.getDescription());
+                personalFileGETContext.setTitle(personalFile.getTitle());
+                personalFileGETContext.setId(personalFile.getId());
+
+                personalFileGETContext.setSender(personalFile.getSender().getName());
+
+                if (personalFile.getWorkshopFileType().equals(WorkshopFileType.File)) {
+
+                    personalFileGETContext.setType("File");
+
+                    File file = personalFile.getFile();
+
+                    String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                            .path("/workshop/offeringWorkshops/download/")
+                            .path(Long.toString(file.getId()))
+                            .toUriString();
+
+                    personalFileGETContext.setDownloadURI(fileDownloadUri);
+
+                    personalFileGETContexts.add(personalFileGETContext);
+
+                } else if (personalFile.getWorkshopFileType().equals(WorkshopFileType.Link)) {
+
+                    personalFileGETContext.setType("Link");
+
+                    String urlLink = personalFile.getUrlLink().toString();
+
+                    personalFileGETContext.setDownloadURI(urlLink);
+
+                    personalFileGETContexts.add(personalFileGETContext);
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+
+
+
+
+        }
+
+
+        return new ResponseEntity<>(personalFileGETContexts, HttpStatus.OK);
+    }
+
+
+    @PostMapping("/offeringWorkshop/{offeringWorkshopId}/personalFiles/{personalFileId}/upload")
+    public ResponseEntity<Object> uploadPersonalFile(@PathVariable long personalFileId,
+                                                     @RequestParam(value = "file") MultipartFile multipartFile, Authentication authentication) throws IOException {
+
+
+        Optional<PersonalFile> optionalPersonalFile = personalFileRepository.findById(personalFileId);
+
+        if (!optionalPersonalFile.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        PersonalFile personalFile = optionalPersonalFile.get();
+
+
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+
+        File uploadedFile = new File();
+
+        uploadedFile.setFileName(fileName);
+        uploadedFile.setData(multipartFile.getBytes());
+        uploadedFile.setFileType(multipartFile.getContentType());
+
+        fileRepository.save(uploadedFile);
+
+        personalFile.setFile(uploadedFile);
+
+        personalFileRepository.save(personalFile);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/workshop/offeringWorkshops/download/")
+                .path(Long.toString(uploadedFile.getId()))
+                .toUriString();
+
+        return new ResponseEntity<>(fileDownloadUri, HttpStatus.OK);
     }
 
 
