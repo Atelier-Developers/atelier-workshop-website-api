@@ -837,7 +837,7 @@ public class WorkshopManagerController {
 
         OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
         for (Request request : offeredWorkshop.getRequests()) {
-            if (request.getRequester().getId() == requesterId) {
+            if (request.getRequester().getId() == requesterId && request.getState() == RequestState.Pending) {
                 ShowRequestContext showRequestContext = new ShowRequestContext();
                 showRequestContext.setState(request.getState());
                 showRequestContext.setId(request.getId());
@@ -1436,6 +1436,7 @@ public class WorkshopManagerController {
                             RequestPaymentStatusContext requestPaymentStatusContext = new RequestPaymentStatusContext();
                             requestPaymentStatusContext.setUser(user);
                             requestPaymentStatusContext.setRequestStatus("Pending");
+                            requestPaymentStatusContext.setId(request.getId());
                             AttenderRequestPaymentTab attenderRequestPaymentTab = (AttenderRequestPaymentTab) request.getRequestData().get(1);
                             boolean payState = true;
                             for (AttenderPaymentTab attenderPaymentTab : attenderRequestPaymentTab.getAttenderPaymentTabList()) {
@@ -1459,6 +1460,7 @@ public class WorkshopManagerController {
                             requestPaymentStatusContext.setUser(user);
                             requestPaymentStatusContext.setRequestStatus("Accepted");
                             requestPaymentStatusContext.setPaymentState(true);
+                            requestPaymentStatusContext.setId(request.getId());
                             attendees.add(requestPaymentStatusContext);
                             break;
                         }
@@ -1474,6 +1476,7 @@ public class WorkshopManagerController {
                             requestPaymentStatusContext.setUser(user);
                             requestPaymentStatusContext.setRequestStatus("Rejected");
                             requestPaymentStatusContext.setPaymentState(false);
+                            requestPaymentStatusContext.setId(request.getId());
                             attendees.add(requestPaymentStatusContext);
                             break;
                         }

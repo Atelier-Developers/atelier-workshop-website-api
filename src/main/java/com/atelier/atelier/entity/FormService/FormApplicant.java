@@ -18,6 +18,7 @@ public abstract class FormApplicant {
     @GeneratedValue
     private long id;
 
+
     @OneToMany(mappedBy = "formApplicant", cascade = CascadeType.ALL)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<Answer> answers;
