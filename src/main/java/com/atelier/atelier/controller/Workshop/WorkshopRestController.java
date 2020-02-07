@@ -2,6 +2,7 @@ package com.atelier.atelier.controller.Workshop;
 
 import com.atelier.atelier.context.*;
 import com.atelier.atelier.entity.RequestService.Request;
+import com.atelier.atelier.entity.RequestService.RequestState;
 import com.atelier.atelier.entity.RequestService.Requester;
 import com.atelier.atelier.entity.UserPortalManagment.*;
 import com.atelier.atelier.entity.WorkshopManagment.*;
@@ -331,9 +332,9 @@ public class WorkshopRestController {
         GradAttRequestStatus gradAttRequestStatus = new GradAttRequestStatus();
         for (Request request : offeredWorkshop.getRequests()) {
             Requester requester = request.getRequester();
-            if (requester.getId() == attender.getId()) {
+            if (requester.getId() == attender.getId() && request.getState().equals(RequestState.Pending)) {
                 gradAttRequestStatus.setAttReq(request);
-            } else if (requester.getId() == grader.getId()) {
+            } else if (requester.getId() == grader.getId() && request.getState().equals(RequestState.Pending)) {
                 gradAttRequestStatus.setGraderReq(request);
             }
         }

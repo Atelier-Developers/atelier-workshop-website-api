@@ -761,8 +761,8 @@ public class WorkshopManagerController {
     }
 
 
-    @PostMapping("/offeringWorkshop/form/{id}/result")
-    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody RequesterIdContext requesterId) {
+    @PostMapping("/offeringWorkshop/form/{id}/result/{requestId}")
+    public ResponseEntity<Object> getResultOfASingleRequestFormApplicant(@PathVariable long id, @PathVariable long requestId, @RequestBody RequesterIdContext requesterId) {
 
         Optional<Form> optionalForm = formRepository.findById(id);
 
@@ -779,6 +779,80 @@ public class WorkshopManagerController {
         }
 
         Requester requester = optionalRequester.get();
+
+        Optional<Request> optionalRequest = requestRepository.findById(requestId);
+
+        if (!optionalRequest.isPresent()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Request request = optionalRequest.get();
+
+        if ((form instanceof AttenderRegisterForm) && (requester instanceof Attender)) {
+
+            List<FormResultContext> formResultContexts = new ArrayList<>();
+
+            List<Question> questions = form.getQuestions();
+            for (Question question : questions) {
+                for (Answer answer : question.getAnswers()) {
+                    AttenderFormApplicant attenderFormApplicant = (AttenderFormApplicant) answer.getFormApplicant();
+                    AttenderWorkshopConnection attenderWorkshopConnection = (AttenderWorkshopConnection) attenderFormApplicant.getWorkshopAttender();
+                    if (attenderWorkshopConnection.getAttender().getId() == requester.getId() && attenderFormApplicant.getRequest().getId() == request.getId()) {
+                        FormResultContext formResultContext = new FormResultContext();
+                        formResultContext.setQuestion(question);
+                        formResultContext.setAnswer(answer);
+                        formResultContexts.add(formResultContext);
+                    }
+                }
+            }
+            return new ResponseEntity<>(formResultContexts, HttpStatus.OK);
+
+        } else if ((form instanceof GraderRequestForm) && (requester instanceof Grader)) {
+
+            List<FormResultContext> formResultContexts = new ArrayList<>();
+
+            List<Question> questions = form.getQuestions();
+            for (Question question : questions) {
+                for (Answer answer : question.getAnswers()) {
+                    GraderFormApplicant attenderFormApplicant = (GraderFormApplicant) answer.getFormApplicant();
+                    GraderWorkshopConnection attenderWorkshopConnection = (GraderWorkshopConnection) attenderFormApplicant.getWorkshopGrader();
+                    if (attenderWorkshopConnection.getGrader().getId() == requester.getId() && attenderFormApplicant.getRequest().getId() == request.getId()) {
+                        FormResultContext formResultContext = new FormResultContext();
+                        formResultContext.setQuestion(question);
+                        formResultContext.setAnswer(answer);
+                        formResultContexts.add(formResultContext);
+                    }
+                }
+            }
+            return new ResponseEntity<>(formResultContexts, HttpStatus.OK);
+
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+
+    }
+
+
+    @PostMapping("/offeringWorkshop/form/{id}/result")
+    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id,  @RequestBody RequesterIdContext requesterId) {
+
+        Optional<Form> optionalForm = formRepository.findById(id);
+
+        if (!optionalForm.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Form form = optionalForm.get();
+
+        Optional<Requester> optionalRequester = requesterRepository.findById(requesterId.getId());
+
+        if (!optionalRequester.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
+        Requester requester = optionalRequester.get();
+
 
         if ((form instanceof AttenderRegisterForm) && (requester instanceof Attender)) {
 

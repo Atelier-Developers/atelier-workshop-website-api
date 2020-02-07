@@ -30,7 +30,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 
-// TODO Unpay,  Get and Delete Personal file,
+// TODO Unpay,  Get and Delete Personal file, History
 
 
 @RestController
@@ -252,6 +252,7 @@ public class AttenderController {
         attender.addRequest(request);
         request.addRequestData(attenderRegisterForm);
         request.setState(RequestState.Pending);
+        attenderFormApplicant.setRequest(request);
         requestRepository.save(request);
         return new ResponseEntity<>(request.getId(), HttpStatus.OK);
     }
@@ -274,7 +275,7 @@ public class AttenderController {
 
         for (Request request1 : offeredWorkshop.getRequests()) {
 
-            if (request1.getRequester().equals(attender)) {
+            if (request1.getRequester().equals(attender) && request1.getState().equals(RequestState.Pending)) {
                 request = request1;
                 break;
             }
@@ -294,10 +295,11 @@ public class AttenderController {
         List<Answer> answers = questions.get(0).getAnswers();
         for (Answer answer : answers) {
 
-            if (attenderWorkshopConnection.getAttenderFormApplicants().contains(answer.getFormApplicant())) {
-                attenderFormApplicant = (AttenderFormApplicant) answer.getFormApplicant();
-                break;
-            }
+                if (attenderWorkshopConnection.getAttenderFormApplicants().contains(answer.getFormApplicant()) && ((AttenderFormApplicant)answer.getFormApplicant()).getRequest().getId() == request.getId()) {
+                    attenderFormApplicant = (AttenderFormApplicant) answer.getFormApplicant();
+                    break;
+                }
+
 
         }
 
@@ -368,7 +370,7 @@ public class AttenderController {
 
         List<Request> requests = requestRepository.findAll();
         for (Request request : requests) {
-            if (request.getRequester().getId() == attender.getId() && request.getRequestable().getId() == offeredWorkshop.getId()) {
+            if (request.getRequester().getId() == attender.getId() && request.getRequestable().getId() == offeredWorkshop.getId() && request.getState().equals(RequestState.Pending)) {
                 return new ResponseEntity<>(request.getRequestData().get(1), HttpStatus.OK);
             }
         }

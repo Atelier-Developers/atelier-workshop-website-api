@@ -1,5 +1,6 @@
 package com.atelier.atelier.entity.FormService;
 
+import com.atelier.atelier.entity.RequestService.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.hibernate.annotations.DiscriminatorOptions;
 
@@ -24,6 +25,7 @@ public abstract class FormApplicant {
     private List<Answer> answers;
 
 
+
     public long getId() {
         return id;
     }
@@ -31,6 +33,8 @@ public abstract class FormApplicant {
     public void setId(long id) {
         this.id = id;
     }
+
+
 
     public List<Answer> getAnswers() {
         return answers;

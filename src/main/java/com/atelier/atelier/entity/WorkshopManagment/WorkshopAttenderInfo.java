@@ -32,6 +32,7 @@ public class WorkshopAttenderInfo {
     private WorkshopGroup workshopGroup;
 
     @OneToMany(mappedBy = "workshopAttenderInfo")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<PersonalFile> personalFiles;
 
     @Enumerated(EnumType.ORDINAL)

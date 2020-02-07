@@ -258,6 +258,7 @@ public class GraderController {
         grader.addRequest(request);
         request.addRequestData(graderRequestForm);
         request.setState(RequestState.Pending);
+        graderFormApplicant.setRequest(request);
         requestRepository.save(request);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -280,7 +281,7 @@ public class GraderController {
 
         for (Request request1 : offeredWorkshop.getRequests()) {
 
-            if (request1.getRequester().equals(grader)) {
+            if (request1.getRequester().equals(grader) && request1.getState().equals(RequestState.Pending)) {
                 request = request1;
                 break;
             }
@@ -300,7 +301,7 @@ public class GraderController {
         List<Answer> answers = questions.get(0).getAnswers();
         for (Answer answer : answers) {
 
-            if (graderWorkshopConnection.getGraderFormApplicants().contains(answer.getFormApplicant())) {
+            if (graderWorkshopConnection.getGraderFormApplicants().contains(answer.getFormApplicant()) && ((GraderFormApplicant)answer.getFormApplicant()).getRequest().getId() == request.getId()) {
                 graderFormApplicant = (GraderFormApplicant) answer.getFormApplicant();
                 break;
             }
