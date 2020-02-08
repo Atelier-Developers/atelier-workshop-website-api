@@ -1413,6 +1413,16 @@ public class WorkshopManagerController {
                         userContext.setId(user.getId());
                         userContext.setUsername(user.getUsername());
                         userContext.setStarred(workshopGraderInfo.isStarred());
+                        boolean hasAnswered = false;
+                        for (Question question : offeredWorkshop.getGraderEvaluationForm().getQuestions()){
+                            for (Answer answer :question.getAnswers()){
+                                if (grader.getGraderWorkshopConnection().getGraderFormApplicants().contains(answer.getFormApplicant())){
+                                    hasAnswered = true;
+                                    break;
+                                }
+                            }
+                        }
+                        userContext.setHasAnswered(hasAnswered);
                         graderUsers.add(userContext);
                         break;
                     }

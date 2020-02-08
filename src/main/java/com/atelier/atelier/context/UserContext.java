@@ -7,6 +7,7 @@ public class UserContext {
     private String username;
     private String email;
     private boolean isStarred;
+    private boolean hasAnswered;
 
     public long getId() {
         return id;
@@ -46,5 +47,13 @@ public class UserContext {
 
     public void setStarred(boolean starred) {
         isStarred = starred;
+    }
+
+    public boolean isHasAnswered() {
+        return hasAnswered;
+    }
+
+    public void setHasAnswered(boolean hasAnswered) {
+        this.hasAnswered = hasAnswered;
     }
 }
