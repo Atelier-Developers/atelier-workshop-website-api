@@ -35,6 +35,7 @@ public class AttenderPaymentTab implements Payment {
     private String comment;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private File file;
 
 

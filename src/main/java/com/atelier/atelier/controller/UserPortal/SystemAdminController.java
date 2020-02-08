@@ -269,6 +269,32 @@ public class SystemAdminController {
         return new ResponseEntity<>(attenderPaymentTab.getId(), HttpStatus.OK);
     }
 
+    @PutMapping("/attendeePaymentTab/{id}/unpay")
+    public ResponseEntity<Object> unpayPaymentTabState(@PathVariable long id , Authentication authentication) {
+
+        Optional<AttenderPaymentTab> optionalAttenderPaymentTab = attenderPaymentTabRepository.findById(id);
+
+        if ( !optionalAttenderPaymentTab.isPresent() ){
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        AttenderPaymentTab attenderPaymentTab = optionalAttenderPaymentTab.get();
+        attenderPaymentTab.setPaid(false);
+
+        attenderPaymentTab.setComment(null);
+
+        if (attenderPaymentTab.getFile() != null ){
+
+            File paymentFile = attenderPaymentTab.getFile();
+
+            attenderPaymentTab.setFile(null);
+
+            fileRepository.delete(paymentFile);
+        }
+
+        attenderPaymentTabRepository.save(attenderPaymentTab);
+        return new ResponseEntity<>(attenderPaymentTab.getId(), HttpStatus.OK);
+    }
+
 
     @PostMapping("/attendeePaymentTab/{id}/file")
     public ResponseEntity<Object> uploadPaymentFile(@PathVariable long id, @RequestParam(value = "file", required = true) MultipartFile file) throws IOException {
