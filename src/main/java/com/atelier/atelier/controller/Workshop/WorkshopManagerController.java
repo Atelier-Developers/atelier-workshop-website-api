@@ -572,12 +572,12 @@ public class WorkshopManagerController {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
                     Question question = optionalQuestion.get();
-                    for (Answer filledAnswer : question.getAnswers()){
-                        if (filledAnswer instanceof FilledAnswer){
+                    for (Answer filledAnswer : question.getAnswers()) {
+                        if (filledAnswer instanceof FilledAnswer) {
                             FilledAnswer filledAnswer1 = (FilledAnswer) filledAnswer;
-                            if (filledAnswer.getFormApplicant() instanceof WorkshopGraderFormApplicant){
+                            if (filledAnswer.getFormApplicant() instanceof WorkshopGraderFormApplicant) {
                                 WorkshopGraderFormApplicant workshopGraderFormApplicant1 = (WorkshopGraderFormApplicant) filledAnswer.getFormApplicant();
-                                if (workshopGraderFormApplicant1.getWorkshopGraderInfo().getId() == workshopGraderInfo.getId()){
+                                if (workshopGraderFormApplicant1.getWorkshopGraderInfo().getId() == workshopGraderInfo.getId()) {
                                     return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
                                 }
                             }
@@ -793,7 +793,7 @@ public class WorkshopManagerController {
 
         Optional<Request> optionalRequest = requestRepository.findById(requestId);
 
-        if (!optionalRequest.isPresent()){
+        if (!optionalRequest.isPresent()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -846,7 +846,7 @@ public class WorkshopManagerController {
 
 
     @PostMapping("/offeringWorkshop/form/{id}/result")
-    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id,  @RequestBody RequesterIdContext requesterId) {
+    public ResponseEntity<Object> getResultOfASingleFormApplicant(@PathVariable long id, @RequestBody RequesterIdContext requesterId) {
 
         Optional<Form> optionalForm = formRepository.findById(id);
 
@@ -1425,11 +1425,13 @@ public class WorkshopManagerController {
                         userContext.setUsername(user.getUsername());
                         userContext.setStarred(workshopGraderInfo.isStarred());
                         boolean hasAnswered = false;
-                        for (Question question : offeredWorkshop.getGraderEvaluationForm().getQuestions()){
-                            for (Answer answer :question.getAnswers()){
-                                if (grader.getGraderWorkshopConnection().getGraderFormApplicants().contains(answer.getFormApplicant())){
-                                    hasAnswered = true;
-                                    break;
+                        if (offeredWorkshop.getGraderEvaluationForm() != null) {
+                            for (Question question : offeredWorkshop.getGraderEvaluationForm().getQuestions()) {
+                                for (Answer answer : question.getAnswers()) {
+                                    if (grader.getGraderWorkshopConnection().getGraderFormApplicants().contains(answer.getFormApplicant())) {
+                                        hasAnswered = true;
+                                        break;
+                                    }
                                 }
                             }
                         }

@@ -1222,7 +1222,7 @@ public class WorkshopRestController {
         for (WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()){
             WorkshopAttender workshopAttender = workshopAttenderInfo.getWorkshopAttender();
             for (User user1 : users){
-                Attender attender = (Attender) user.getRole("Attender");
+                Attender attender = (Attender) user1.getRole("Attender");
                 if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
                     attUsers.add(user1);
                     break;
