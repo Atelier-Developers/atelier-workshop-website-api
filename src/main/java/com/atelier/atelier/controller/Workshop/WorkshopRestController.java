@@ -760,7 +760,7 @@ public class WorkshopRestController {
 
         for (WorkshopAttenderInfo workshopAttenderInfo1 : attender.getAttenderWorkshopConnection().getWorkshopAttenderInfos()) {
 
-            if (workshopAttenderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()) {
+            if (workshopAttenderInfo1.getOfferedWorkshop().getId() == offeredWorkshop.getId()) {
                 workshopAttenderInfo = workshopAttenderInfo1;
                 break;
             }
@@ -843,6 +843,8 @@ public class WorkshopRestController {
             personalFileCorespondentTypes.add(PersonalFileCorespondentType.Attender);
 
             personalFile.setReceiverTypes(personalFileCorespondentTypes);
+            personalFile.setTitle(personalFileCreationContext.getTitle());
+            personalFile.setDescription(personalFileCreationContext.getDescription());
 
             if (personalFileCreationContext.getType().equalsIgnoreCase("Link")) {
 
