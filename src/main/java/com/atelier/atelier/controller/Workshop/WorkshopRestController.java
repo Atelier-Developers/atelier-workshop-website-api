@@ -814,7 +814,7 @@ public class WorkshopRestController {
             personalFile.setSenderType(PersonalFileCorespondentType.StarredGrader);
 
             List<PersonalFileCorespondentType> personalFileCorespondentTypes = new ArrayList<>();
-            personalFileCorespondentTypes.add(PersonalFileCorespondentType.StarredGrader);
+            personalFileCorespondentTypes.add(PersonalFileCorespondentType.Attender);
 
             personalFile.setReceiverTypes(personalFileCorespondentTypes);
 
@@ -840,7 +840,7 @@ public class WorkshopRestController {
             personalFile.setSenderType(PersonalFileCorespondentType.Supervisor);
 
             List<PersonalFileCorespondentType> personalFileCorespondentTypes = new ArrayList<>();
-            personalFileCorespondentTypes.add(PersonalFileCorespondentType.Supervisor);
+            personalFileCorespondentTypes.add(PersonalFileCorespondentType.Attender);
 
             personalFile.setReceiverTypes(personalFileCorespondentTypes);
 
