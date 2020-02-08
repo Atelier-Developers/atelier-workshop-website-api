@@ -1174,4 +1174,97 @@ public class WorkshopRestController {
     }
 
 
+
+
+    @GetMapping("/offeringWorkshop/{offeringWorkshopId}/starredGrader/allAttendees")
+    public ResponseEntity<Object> getUsersOfAttendeesInTheSameGroupAsStarredGrader(@PathVariable long offeringWorkshopId, Authentication authentication){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        User user = User.getUser(authentication, userRepository);
+
+        Grader grader = (Grader) user.getRole("Grader");
+
+        GraderWorkshopConnection graderWorkshopConnection = grader.getGraderWorkshopConnection();
+
+        WorkshopGroup workshopGroup = null;
+        for (WorkshopGraderInfo workshopGraderInfo : graderWorkshopConnection.getWorkshopGraderInfos()){
+            if (workshopGraderInfo.getOfferedWorkshop().getId() == offeredWorkshop.getId()){
+                if (workshopGraderInfo.isStarred()){
+                    if (workshopGraderInfo.getWorkshopGroup() == null ){
+                        List<User> result = new ArrayList<>();
+                        return new ResponseEntity<>(result, HttpStatus.NO_CONTENT);
+                    }
+                    else {
+                        workshopGroup = workshopGraderInfo.getWorkshopGroup();
+                    }
+                }
+
+                else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            }
+        }
+
+
+        List<User> users = userRepository.findAll();
+
+        List<User> attUsers = new ArrayList<>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : workshopGroup.getAttenderInfos()){
+            WorkshopAttender workshopAttender = workshopAttenderInfo.getWorkshopAttender();
+            for (User user1 : users){
+                Attender attender = (Attender) user.getRole("Attender");
+                if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
+                    attUsers.add(user1);
+                    break;
+                }
+            }
+        }
+        return new ResponseEntity<>(attUsers, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/offeringWorkshop/{offeringWorkshopId}/manager/allAttendees")
+    public ResponseEntity<Object> getAllAttendeesOfAnOfferedWorkshop(@PathVariable long offeringWorkshopId){
+
+        Optional<OfferedWorkshop> optionalOfferedWorkshop = offeringWorkshopRepository.findById(offeringWorkshopId);
+
+        if (!optionalOfferedWorkshop.isPresent()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        OfferedWorkshop offeredWorkshop = optionalOfferedWorkshop.get();
+
+        List<User> users = userRepository.findAll();
+        List<User> attUsers = new ArrayList<>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : offeredWorkshop.getAttenderInfos()){
+
+            WorkshopAttender workshopAttender = workshopAttenderInfo.getWorkshopAttender();
+
+            for (User user : users){
+
+                Attender attender = (Attender) user.getRole("Attender");
+
+                if (attender.getAttenderWorkshopConnection().getId() == workshopAttender.getId()){
+
+                    attUsers.add(user);
+                    break;
+                }
+            }
+        }
+
+        return new ResponseEntity<>(attUsers, HttpStatus.OK);
+
+    }
+
+
+
 }
