@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -2114,6 +2115,224 @@ public class WorkshopManagerController {
         }
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/userHistory/{userId}")
+    public ResponseEntity<Object> getUserHistoryForOfferingWorkshop(@PathVariable long userId) {
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (!optionalUser.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optionalUser.get();
+
+        List<User> users = userRepository.findAll();
+
+        UserHistoryContext userHistoryContext = new UserHistoryContext();
+
+        // ATTENDED WORKSHOPS
+
+        Attender attender = (Attender) user.getRole("Attender");
+
+        AttenderWorkshopConnection attenderWorkshopConnection = attender.getAttenderWorkshopConnection();
+
+        List<WorkshopAndFormContext> attendedWorkshops = new ArrayList<>();
+
+        for (WorkshopAttenderInfo workshopAttenderInfo : attenderWorkshopConnection.getWorkshopAttenderInfos()) {
+
+            WorkshopAndFormContext workshopAndFormContext = new WorkshopAndFormContext();
+
+            OfferedWorkshop offeredWorkshop = workshopAttenderInfo.getOfferedWorkshop();
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            List<String> managerNames = new ArrayList<>();
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
+
+                ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) workshopManagerInfo.getWorkshopManager();
+
+                for (User user1 : users) {
+
+                    WorkshopManager workshopManager = (WorkshopManager) user1.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager.getId() == managerWorkshopConnection.getId()) {
+                        managerNames.add(user1.getName());
+                        break;
+                    }
+
+                }
+            }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
+
+            workshopAndFormContext.setWorkshop(offeredWorkshopManagerNameContext);
+
+            List<WorkshopForm> workshopForms = offeredWorkshop.getWorkshopForms();
+
+            if (workshopForms == null || workshopForms.isEmpty()) {
+                List<FormQAContext> forms = new ArrayList<>();
+                workshopAndFormContext.setForm(forms);
+            } else {
+
+                List<FormQAContext> formQAContexts = new ArrayList<>();
+
+                for (WorkshopForm workshopForm : workshopForms) {
+
+                    FormQAContext formQAContext = new FormQAContext();
+
+                    formQAContext.setName(workshopForm.getName());
+
+                    List<QAContext> qaContexts = new ArrayList<>();
+                    for (Question question : workshopForm.getQuestions()) {
+
+                        for (Answer answer : question.getAnswers()) {
+
+                            if (answer instanceof FilledAnswer) {
+
+                                FilledAnswer filledAnswer = (FilledAnswer) answer;
+
+                                if (filledAnswer.getFormApplicant() instanceof WorkshopAttenderFormApplicant) {
+
+                                    WorkshopAttenderFormApplicant workshopAttenderFormApplicant = (WorkshopAttenderFormApplicant) filledAnswer.getFormApplicant();
+
+                                    if (workshopAttenderFormApplicant.getWorkshopAttenderInfo().getId() == workshopAttenderInfo.getId()) {
+
+                                        QAContext qaContext = new QAContext();
+
+                                        qaContext.setQuestion(question.getText());
+
+                                        AnswerData answerData = filledAnswer.getAnswerData().get(0);
+
+                                        if (answerData instanceof TextAnswer) {
+                                            TextAnswer textAnswer = (TextAnswer) answerData;
+                                            qaContext.setAnswer(textAnswer.getText());
+                                        } else if (answerData instanceof ChoiceAnswer) {
+                                            ChoiceAnswer choiceAnswer = (ChoiceAnswer) answerData;
+                                            qaContext.setAnswer(question.getAnswerables().get(choiceAnswer.getChoice()).getText());
+                                        }
+
+                                        qaContexts.add(qaContext);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    formQAContexts.add(formQAContext);
+                }
+
+                workshopAndFormContext.setForm(formQAContexts);
+            }
+
+            attendedWorkshops.add(workshopAndFormContext);
+        }
+
+        userHistoryContext.setAttendedWorkshops(attendedWorkshops);
+
+        // Assisted workshops
+
+        Grader grader = (Grader) user.getRole("Grader");
+
+        GraderWorkshopConnection graderWorkshopConnection = grader.getGraderWorkshopConnection();
+
+        List<WorkshopAndFormContext> assistedWorkshops = new ArrayList<>();
+        for (WorkshopGraderInfo workshopGraderInfo : graderWorkshopConnection.getWorkshopGraderInfos()) {
+
+            WorkshopAndFormContext workshopAndFormContext = new WorkshopAndFormContext();
+
+            OfferedWorkshop offeredWorkshop = workshopGraderInfo.getOfferedWorkshop();
+
+            OfferedWorkshopManagerNameContext offeredWorkshopManagerNameContext = new OfferedWorkshopManagerNameContext();
+
+            offeredWorkshopManagerNameContext.setOfferedWorkshop(offeredWorkshop);
+
+            List<String> managerNames = new ArrayList<>();
+            for (WorkshopManagerInfo workshopManagerInfo : offeredWorkshop.getWorkshopManagerInfos()) {
+
+                ManagerWorkshopConnection managerWorkshopConnection = (ManagerWorkshopConnection) workshopManagerInfo.getWorkshopManager();
+
+                for (User user1 : users) {
+
+                    WorkshopManager workshopManager = (WorkshopManager) user1.getRole("ManagerWorkshopConnection");
+
+                    if (workshopManager.getId() == managerWorkshopConnection.getId()) {
+                        managerNames.add(user1.getName());
+                        break;
+                    }
+
+                }
+
+            }
+
+            offeredWorkshopManagerNameContext.setWorkshopManagers(managerNames);
+
+            workshopAndFormContext.setWorkshop(offeredWorkshopManagerNameContext);
+
+            if (offeredWorkshop.getGraderEvaluationForm() == null) {
+                List<FormQAContext> qaContexts = new ArrayList<>();
+                workshopAndFormContext.setForm(qaContexts);
+            } else {
+
+                List<FormQAContext> formQAContexts = new ArrayList<>();
+
+                GraderEvaluationForm graderEvaluationForm = offeredWorkshop.getGraderEvaluationForm();
+
+                FormQAContext formQAContext = new FormQAContext();
+
+                formQAContext.setName(graderEvaluationForm.getName());
+
+                List<QAContext> qaContexts = new ArrayList<>();
+                for (Question question : graderEvaluationForm.getQuestions()) {
+
+                    for (Answer answer : question.getAnswers()) {
+
+                        FilledAnswer filledAnswer = (FilledAnswer) answer;
+
+                        if (filledAnswer.getFormApplicant() instanceof WorkshopGraderFormApplicant) {
+
+                            WorkshopGraderFormApplicant workshopGraderFormApplicant = (WorkshopGraderFormApplicant) filledAnswer.getFormApplicant();
+
+                            if (workshopGraderFormApplicant.getWorkshopGraderInfo().getId() == workshopGraderInfo.getId()) {
+
+                                QAContext qaContext = new QAContext();
+
+                                qaContext.setQuestion(question.getText());
+
+                                AnswerData answerData = filledAnswer.getAnswerData().get(0);
+
+                                if (answerData instanceof TextAnswer) {
+                                    TextAnswer textAnswer = (TextAnswer) answerData;
+                                    qaContext.setAnswer(textAnswer.getText());
+                                } else if (answerData instanceof ChoiceAnswer) {
+                                    ChoiceAnswer choiceAnswer = (ChoiceAnswer) answerData;
+                                    qaContext.setAnswer(question.getAnswerables().get(choiceAnswer.getChoice()).getText());
+                                }
+
+                                qaContexts.add(qaContext);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                formQAContext.setQuestionsAndAnswers(qaContexts);
+                formQAContexts.add(formQAContext);
+
+                workshopAndFormContext.setForm(formQAContexts);
+            }
+
+            assistedWorkshops.add(workshopAndFormContext);
+
+        }
+
+
+        userHistoryContext.setAssistedWorkshops(assistedWorkshops);
+
+        return new ResponseEntity<>(userHistoryContext, HttpStatus.OK);
     }
 
 

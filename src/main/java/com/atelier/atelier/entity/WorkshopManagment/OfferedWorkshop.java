@@ -95,6 +95,7 @@ public class OfferedWorkshop extends Requestable implements Comparable<OfferedWo
     private AttenderRegisterForm attenderRegisterForm;
 
     @OneToMany(mappedBy = "offeredWorkshop", cascade = CascadeType.ALL)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private List<WorkshopFile> workshopFiles;
 
 
