@@ -92,6 +92,17 @@ public class WorkshopGraderController {
                     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                 }
                 Question question = optionalQuestion.get();
+                for (Answer filledAnswer1 : question.getAnswers()){
+                    if (filledAnswer1 instanceof FilledAnswer){
+                        FilledAnswer filledAnswer2 = (FilledAnswer) filledAnswer1;
+                        if (filledAnswer2.getFormApplicant() instanceof WorkshopAttenderFormApplicant){
+                            WorkshopAttenderFormApplicant workshopAttenderFormApplicant1 = (WorkshopAttenderFormApplicant) filledAnswer2.getFormApplicant();
+                            if (workshopAttenderFormApplicant1.getWorkshopAttenderInfo().getId() == workshopAttenderInfo.getId()){
+                                return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+                            }
+                        }
+                    }
+                }
                 FilledAnswer filledAnswer = new FilledAnswer();
                 if (question.getForm().getId() != form.getId()) {
                     return new ResponseEntity<>(HttpStatus.FORBIDDEN);

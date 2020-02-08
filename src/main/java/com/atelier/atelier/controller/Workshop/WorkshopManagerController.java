@@ -572,6 +572,17 @@ public class WorkshopManagerController {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
                     Question question = optionalQuestion.get();
+                    for (Answer filledAnswer : question.getAnswers()){
+                        if (filledAnswer instanceof FilledAnswer){
+                            FilledAnswer filledAnswer1 = (FilledAnswer) filledAnswer;
+                            if (filledAnswer.getFormApplicant() instanceof WorkshopGraderFormApplicant){
+                                WorkshopGraderFormApplicant workshopGraderFormApplicant1 = (WorkshopGraderFormApplicant) filledAnswer.getFormApplicant();
+                                if (workshopGraderFormApplicant1.getWorkshopGraderInfo().getId() == workshopGraderInfo.getId()){
+                                    return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+                                }
+                            }
+                        }
+                    }
                     FilledAnswer filledAnswer = new FilledAnswer();
                     if (question.getForm().getId() != form.getId()) {
                         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
