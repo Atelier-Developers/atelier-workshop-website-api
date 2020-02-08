@@ -528,12 +528,18 @@ public class AttenderController {
 
         groupUsersContext.setAttendees(attendeeUsers);
 
-        List<User> graderUsers = new ArrayList<User>();
+        List<UserContext> graderUsers = new ArrayList<>();
         for (WorkshopGraderInfo workshopGraderInfo1 : attendeeGroup.getGraderInfos()) {
             for (User user : users) {
                 Grader grader = (Grader) user.getRole("Grader");
                 if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo1.getWorkshopGrader().getId()) {
-                    graderUsers.add(user);
+                    UserContext userContext = new UserContext();
+                    userContext.setUsername(user.getUsername());
+                    userContext.setEmail(user.getEmail());
+                    userContext.setName(user.getName());
+                    userContext.setId(user.getId());
+                    userContext.setStarred(workshopGraderInfo1.isStarred());
+                    graderUsers.add(userContext);
                     break;
                 }
             }

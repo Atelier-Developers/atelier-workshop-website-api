@@ -1402,12 +1402,18 @@ public class WorkshopManagerController {
             groupUsersContext.setGroupName(workshopGroup.getName());
             groupUsersContext.setGroupId(workshopGroup.getId());
 
-            List<User> graderUsers = new ArrayList<User>();
+            List<UserContext> graderUsers = new ArrayList<UserContext>();
             for (WorkshopGraderInfo workshopGraderInfo : workshopGroup.getGraderInfos()) {
                 for (User user : users) {
                     Grader grader = (Grader) user.getRole("Grader");
                     if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo.getWorkshopGrader().getId()) {
-                        graderUsers.add(user);
+                        UserContext userContext = new UserContext();
+                        userContext.setName(user.getName());
+                        userContext.setEmail(user.getEmail());
+                        userContext.setId(user.getId());
+                        userContext.setUsername(user.getUsername());
+                        userContext.setStarred(workshopGraderInfo.isStarred());
+                        graderUsers.add(userContext);
                         break;
                     }
                 }

@@ -3,6 +3,7 @@ package com.atelier.atelier.controller.Workshop;
 import com.atelier.atelier.context.AnswerQuestionContext;
 import com.atelier.atelier.context.FormAnswerContext;
 import com.atelier.atelier.context.GroupUsersContext;
+import com.atelier.atelier.context.UserContext;
 import com.atelier.atelier.entity.FormService.*;
 import com.atelier.atelier.entity.UserPortalManagment.Attender;
 import com.atelier.atelier.entity.UserPortalManagment.Grader;
@@ -189,12 +190,18 @@ public class WorkshopGraderController {
 
         groupUsersContext.setAttendees(attendeeUsers);
 
-        List<User> graderUsers = new ArrayList<User>();
+        List<UserContext> graderUsers = new ArrayList<>();
         for (WorkshopGraderInfo workshopGraderInfo1 : graderGroup.getGraderInfos()){
             for(User user : users){
                 Grader grader = (Grader) user.getRole("Grader");
                 if (grader.getGraderWorkshopConnection().getId() == workshopGraderInfo1.getWorkshopGrader().getId()){
-                    graderUsers.add(user);
+                    UserContext userContext = new UserContext();
+                    userContext.setUsername(user.getUsername());
+                    userContext.setId(user.getId());
+                    userContext.setName(user.getName());
+                    userContext.setEmail(user.getEmail());
+                    userContext.setStarred(workshopGraderInfo.isStarred());
+                    graderUsers.add(userContext);
                     break;
                 }
             }

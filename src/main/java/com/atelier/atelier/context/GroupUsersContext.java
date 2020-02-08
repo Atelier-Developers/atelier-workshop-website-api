@@ -8,7 +8,7 @@ public class GroupUsersContext {
 
     private long groupId;
     private String groupName;
-    private List<User> graders;
+    private List<UserContext> graders;
     private List<User> attendees;
 
 
@@ -28,11 +28,12 @@ public class GroupUsersContext {
         this.groupName = groupName;
     }
 
-    public List<User> getGraders() {
+
+    public List<UserContext> getGraders() {
         return graders;
     }
 
-    public void setGraders(List<User> graders) {
+    public void setGraders(List<UserContext> graders) {
         this.graders = graders;
     }
 
