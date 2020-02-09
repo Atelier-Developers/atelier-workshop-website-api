@@ -1483,23 +1483,39 @@ public class WorkshopManagerController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        List<User> graders = new ArrayList<User>();
+        List<RequestIdUserContext> graders = new ArrayList<>();
 
         List<User> users = userRepository.findAll();
 
         for (Request request : offeredWorkshop.getRequests()) {
             if (request.getRequester() instanceof Grader) {
-                if (request.getState().equals(RequestState.Pending)) {
+//                if (request.getState().equals(RequestState.Pending)) {
                     Grader grader = (Grader) request.getRequester();
                     WorkshopGrader workshopGrader = grader.getGraderWorkshopConnection();
                     for (User user : users) {
                         Grader userGrader = (Grader) user.getRole("Grader");
                         if (userGrader.getGraderWorkshopConnection().getId() == workshopGrader.getId()) {
-                            graders.add(user);
+                            RequestIdUserContext requestIdUserContext = new RequestIdUserContext();
+                            requestIdUserContext.setName(user.getName());
+                            requestIdUserContext.setUsername(user.getUsername());
+                            requestIdUserContext.setEmail(user.getEmail());
+                            requestIdUserContext.setId(user.getId());
+                            requestIdUserContext.setRoles(user.getRoles());
+                            requestIdUserContext.setRequestId(request.getId());
+                            if (request.getState().equals(RequestState.Pending)){
+                                requestIdUserContext.setRequestStatus("Pending");
+                            }
+                            else if (request.getState().equals(RequestState.Accepted)){
+                                requestIdUserContext.setRequestStatus("Accepted");
+                            }
+                            else if (request.getState().equals(RequestState.Rejected)){
+                                requestIdUserContext.setRequestStatus("Rejected");
+                            }
+                            graders.add(requestIdUserContext);
                             break;
                         }
                     }
-                }
+//                }
             }
         }
 
